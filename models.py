@@ -28,3 +28,11 @@ class Categoria(Base):
     produtos: Mapped[list["Produto"]] = relationship(
         back_populates="categoria"
     )
+
+class Usuario(Base):
+    __tablename__ = "usuarios"
+    
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(100))
+    email: Mapped[str] = mapped_column(String(150), unique=True)
+    password_hash: Mapped[str] = mapped_column(String(255))

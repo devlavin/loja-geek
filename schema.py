@@ -49,3 +49,18 @@ class ProdutoComCategoriaResponse(BaseModel):
     
 class AtualizarEstoque(BaseModel):
     estoque: int = Field(ge=0)
+    
+class UsuarioCreate(BaseModel):
+    name: str
+    email: str
+    password: str
+
+class UsuarioLogin(BaseModel):
+    email: str
+    password: str
+class UsuarioResponse(BaseModel):
+    id: int
+    name: str
+    email: str
+    
+    model_config = ConfigDict(from_attributes=True)

@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-
 from database import get_db
+
 from models import Produto, Categoria
 from schema import (
     Item,
@@ -11,6 +11,7 @@ from schema import (
     ProdutoResponse,
     ProdutoComCategoriaResponse,
 )
+
 
 router = APIRouter(
     prefix="/produtos",
@@ -100,7 +101,11 @@ def mostrarProd(id: int, db: Session = Depends(get_db)):
     "/{id}",
     response_model=ProdutoResponse
     )
-def atualizarProd(id: int, item: AtualizarPreco, db: Session = Depends(get_db)):
+def atualizarProd(
+    id: int, 
+    item: AtualizarPreco, 
+    db: Session = Depends(get_db)
+):
     
     resultado = db.execute(
         select(Produto).where(Produto.id == id)
