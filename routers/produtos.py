@@ -110,6 +110,28 @@ def listar_produtos(
 
     return resultado.scalars().all()
 
+@router.get(
+    "/{id}",
+    response_model=ProdutoResponse
+)
+def buscar_produto(
+    id: int,
+    db: Session = Depends(get_db)
+):
+    resultado = db.execute(
+        select(Produto).where(Produto.id == id)
+    )
+
+    produto = resultado.scalar_one_or_none()
+
+    if produto is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Produto não encontrado."
+        )
+
+    return produto
+
 @router.patch(
     "/{id}",
     response_model=ProdutoResponse
