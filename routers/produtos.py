@@ -1,9 +1,9 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from database import get_db
-
-from models import Produto, Categoria
+from auth import get_current_admin
+from models import Produto, Categoria, Usuario
 from schema import (
     Item,
     AtualizarPreco,
@@ -21,6 +21,7 @@ router = APIRouter(
 @router.post("")
 def cadastrarProd(
     itens: list[Item],
+    _: Usuario = Depends(get_current_admin),
     db: Session = Depends(get_db)
     ):
     try:
@@ -71,31 +72,43 @@ def cadastrarProd(
 @router.get(
     "",
     response_model=list[ProdutoResponse]
-    )
-def listar_produto(db: Session = Depends(get_db)):
-    resultado = db.execute(select(Produto))
-                           
-    produtos = resultado.scalars().all()
-    
-    return produtos
+)
+def listar_produtos(
+    nome: str | None = None,
+    categoria: str | None = None,
+    min_price: float | None = None,
+    max_price: float | None = None,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, ge=1, le=100),
+    db: Session = Depends(get_db)
+):
+    query = select(Produto)
 
-@router.get("/{id}",
-         response_model=ProdutoComCategoriaResponse
+    if nome:
+        query = query.where(
+            Produto.name.ilike(f"%{nome}%")
         )
-def mostrarProd(id: int, db: Session = Depends(get_db)):
 
-    resultado = db.execute(
-        select(Produto).where(Produto.id == id)
-    )
-    produto = resultado.scalar_one_or_none()
-    
-    if produto is None:
-        
-        raise HTTPException(
-            status_code=404,
-            detail="Produto não encontrado."
+    if categoria:
+        query = query.join(Produto.categoria).where(
+            Categoria.name.ilike(f"%{categoria}%")
         )
-    return produto
+
+    if min_price is not None:
+        query = query.where(
+            Produto.price >= min_price
+        )
+
+    if max_price is not None:
+        query = query.where(
+            Produto.price <= max_price
+        )
+
+    query = query.offset(skip).limit(limit)
+
+    resultado = db.execute(query)
+
+    return resultado.scalars().all()
 
 @router.patch(
     "/{id}",
@@ -103,7 +116,8 @@ def mostrarProd(id: int, db: Session = Depends(get_db)):
     )
 def atualizarProd(
     id: int, 
-    item: AtualizarPreco, 
+    item: AtualizarPreco,
+    _: Usuario = Depends(get_current_admin),
     db: Session = Depends(get_db)
 ):
     
@@ -131,6 +145,7 @@ def atualizarProd(
 def atualizar_estoque(
     id: int,
     item: AtualizarEstoque,
+    _: Usuario = Depends(get_current_admin),
     db: Session = Depends(get_db)
 ):
     resultado = db.execute(
@@ -153,7 +168,11 @@ def atualizar_estoque(
     
 
 @router.delete("/{id}")
-def excluirProd(id: int, db: Session = Depends(get_db)):
+def excluirProd(
+    id: int,
+    _: Usuario = Depends(get_current_admin), 
+    db: Session = Depends(get_db)
+):
     
     resultado = db.execute(
         select(Produto).where(Produto.id == id)

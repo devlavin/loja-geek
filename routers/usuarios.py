@@ -39,7 +39,8 @@ def cadastrar_usuario(
     novo_usuario = Usuario(
         name = usuario.name,
         email = usuario.email,
-        password_hash = senha_hash
+        password_hash = senha_hash,
+        role = "user"
     )
     
     db.add(novo_usuario)

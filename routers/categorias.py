@@ -2,8 +2,8 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from database import get_db
-
-from models import Categoria
+from auth import get_current_admin
+from models import Categoria, Usuario
 from schema import (
     CategoriaCreate,
     AtualizarCategoria,
@@ -21,7 +21,8 @@ router = APIRouter(
     response_model=CategoriaResponse
     )
 def cadastrar_categoria(
-    categoria: CategoriaCreate, 
+    categoria: CategoriaCreate,
+    _: Usuario = Depends(get_current_admin), 
     db: Session = Depends(get_db)
     ):
     
@@ -68,7 +69,12 @@ def mostrar_categorias(id: int, db: Session = Depends(get_db)):
     "/{id}",
     response_model=CategoriaResponse
     )
-def atualizar_categoria(id: int, categoria_atualizada: AtualizarCategoria, db: Session = Depends(get_db)):
+def atualizar_categoria(
+    id: int, 
+    categoria_atualizada: AtualizarCategoria,
+    _: Usuario = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
     resultado = db.execute(
         select(Categoria).where(Categoria.id == id)
     )
@@ -87,7 +93,11 @@ def atualizar_categoria(id: int, categoria_atualizada: AtualizarCategoria, db: S
     return categoria
 
 @router.delete("/{id}")
-def excluir_categoria(id: int, db: Session = Depends(get_db)):
+def excluir_categoria(
+    id: int,
+    _: Usuario = Depends(get_current_admin), 
+    db: Session = Depends(get_db)
+):
     resultado = db.execute(
         select(Categoria).where(Categoria.id == id)
     )

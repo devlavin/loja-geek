@@ -72,3 +72,13 @@ def get_current_user(
         raise credenciais_invalidas
 
     return usuario
+
+def get_current_admin(
+    usuario: Usuario = Depends(get_current_user)
+):
+    if usuario.role != "admin":
+        raise HTTPException(
+            status_code=403,
+            detail="Acesso permitido apenas para administradores."
+        )
+    return usuario
