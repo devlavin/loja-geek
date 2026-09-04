@@ -5,7 +5,7 @@ from database import get_db
 import bcrypt
 from auth import criar_token, get_current_user
 from models import Usuario
-from schema import UsuarioCreate, UsuarioLogin, UsuarioResponse
+from schema import UsuarioCreate, UsuarioLogin, UsuarioResponse, AtualizarUsuario
 
 router = APIRouter(
     prefix="/usuarios",
@@ -89,3 +89,66 @@ def usuario_atual(
     usuario: Usuario = Depends(get_current_user)
 ):
     return usuario
+
+@router.patch(
+    "/{id}", 
+    response_model=UsuarioResponse
+)
+def atualizar_usuario(
+    id: int,
+    dados: AtualizarUsuario,
+    usuario: Usuario = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if id != usuario.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Você só pode editar seu próprio usuário."
+        )
+
+    if dados.email is not None:
+        resultado = db.execute(
+            select(Usuario).where(Usuario.email == dados.email)
+        )
+
+        usuario_existente = resultado.scalar_one_or_none()
+
+        if usuario_existente is not None and usuario_existente.id != usuario.id:
+            raise HTTPException(
+                status_code=400,
+                detail="E-mail já cadastrado."
+            )
+
+        usuario.email = dados.email
+
+    if dados.password is not None:
+        senha_hash = bcrypt.hashpw(
+            dados.password.encode("utf-8"),
+            bcrypt.gensalt()
+        ).decode("utf-8")
+
+        usuario.password_hash = senha_hash
+
+    db.commit()
+    db.refresh(usuario)
+
+    return usuario
+
+@router.delete("/{id}")
+def deletar_usuario(
+    id: int,
+    usuario: Usuario = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if id != usuario.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Você só pode excluir seu próprio usuário."
+        )
+
+    db.delete(usuario)
+    db.commit()
+
+    return {
+        "message": "Usuário excluído com sucesso."
+    }

@@ -80,6 +80,37 @@ class UsuarioCreate(BaseModel):
 class UsuarioLogin(BaseModel):
     email: str
     password: str
+    
+class AtualizarUsuario(BaseModel):
+    email: EmailStr | None = None
+    password: str | None = Field(
+        default=None,
+        min_length=8
+    )
+
+    @field_validator("password")
+    @classmethod
+    def validar_senha(cls, senha):
+        if senha is None:
+            return senha
+
+        if not re.search(r"[A-Z]", senha):
+            raise ValueError(
+                "A senha deve conter pelo menos uma letra maiuscula."
+            )
+
+        if not re.search(r"\d", senha):
+            raise ValueError(
+                "A senha deve conter pelo menos um número."
+            )
+
+        if not re.search(r"[^A-Za-z0-9]", senha):
+            raise ValueError(
+                "A senha deve conter pelo menos um caractere especial."
+            )
+
+        return senha
+    
 class UsuarioResponse(BaseModel):
     id: int
     name: str
