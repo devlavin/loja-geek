@@ -1274,28 +1274,47 @@ O núcleo funcional da loja já está implementado.
 
 Os próximos passos serão voltados para **qualidade, manutenção, infraestrutura e produção**.
 
-## 🧪 1. Testes automatizados
+## 🧪 1. Testes automatizados — CONCLUÍDO ✅
 
-Adicionar testes utilizando `pytest` para:
+Foi implementada uma suíte de testes utilizando `pytest` para validar os principais fluxos da API.
 
-* cadastro;
+O ambiente de testes utiliza um banco PostgreSQL separado:
+
+```text
+fastapi_produtos_test
+```
+
+Foram testados fluxos envolvendo:
+
+* cadastro de usuários;
 * validação de email;
 * validação de senha;
 * login;
 * JWT;
+* autenticação;
 * autorização;
 * produtos;
 * categorias;
 * filtros;
-* carrinho;
+* paginação;
 * estoque;
+* carrinho;
+* controle de quantidade;
 * pedidos;
 * pagamento;
 * cancelamento;
 * área administrativa;
 * regras de status.
 
-Os testes deverão utilizar um ambiente/banco de testes separado para não modificar os dados de desenvolvimento.
+Resultado atual:
+
+```text
+36 passed
+```
+
+Todos os 36 testes automatizados estão passando.
+
+Com isso, a etapa de testes automatizados foi concluída e o projeto está pronto para avançar para Alembic.
 
 ---
 
@@ -1506,10 +1525,22 @@ O projeto começou como uma forma de aprender CRUD e foi transformado gradualmen
 
 # 📌 Próximo passo
 
-Amanhã, o próximo módulo será:
+O próximo módulo será:
 
 ```text
-🧪 PYTEST
+🗃️ ALEMBIC
 ```
 
-A ideia será criar um ambiente de testes separado e começar a testar a API por fluxos completos, garantindo que o que já construímos continue funcionando antes de partir para Alembic, refatoração, Docker e deploy.
+A ideia será adicionar migrations ao projeto para controlar a evolução da estrutura do banco de dados de forma organizada e reproduzível.
+
+Depois de Alembic, seguiremos para:
+
+```text
+🧹 Refatoração final
+        ↓
+🐳 Docker
+        ↓
+🚀 Preparação para produção / Deploy
+        ↓
+🎨 Frontend
+```
