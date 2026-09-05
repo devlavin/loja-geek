@@ -87,10 +87,10 @@ def criar_pedido(
         db.commit()
         db.refresh(pedido)
 
-        resposta_itens = []
+        response_itens = []
 
         for item in pedido.itens:
-            resposta_itens.append({
+            response_itens.append({
                 "produto_id": item.produto_id,
                 "nome": item.produto.name,
                 "quantidade": item.quantidade,
@@ -101,7 +101,7 @@ def criar_pedido(
         return {
             "id": pedido.id,
             "status": pedido.status,
-            "itens": resposta_itens,
+            "itens": response_itens,
             "total": pedido.total
         }
 
@@ -172,7 +172,7 @@ def listar_pedidos(
 
     pedidos = resultado.scalars().all()
 
-    resposta = []
+    response = []
 
     for pedido in pedidos:
         itens = []
@@ -186,14 +186,14 @@ def listar_pedidos(
                 "subtotal": item.preco * item.quantidade
             })
 
-        resposta.append({
+        response.append({
             "id": pedido.id,
             "status": pedido.status,
             "itens": itens,
             "total": pedido.total
         })
 
-    return resposta
+    return response
 
 @router.get(
     "/{pedido_id}",

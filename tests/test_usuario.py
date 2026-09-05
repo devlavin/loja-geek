@@ -153,7 +153,7 @@ def test_usuario_atual():
     assert dados ["email"] == "pedro@teste.com"
 
 def test_atualizar_email():
-    resposta = client.post(
+    response = client.post(
         "/usuarios",
         json={
             "name": "Pedro",
@@ -162,7 +162,7 @@ def test_atualizar_email():
         }
     )
 
-    usuario = resposta.json()
+    usuario = response.json()
 
     login = client.post(
         "/usuarios/login",
@@ -174,7 +174,7 @@ def test_atualizar_email():
 
     token = login.json()["access_token"]
 
-    resposta = client.patch(
+    response = client.patch(
         f"/usuarios/{usuario['id']}",
         json={
             "email": "pedronovo@email.com"
@@ -184,11 +184,11 @@ def test_atualizar_email():
         }
     )
 
-    assert resposta.status_code == 200
-    assert resposta.json()["email"] == "pedronovo@email.com"
+    assert response.status_code == 200
+    assert response.json()["email"] == "pedronovo@email.com"
     
 def test_atualizar_senha():
-    resposta = client.post(
+    response = client.post(
         "/usuarios",
         json={
             "name": "Pedro",
@@ -197,7 +197,7 @@ def test_atualizar_senha():
         }
     )
 
-    usuario = resposta.json()
+    usuario = response.json()
 
     login = client.post(
         "/usuarios/login",
@@ -209,7 +209,7 @@ def test_atualizar_senha():
 
     token = login.json()["access_token"]
 
-    resposta = client.patch(
+    response = client.patch(
         f"/usuarios/{usuario['id']}",
         json={
             "password": "Pedro123!"
@@ -219,7 +219,7 @@ def test_atualizar_senha():
         }
     )
 
-    assert resposta.status_code == 200
+    assert response.status_code == 200
 
     login_novo = client.post(
         "/usuarios/login",
@@ -232,7 +232,7 @@ def test_atualizar_senha():
     assert login_novo.status_code == 200
     
 def test_deletar_usuario():
-    resposta = client.post(
+    response = client.post(
         "/usuarios",
         json={
             "name": "Pedro",
@@ -241,7 +241,7 @@ def test_deletar_usuario():
         }
     )
 
-    usuario = resposta.json()
+    usuario = response.json()
 
     login = client.post(
         "/usuarios/login",
@@ -253,14 +253,14 @@ def test_deletar_usuario():
 
     token = login.json()["access_token"]
 
-    resposta = client.delete(
+    response = client.delete(
         f"/usuarios/{usuario['id']}",
         headers={
             "Authorization": f"Bearer {token}"
         }
     )
 
-    assert resposta.status_code == 200
+    assert response.status_code == 200
     
     login_depois = client.post(
         "/usuarios/login",

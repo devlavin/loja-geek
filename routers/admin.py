@@ -26,7 +26,7 @@ def listar_todos_pedidos(
 
     pedidos = resultado.scalars().all()
 
-    resposta = []
+    response = []
 
     for pedido in pedidos:
         itens = []
@@ -40,7 +40,7 @@ def listar_todos_pedidos(
                 "subtotal": item.preco * item.quantidade
             })
 
-        resposta.append({
+        response.append({
             "id": pedido.id,
             "usuario_id": pedido.usuario_id,
             "status": pedido.status,
@@ -48,7 +48,7 @@ def listar_todos_pedidos(
             "total": pedido.total
         })
 
-    return resposta
+    return response
 
 @router.get("/pedidos/{pedido_id}")
 def visualizar_pedido_admin(
@@ -162,17 +162,17 @@ def listar_usuarios(
 
     usuarios = resultado.scalars().all()
 
-    resposta = []
+    response = []
 
     for usuario in usuarios:
-        resposta.append({
+        response.append({
             "id": usuario.id,
             "name": usuario.name,
             "email": usuario.email,
             "role": usuario.role
         })
 
-    return resposta
+    return response
 
 @router.get("/usuarios/{usuario_id}")
 def visualizar_usuario_admin(

@@ -26,11 +26,11 @@ def Exemplo_1():
 
 O objetivo inicial foi entender:
 
-* como criar uma API;
-* como criar endpoints;
-* como utilizar métodos HTTP;
-* como o FastAPI processa requisições;
-* como retornar respostas.
+- como criar uma API;
+- como criar endpoints;
+- como utilizar métodos HTTP;
+- como o FastAPI processa requisições;
+- como retornar responses.
 
 ---
 
@@ -47,9 +47,9 @@ class Item(BaseModel):
 
 Cada produto possuía inicialmente:
 
-* `id`
-* `name`
-* `price`
+- `id`
+- `name`
+- `price`
 
 O Pydantic ficou responsável pela validação dos dados recebidos pela API.
 
@@ -142,12 +142,12 @@ Também foi configurado um ambiente virtual:
 
 E instaladas as principais dependências:
 
-* FastAPI
-* SQLAlchemy
-* Psycopg
-* python-dotenv
-* bcrypt
-* PyJWT
+- FastAPI
+- SQLAlchemy
+- Psycopg
+- python-dotenv
+- bcrypt
+- PyJWT
 
 O `psycopg` foi utilizado como driver para comunicação entre Python/SQLAlchemy e PostgreSQL.
 
@@ -206,13 +206,13 @@ Inicialmente foi criado o model `Produto`.
 
 Com a evolução do projeto, novos models foram adicionados:
 
-* `Produto`
-* `Categoria`
-* `Usuario`
-* `Carrinho`
-* `ItemCarrinho`
-* `Pedido`
-* `PedidoItem`
+- `Produto`
+- `Categoria`
+- `Usuario`
+- `Carrinho`
+- `ItemCarrinho`
+- `Pedido`
+- `PedidoItem`
 
 ---
 
@@ -506,10 +506,10 @@ Durante o cadastro, primeiro a senha passa pelas validações do Pydantic.
 
 A senha precisa possuir:
 
-* pelo menos 8 caracteres;
-* pelo menos uma letra maiúscula;
-* pelo menos um número;
-* pelo menos um caractere especial.
+- pelo menos 8 caracteres;
+- pelo menos uma letra maiúscula;
+- pelo menos um número;
+- pelo menos um caractere especial.
 
 Exemplo de senha válida:
 
@@ -643,26 +643,26 @@ role
 
 Pode:
 
-* visualizar produtos;
-* visualizar categorias;
-* utilizar o carrinho;
-* realizar compras;
-* visualizar seus próprios pedidos.
+- visualizar produtos;
+- visualizar categorias;
+- utilizar o carrinho;
+- realizar compras;
+- visualizar seus próprios pedidos.
 
 ### Administrador
 
 Pode realizar todas as operações do usuário comum e também:
 
-* cadastrar produtos;
-* alterar produtos;
-* excluir produtos;
-* alterar estoque;
-* cadastrar categorias;
-* alterar categorias;
-* excluir categorias;
-* gerenciar pedidos;
-* visualizar usuários;
-* alterar permissões de usuários.
+- cadastrar produtos;
+- alterar produtos;
+- excluir produtos;
+- alterar estoque;
+- cadastrar categorias;
+- alterar categorias;
+- excluir categorias;
+- gerenciar pedidos;
+- visualizar usuários;
+- alterar permissões de usuários.
 
 A autorização utiliza:
 
@@ -940,7 +940,7 @@ GET /pedidos/{pedido_id}
 
 O sistema garante que o usuário só consiga acessar pedidos pertencentes a ele.
 
-A resposta contém:
+A response contém:
 
 ```text
 id
@@ -1250,19 +1250,19 @@ A aplicação atualmente segue aproximadamente:
 
 Até o momento, foram implementados:
 
-* hash de senha com bcrypt;
-* validação de senha;
-* validação de email;
-* JWT para autenticação;
-* expiração de token;
-* autenticação com Bearer Token;
-* diferenciação entre usuário e administrador;
-* proteção de endpoints administrativos;
-* email único;
-* respostas com `response_model`;
-* variáveis sensíveis armazenadas em `.env`;
-* `.env` protegido pelo `.gitignore`;
-* separação entre erros HTTP 401 e 403.
+- hash de senha com bcrypt;
+- validação de senha;
+- validação de email;
+- JWT para autenticação;
+- expiração de token;
+- autenticação com Bearer Token;
+- diferenciação entre usuário e administrador;
+- proteção de endpoints administrativos;
+- email único;
+- responses com `response_model`;
+- variáveis sensíveis armazenadas em `.env`;
+- `.env` protegido pelo `.gitignore`;
+- separação entre erros HTTP 401 e 403.
 
 A senha de usuário também não é aceita como `role` no cadastro público, evitando que alguém tente se cadastrar diretamente como administrador.
 
@@ -1286,25 +1286,25 @@ fastapi_produtos_test
 
 Foram testados fluxos envolvendo:
 
-* cadastro de usuários;
-* validação de email;
-* validação de senha;
-* login;
-* JWT;
-* autenticação;
-* autorização;
-* produtos;
-* categorias;
-* filtros;
-* paginação;
-* estoque;
-* carrinho;
-* controle de quantidade;
-* pedidos;
-* pagamento;
-* cancelamento;
-* área administrativa;
-* regras de status.
+- cadastro de usuários;
+- validação de email;
+- validação de senha;
+- login;
+- JWT;
+- autenticação;
+- autorização;
+- produtos;
+- categorias;
+- filtros;
+- paginação;
+- estoque;
+- carrinho;
+- controle de quantidade;
+- pedidos;
+- pagamento;
+- cancelamento;
+- área administrativa;
+- regras de status.
 
 Resultado atual:
 
@@ -1343,16 +1343,16 @@ Depois dos testes, será feita uma única revisão geral do projeto.
 
 Serão avaliados:
 
-* organização dos routers;
-* schemas;
-* nomes de variáveis;
-* funções;
-* respostas;
-* tratamento de erros;
-* regras duplicadas;
-* consultas SQLAlchemy;
-* organização dos arquivos;
-* padronização de nomes.
+- organização dos routers;
+- schemas;
+- nomes de variáveis;
+- funções;
+- responses;
+- tratamento de erros;
+- regras duplicadas;
+- consultas SQLAlchemy;
+- organização dos arquivos;
+- padronização de nomes.
 
 Também será tomada a decisão definitiva sobre utilizar português ou inglês nos nomes do projeto.
 
@@ -1378,14 +1378,14 @@ Utilizando Docker Compose para facilitar o ambiente de desenvolvimento.
 
 Depois do backend estar concluído:
 
-* configurar ambiente de produção;
-* revisar variáveis de ambiente;
-* configurar banco;
-* revisar segurança;
-* executar migrations;
-* configurar logs;
-* preparar servidor;
-* preparar deploy.
+- configurar ambiente de produção;
+- revisar variáveis de ambiente;
+- configurar banco;
+- revisar segurança;
+- executar migrations;
+- configurar logs;
+- preparar servidor;
+- preparar deploy.
 
 ---
 
@@ -1395,17 +1395,17 @@ Após finalizar e testar o backend, será desenvolvido o frontend da loja.
 
 O frontend será responsável por:
 
-* catálogo;
-* busca;
-* filtros;
-* categorias;
-* login;
-* cadastro;
-* carrinho;
-* checkout;
-* pedidos;
-* área do usuário;
-* área administrativa.
+- catálogo;
+- busca;
+- filtros;
+- categorias;
+- login;
+- cadastro;
+- carrinho;
+- checkout;
+- pedidos;
+- área do usuário;
+- área administrativa.
 
 ---
 
@@ -1447,33 +1447,33 @@ para:
 
 O backend já possui:
 
-* CRUD de produtos;
-* categorias;
-* relacionamento entre categorias e produtos;
-* controle de estoque;
-* usuários;
-* validação de email;
-* validação de senha;
-* bcrypt;
-* JWT;
-* autenticação;
-* autorização;
-* roles;
-* carrinho;
-* controle de quantidade;
-* controle de estoque no carrinho;
-* pedidos;
-* histórico de pedidos;
-* pagamento simulado;
-* cancelamento;
-* fluxo de status;
-* área administrativa;
-* gerenciamento de usuários;
-* busca;
-* filtros;
-* paginação;
-* valores monetários com Decimal/Numeric;
-* Git e GitHub.
+- CRUD de produtos;
+- categorias;
+- relacionamento entre categorias e produtos;
+- controle de estoque;
+- usuários;
+- validação de email;
+- validação de senha;
+- bcrypt;
+- JWT;
+- autenticação;
+- autorização;
+- roles;
+- carrinho;
+- controle de quantidade;
+- controle de estoque no carrinho;
+- pedidos;
+- histórico de pedidos;
+- pagamento simulado;
+- cancelamento;
+- fluxo de status;
+- área administrativa;
+- gerenciamento de usuários;
+- busca;
+- filtros;
+- paginação;
+- valores monetários com Decimal/Numeric;
+- Git e GitHub.
 
 ---
 
@@ -1481,43 +1481,43 @@ O backend já possui:
 
 O desenvolvimento permitiu sair de um CRUD básico e estudar conceitos presentes em aplicações reais:
 
-* Python;
-* FastAPI;
-* Pydantic;
-* HTTP;
-* REST;
-* CRUD;
-* PostgreSQL;
-* SQLAlchemy;
-* Psycopg;
-* Foreign Keys;
-* relacionamentos ORM;
-* Sessions;
-* Transactions;
-* `commit`, `rollback`, `flush` e `refresh`;
-* validação de dados;
-* validação de email;
-* validação de senha;
-* hash de senhas;
-* bcrypt;
-* JWT;
-* autenticação;
-* autorização;
-* roles;
-* dependências do FastAPI;
-* controle de estoque;
-* regras de negócio;
-* carrinho de compras;
-* pedidos;
-* pagamento simulado;
-* controle de status;
-* filtros;
-* paginação;
-* Decimal;
-* Numeric;
-* organização de projeto;
-* variáveis de ambiente;
-* Git e GitHub.
+- Python;
+- FastAPI;
+- Pydantic;
+- HTTP;
+- REST;
+- CRUD;
+- PostgreSQL;
+- SQLAlchemy;
+- Psycopg;
+- Foreign Keys;
+- relacionamentos ORM;
+- Sessions;
+- Transactions;
+- `commit`, `rollback`, `flush` e `refresh`;
+- validação de dados;
+- validação de email;
+- validação de senha;
+- hash de senhas;
+- bcrypt;
+- JWT;
+- autenticação;
+- autorização;
+- roles;
+- dependências do FastAPI;
+- controle de estoque;
+- regras de negócio;
+- carrinho de compras;
+- pedidos;
+- pagamento simulado;
+- controle de status;
+- filtros;
+- paginação;
+- Decimal;
+- Numeric;
+- organização de projeto;
+- variáveis de ambiente;
+- Git e GitHub.
 
 O projeto começou como uma forma de aprender CRUD e foi transformado gradualmente em uma **API de e-commerce completa**, com foco em entender não apenas como fazer cada funcionalidade, mas também por que cada decisão de arquitetura existe.
 

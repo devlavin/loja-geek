@@ -7,7 +7,7 @@ client = TestClient(app)
 
 def test_adicionar_produto_carrinho(db):
 
-    resposta = client.post(
+    response = client.post(
         "/usuarios",
         json={
             "name": "Pedro",
@@ -16,7 +16,7 @@ def test_adicionar_produto_carrinho(db):
         }
     )
 
-    assert resposta.status_code == 200
+    assert response.status_code == 200
 
     login = client.post(
         "/usuarios/login",
@@ -51,7 +51,7 @@ def test_adicionar_produto_carrinho(db):
     db.commit()
     db.refresh(produto)
     
-    resposta = client.post(
+    response = client.post(
         "/carrinho",
         json={
             "produto_id": produto.id,
@@ -60,9 +60,9 @@ def test_adicionar_produto_carrinho(db):
         headers=headers
     )
 
-    assert resposta.status_code == 200
+    assert response.status_code == 200
 
-    dados = resposta.json()
+    dados = response.json()
 
     assert len(dados["itens"]) == 1
     assert dados["itens"][0]["produto_id"] == produto.id
@@ -73,7 +73,7 @@ def test_adicionar_produto_carrinho(db):
     
 def test_nao_adicionar_quantidade_maior_que_estoque(db):
 
-    resposta = client.post(
+    response = client.post(
         "/usuarios",
         json={
             "name": "Pedro",
@@ -115,7 +115,7 @@ def test_nao_adicionar_quantidade_maior_que_estoque(db):
     db.commit()
     db.refresh(produto)
 
-    resposta = client.post(
+    response = client.post(
         "/carrinho",
         json={
             "produto_id": produto.id,
@@ -124,14 +124,14 @@ def test_nao_adicionar_quantidade_maior_que_estoque(db):
         headers=headers
     )
 
-    assert resposta.status_code == 400
-    assert resposta.json()["detail"] == (
+    assert response.status_code == 400
+    assert response.json()["detail"] == (
         "Quantidade solicitada maior que o estoque disponível."
     )
 
 def test_adicionar_produto_inexistente():
 
-    resposta = client.post(
+    response = client.post(
         "/usuarios",
         json={
             "name": "Pedro",
@@ -154,7 +154,7 @@ def test_adicionar_produto_inexistente():
         "Authorization": f"Bearer {token}"
     }
 
-    resposta = client.post(
+    response = client.post(
         "/carrinho",
         json={
             "produto_id": 9999,
@@ -163,8 +163,8 @@ def test_adicionar_produto_inexistente():
         headers=headers
     )
 
-    assert resposta.status_code == 404
-    assert resposta.json()["detail"] == "Produto não encontrado."
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Produto não encontrado."
     
 def test_adicionar_produto_sem_estoque(db):
 
@@ -210,7 +210,7 @@ def test_adicionar_produto_sem_estoque(db):
     db.commit()
     db.refresh(produto)
 
-    resposta = client.post(
+    response = client.post(
         "/carrinho",
         json={
             "produto_id": produto.id,
@@ -219,8 +219,8 @@ def test_adicionar_produto_sem_estoque(db):
         headers=headers
     )
 
-    assert resposta.status_code == 400
-    assert resposta.json()["detail"] == (
+    assert response.status_code == 400
+    assert response.json()["detail"] == (
         "Quantidade solicitada maior que o estoque disponível."
     )
     
@@ -269,7 +269,7 @@ def test_nao_adicionar_produto_duplicado(db):
     db.refresh(produto)
 
     # Primeira vez: deve funcionar
-    resposta = client.post(
+    response = client.post(
         "/carrinho",
         json={
             "produto_id": produto.id,
@@ -278,10 +278,10 @@ def test_nao_adicionar_produto_duplicado(db):
         headers=headers
     )
 
-    assert resposta.status_code == 200
+    assert response.status_code == 200
 
     # Segunda vez: não deve criar outro item
-    resposta = client.post(
+    response = client.post(
         "/carrinho",
         json={
             "produto_id": produto.id,
@@ -290,8 +290,8 @@ def test_nao_adicionar_produto_duplicado(db):
         headers=headers
     )
 
-    assert resposta.status_code == 400
-    assert resposta.json()["detail"] == "Produto já está no carrinho."
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Produto já está no carrinho."
 
 def test_visualizar_carrinho(db):
 
@@ -337,7 +337,7 @@ def test_visualizar_carrinho(db):
     db.commit()
     db.refresh(produto)
 
-    resposta = client.post(
+    response = client.post(
         "/carrinho",
         json={
             "produto_id": produto.id,
@@ -346,16 +346,16 @@ def test_visualizar_carrinho(db):
         headers=headers
     )
 
-    assert resposta.status_code == 200
+    assert response.status_code == 200
 
-    resposta = client.get(
+    response = client.get(
         "/carrinho",
         headers=headers
     )
 
-    assert resposta.status_code == 200
+    assert response.status_code == 200
 
-    dados = resposta.json()
+    dados = response.json()
 
     assert len(dados["itens"]) == 1
 
@@ -411,7 +411,7 @@ def test_alterar_quantidade(db):
     db.commit()
     db.refresh(produto)
 
-    resposta = client.post(
+    response = client.post(
         "/carrinho",
         json={
             "produto_id": produto.id,
@@ -420,9 +420,9 @@ def test_alterar_quantidade(db):
         headers=headers
     )
 
-    assert resposta.status_code == 200
+    assert response.status_code == 200
 
-    resposta = client.patch(
+    response = client.patch(
         f"/carrinho/{produto.id}",
         params={
             "quantidade": 5
@@ -430,9 +430,9 @@ def test_alterar_quantidade(db):
         headers=headers
     )
 
-    assert resposta.status_code == 200
+    assert response.status_code == 200
 
-    dados = resposta.json()
+    dados = response.json()
 
     assert dados["produto_id"] == produto.id
     assert dados["quantidade"] == 5
@@ -488,7 +488,7 @@ def test_alterar_quantidade_zero(db):
         headers=headers
     )
 
-    resposta = client.patch(
+    response = client.patch(
         f"/carrinho/{produto.id}",
         params={
             "quantidade": 0
@@ -496,8 +496,8 @@ def test_alterar_quantidade_zero(db):
         headers=headers
     )
 
-    assert resposta.status_code == 400
-    assert resposta.json()["detail"] == (
+    assert response.status_code == 400
+    assert response.json()["detail"] == (
         "A quantidade deve ser maior que zero."
     )
 
@@ -552,7 +552,7 @@ def test_alterar_quantidade_maior_que_estoque(db):
         headers=headers
     )
 
-    resposta = client.patch(
+    response = client.patch(
         f"/carrinho/{produto.id}",
         params={
             "quantidade": 6
@@ -560,8 +560,8 @@ def test_alterar_quantidade_maior_que_estoque(db):
         headers=headers
     )
 
-    assert resposta.status_code == 400
-    assert resposta.json()["detail"] == (
+    assert response.status_code == 400
+    assert response.json()["detail"] == (
         "Quantidade solicitada maior que o estoque disponível."
     )
     
@@ -613,7 +613,7 @@ def test_alterar_produto_que_nao_esta_no_carrinho(db):
     db.commit()
     db.refresh(produto)
 
-    resposta = client.patch(
+    response = client.patch(
         f"/carrinho/{produto.id}",
         params={
             "quantidade": 5
@@ -621,8 +621,8 @@ def test_alterar_produto_que_nao_esta_no_carrinho(db):
         headers=headers
     )
 
-    assert resposta.status_code == 404
-    assert resposta.json()["detail"] == (
+    assert response.status_code == 404
+    assert response.json()["detail"] == (
         "Produto não está no carrinho."
     )
     
@@ -668,7 +668,7 @@ def test_remover_produto_carrinho(db):
     db.commit()
     db.refresh(produto)
 
-    resposta = client.post(
+    response = client.post(
         "/carrinho",
         json={
             "produto_id": produto.id,
@@ -677,27 +677,27 @@ def test_remover_produto_carrinho(db):
         headers=headers
     )
 
-    assert resposta.status_code == 200
+    assert response.status_code == 200
 
     # Remove
-    resposta = client.delete(
+    response = client.delete(
         f"/carrinho/{produto.id}",
         headers=headers
     )
 
-    assert resposta.status_code == 200
-    assert resposta.json()["message"] == (
+    assert response.status_code == 200
+    assert response.json()["message"] == (
         "Produto removido do carrinho."
     )
 
-    resposta = client.get(
+    response = client.get(
         "/carrinho",
         headers=headers
     )
 
-    assert resposta.status_code == 200
-    assert resposta.json()["itens"] == []
-    assert resposta.json()["total"] == "0"
+    assert response.status_code == 200
+    assert response.json()["itens"] == []
+    assert response.json()["total"] == "0"
     
 def test_remover_produto_que_nao_esta_no_carrinho(db):
 
@@ -746,13 +746,13 @@ def test_remover_produto_que_nao_esta_no_carrinho(db):
     db.commit()
     db.refresh(produto)
 
-    resposta = client.delete(
+    response = client.delete(
         f"/carrinho/{produto.id}",
         headers=headers
     )
 
-    assert resposta.status_code == 404
-    assert resposta.json()["detail"] == (
+    assert response.status_code == 404
+    assert response.json()["detail"] == (
         "Produto não está no carrinho."
     )
     
@@ -781,14 +781,14 @@ def test_visualizar_carrinho_vazio():
         "Authorization": f"Bearer {token}"
     }
 
-    resposta = client.get(
+    response = client.get(
         "/carrinho",
         headers=headers
     )
 
-    assert resposta.status_code == 200
+    assert response.status_code == 200
 
-    dados = resposta.json()
+    dados = response.json()
 
     assert dados["itens"] == []
     assert dados["total"] == "0"
