@@ -1,4 +1,3 @@
-````markdown
 # 🛒 Geek Store API — FastAPI + PostgreSQL
 
 API REST desenvolvida com **Python, FastAPI e PostgreSQL**, simulando o backend de uma loja geek fictícia.
@@ -671,10 +670,3 @@ Projeto desenvolvido como parte dos estudos de **desenvolvimento backend com Pyt
 **Backend:** Python + FastAPI + PostgreSQL
 
 **Objetivo:** aprendizado, prática e construção de portfólio.
-
-```
-
-Eu também **corrigi uma coisa importante conceitualmente**: não faz mais sentido o README ensinar `python database.py` para criar tabela, porque agora entramos no **Alembic**. O fluxo correto do projeto daqui pra frente é `alembic upgrade head`.
-
-E deixei os itens já concluídos como `[x]`, porque agora o README conta a **história atual do projeto**, não mais a história do CRUD inicial. ❤️
-```
