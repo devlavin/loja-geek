@@ -1,41 +1,41 @@
 from fastapi.testclient import TestClient
 
 from main import app
-from models import Produto, Categoria
+from models import product, category
 
 client = TestClient(app)
 
-def test_listar_produtos():
-    response = client.get("/produtos")
+def test_list_products():
+    response = client.get("/products")
     
     assert response.status_code == 200
     
-def test_buscar_produto(admin_token, db):
-    categoria = Categoria(
+def test_buscar_product(admin_token, db):
+    category = category(
         name = "Chinelo"
     )
     
-    db.add(categoria)
+    db.add(category)
     db.commit()
-    db.refresh(categoria)
+    db.refresh(category)
     
-    produto = Produto(
+    product = product(
         name = "Chinelo Grifinoria",
         price = 99.99,
-        estoque = 14,
-        category_id = categoria.id
+        stock = 14,
+        category_id = category.id
     )
     
-    db.add(produto)
+    db.add(product)
     db.commit()
-    db.refresh(produto)
+    db.refresh(product)
     
     headers = {
         "Authorization": f"Bearer {admin_token}"
     }
     
     response = client.get(
-        f"/produtos/{produto.id}",
+        f"/products/{product.id}",
         headers = headers
         
     )
@@ -43,52 +43,52 @@ def test_buscar_produto(admin_token, db):
     assert response.status_code == 200   
         
     
-def test_criar_produto_no_banco(db):
-    categoria = Categoria(
-        name="Categoria Teste"
+def test_create_product_no_banco(db):
+    category = category(
+        name="category Teste"
     )
 
-    db.add(categoria)
+    db.add(category)
     db.commit()
-    db.refresh(categoria)
+    db.refresh(category)
     
-    produto = Produto(
+    product = product(
         name="Camiseta Teste",
         price = 39.99,
-        estoque = 10,
-        category_id = categoria.id
+        stock = 10,
+        category_id = category.id
     )
     
-    db.add(produto)
+    db.add(product)
     db.commit()
-    db.refresh(produto)
+    db.refresh(product)
     
-    assert produto.id is not None
-    assert produto.name == "Camiseta Teste"
-    assert produto.estoque == 10
-    assert produto.category_id == categoria.id
+    assert product.id is not None
+    assert product.name == "Camiseta Teste"
+    assert product.stock == 10
+    assert product.category_id == category.id
     
-def test_cadastrar_produto(admin_token, db):
-    categoria = Categoria(
+def test_create_product(admin_token, db):
+    category = category(
         name="Harry Potter"
     )
     
-    db.add(categoria)
+    db.add(category)
     db.commit()
-    db.refresh(categoria)
+    db.refresh(category)
     
     headers = {
         "Authorization": f"Bearer {admin_token}"
     }
 
     response = client.post(
-        f"/produtos",
+        f"/products",
         json=[
             {
                 "name": "Camiseta Corvinal",
                 "price": 49.99,
-                "estoque": 8,
-                "category_id": categoria.id
+                "stock": 8,
+                "category_id": category.id
             }
         ],
         headers=headers
@@ -96,32 +96,32 @@ def test_cadastrar_produto(admin_token, db):
 
     assert response.status_code == 200
     
-def test_atualizar_preco(admin_token, db):
-    categoria = Categoria(
+def test_update_preco(admin_token, db):
+    category = category(
         name="Jogos Vorazes"
     )
     
-    db.add(categoria)
+    db.add(category)
     db.commit()
-    db.refresh(categoria)
+    db.refresh(category)
     
-    produto = Produto(
+    product = product(
         name="Caneca Snow",
         price=35.89,
-        estoque=5,
-        category_id=categoria.id
+        stock=5,
+        category_id=category.id
     )
 
-    db.add(produto)
+    db.add(product)
     db.commit()
-    db.refresh(produto)
+    db.refresh(product)
     
     headers = {
         "Authorization": f"Bearer {admin_token}"
     }
     
     response = client.patch(
-        f"/produtos/{produto.id}",
+        f"/products/{product.id}",
         json={
             "price": 39.99
         },
@@ -130,73 +130,73 @@ def test_atualizar_preco(admin_token, db):
     
     assert response.status_code == 200
     
-def test_atualizar_estoque(admin_token, db):
-    categoria = Categoria(
+def test_update_stock(admin_token, db):
+    category = category(
         name="Maze Runner"
     )
     
-    db.add(categoria)
+    db.add(category)
     db.commit()
-    db.refresh(categoria)
+    db.refresh(category)
     
-    produto = Produto(
+    product = product(
         name="Maze Runner: Correr ou Morrer",
         price = 45.79,
-        estoque = 12,
-        category_id = categoria.id
+        stock = 12,
+        category_id = category.id
     )
     
-    db.add(produto)
+    db.add(product)
     db.commit()
-    db.refresh(produto)
+    db.refresh(product)
     
     headers = {
         "Authorization": f"Bearer {admin_token}"
     }
     
     response = client.patch(
-        f"/produtos/{produto.id}/estoque",
+        f"/products/{product.id}/stock",
         json={
-            "estoque": 15
+            "stock": 15
         },
         headers = headers
     )
     
     assert response.status_code == 200
     
-def test_delete_produto(admin_token, db):
-    categoria = Categoria(
+def test_delete_product(admin_token, db):
+    category = category(
         name="Percy Jackson"
     )
     
-    db.add(categoria)
+    db.add(category)
     db.commit()
-    db.refresh(categoria)
+    db.refresh(category)
     
-    produto = Produto(
+    product = product(
         name = "Camiseta Tridente Poseidon",
         price = 57.99,
-        estoque = 5,
-        category_id = categoria.id
+        stock = 5,
+        category_id = category.id
     )
     
-    db.add(produto)
+    db.add(product)
     db.commit()
-    db.refresh(produto)
+    db.refresh(product)
     
     headers = {
         "Authorization": f"Bearer {admin_token}"
     }
     
     response = client.delete(
-        f"/produtos/{produto.id}",
+        f"/products/{product.id}",
         headers = headers
     )
     
     assert response.status_code == 200
     
-    produto_excluido = db.query(Produto).filter(
-        Produto.id == produto.id
+    product_excluido = db.query(product).filter(
+        product.id == product.id
     ).first()
     
-    assert produto_excluido is None
+    assert product_excluido is None

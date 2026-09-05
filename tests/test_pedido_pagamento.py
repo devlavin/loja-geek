@@ -1,15 +1,15 @@
 from fastapi.testclient import TestClient
 
 from main import app
-from models import Produto, Categoria
+from models import product, category
 
 client = TestClient(app)
 
 
-def criar_pedido_teste(db):
+def create_order_teste(db):
 
     client.post(
-        "/usuarios",
+        "/users",
         json={
             "name": "Pedro",
             "email": "pedro@teste.com",
@@ -18,7 +18,7 @@ def criar_pedido_teste(db):
     )
 
     login = client.post(
-        "/usuarios/login",
+        "/users/login",
         json={
             "email": "pedro@teste.com",
             "password": "Pedro123@"
@@ -31,47 +31,47 @@ def criar_pedido_teste(db):
         "Authorization": f"Bearer {token}"
     }
 
-    categoria = Categoria(name="Geek")
+    category = category(name="Geek")
 
-    db.add(categoria)
+    db.add(category)
     db.commit()
-    db.refresh(categoria)
+    db.refresh(category)
 
-    produto = Produto(
+    product = product(
         name="Caneca Naruto",
         price=50,
-        estoque=10,
-        category_id=categoria.id
+        stock=10,
+        category_id=category.id
     )
 
-    db.add(produto)
+    db.add(product)
     db.commit()
-    db.refresh(produto)
+    db.refresh(product)
 
     client.post(
-        "/carrinho",
+        "/cart",
         json={
-            "produto_id": produto.id,
-            "quantidade": 2
+            "product_id": product.id,
+            "quantity": 2
         },
         headers=headers
     )
 
-    pedido = client.post(
-        "/pedidos",
+    order = client.post(
+        "/orders",
         headers=headers
     )
 
-    pedido_id = pedido.json()["id"]
+    order_id = order.json()["id"]
 
-    return headers, pedido_id
+    return headers, order_id
 
 
-def test_pagar_pedido(db):
-    headers, pedido_id = criar_pedido_teste(db)
+def test_pay_order(db):
+    headers, order_id = create_order_teste(db)
 
     response = client.post(
-        f"/pedidos/{pedido_id}/pagar",
+        f"/orders/{order_id}/pay",
         headers=headers
     )
 
@@ -80,16 +80,16 @@ def test_pagar_pedido(db):
     data = response.json()
 
     assert data["message"] == "Pagamento aprovado."
-    assert data["pedido_id"] == pedido_id
+    assert data["order_id"] == order_id
     assert data["status"] == "PAGO"
 
 
-def test_pagar_pedido_ja_pago(db):
-    headers, pedido_id = criar_pedido_teste(db)
+def test_pay_order_ja_pago(db):
+    headers, order_id = create_order_teste(db)
 
     # Primeiro pagamento
     response = client.post(
-        f"/pedidos/{pedido_id}/pagar",
+        f"/orders/{order_id}/pay",
         headers=headers
     )
 
@@ -97,31 +97,31 @@ def test_pagar_pedido_ja_pago(db):
 
     # Segundo pagamento
     response = client.post(
-        f"/pedidos/{pedido_id}/pagar",
+        f"/orders/{order_id}/pay",
         headers=headers
     )
 
     assert response.status_code == 400
-    assert response.json()["detail"] == "Este pedido não pode ser pago."
+    assert response.json()["detail"] == "Este order não pode ser pago."
 
 
-def test_pagar_pedido_inexistente(db):
-    headers, _ = criar_pedido_teste(db)
+def test_pay_order_inexistente(db):
+    headers, _ = create_order_teste(db)
 
     response = client.post(
-        "/pedidos/999/pagar",
+        "/orders/999/pay",
         headers=headers
     )
 
     assert response.status_code == 404
-    assert response.json()["detail"] == "Pedido não encontrado."
+    assert response.json()["detail"] == "order não encontrado."
 
 
-def test_usuario_nao_pode_pagar_pedido_de_outro_usuario(db):
-    headers_pedro, pedido_id = criar_pedido_teste(db)
+def test_user_nao_pode_pay_order_de_outro_user(db):
+    headers_pedro, order_id = create_order_teste(db)
 
     client.post(
-        "/usuarios",
+        "/users",
         json={
             "name": "Maria",
             "email": "maria@teste.com",
@@ -130,7 +130,7 @@ def test_usuario_nao_pode_pagar_pedido_de_outro_usuario(db):
     )
 
     login = client.post(
-        "/usuarios/login",
+        "/users/login",
         json={
             "email": "maria@teste.com",
             "password": "Maria123@"
@@ -143,11 +143,11 @@ def test_usuario_nao_pode_pagar_pedido_de_outro_usuario(db):
         "Authorization": f"Bearer {token_maria}"
     }
 
-    # Maria tenta pagar o pedido de Pedro
+    # Maria tenta pay o order de Pedro
     response = client.post(
-        f"/pedidos/{pedido_id}/pagar",
+        f"/orders/{order_id}/pay",
         headers=headers_maria
     )
 
     assert response.status_code == 404
-    assert response.json()["detail"] == "Pedido não encontrado."
+    assert response.json()["detail"] == "order não encontrado."

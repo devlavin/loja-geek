@@ -1,14 +1,14 @@
-# 🐍 Projeto CRUD de Produtos — FastAPI + PostgreSQL
+# 🐍 Projeto CRUD de products — FastAPI + PostgreSQL
 
 ## 📌 Sobre o projeto
 
-Este projeto começou como um CRUD simples de produtos desenvolvido em Python com FastAPI, inicialmente utilizando armazenamento em memória.
+Este projeto começou como um CRUD simples de products desenvolvido em Python com FastAPI, inicialmente utilizando armazenamento em memória.
 
 O objetivo foi compreender, de forma progressiva, como construir uma API REST, validar dados, trabalhar com banco de dados, autenticação, autorização e regras de negócio.
 
 Após validar a lógica do CRUD em memória, o projeto foi evoluído para utilizar PostgreSQL com SQLAlchemy, tornando os dados persistentes e aproximando a aplicação de uma arquitetura utilizada em aplicações reais.
 
-Atualmente, o projeto evoluiu de um simples CRUD de produtos para uma **API de uma loja virtual**, com usuários, autenticação, categorias, estoque, carrinho, pedidos, pagamento simulado e área administrativa.
+Atualmente, o projeto evoluiu de um simples CRUD de products para uma **API de uma loja virtual**, com usuários, autenticação, categorys, stock, cart, orders, pagamento simulado e área administrativa.
 
 ---
 
@@ -26,8 +26,8 @@ def Exemplo_1():
 
 O objetivo inicial foi entender:
 
-- como criar uma API;
-- como criar endpoints;
+- como create uma API;
+- como create endpoints;
 - como utilizar métodos HTTP;
 - como o FastAPI processa requisições;
 - como retornar responses.
@@ -36,7 +36,7 @@ O objetivo inicial foi entender:
 
 # 2. 📦 Criação do modelo de dados
 
-Utilizei Pydantic para definir e validar os dados dos produtos:
+Utilizei Pydantic para definir e validar os dados dos products:
 
 ```python
 class Item(BaseModel):
@@ -45,7 +45,7 @@ class Item(BaseModel):
     price: float
 ```
 
-Cada produto possuía inicialmente:
+Cada product possuía inicialmente:
 
 - `id`
 - `name`
@@ -57,70 +57,70 @@ O Pydantic ficou responsável pela validação dos dados recebidos pela API.
 
 # 3. 💾 Criação do CRUD inicialmente em memória
 
-Antes de utilizar um banco de dados, criei uma lista para armazenar os produtos:
+Antes de utilizar um banco de dados, criei uma lista para armazenar os products:
 
 ```python
-produtos = []
+products = []
 ```
 
 Isso permitiu desenvolver e testar a lógica do CRUD sem depender inicialmente de um banco.
 
 Foram criadas as operações:
 
-| Método | Endpoint         | Função             |
-| ------ | ---------------- | ------------------ |
-| POST   | `/produtos`      | Cadastrar produtos |
-| GET    | `/produtos`      | Listar produtos    |
-| GET    | `/produtos/{id}` | Buscar produto     |
-| PATCH  | `/produtos/{id}` | Atualizar preço    |
-| DELETE | `/produtos/{id}` | Excluir produto    |
+| Método | Endpoint         | Função          |
+| ------ | ---------------- | --------------- |
+| POST   | `/products`      | create products |
+| GET    | `/products`      | list products   |
+| GET    | `/products/{id}` | Buscar product  |
+| PATCH  | `/products/{id}` | update preço    |
+| DELETE | `/products/{id}` | Excluir product |
 
 Essa etapa foi importante para entender primeiro a lógica da aplicação antes de introduzir persistência.
 
 ---
 
-# 4. 📚 Cadastro de vários produtos
+# 4. 📚 Cadastro de vários products
 
-Inicialmente o endpoint recebia apenas um produto.
+Inicialmente o endpoint recebia apenas um product.
 
-Depois alterei para aceitar vários produtos de uma vez:
-
-```python
-@app.post("/produtos")
-def cadastrarProd(itens: list[Item]):
-```
-
-Utilizei um `for` para percorrer os produtos:
+Depois alterei para aceitar vários products de uma vez:
 
 ```python
-for item in itens:
-    produtos.append(item)
+@app.post("/products")
+def createProd(items: list[Item]):
 ```
 
-Isso permitiu enviar vários produtos em uma única requisição.
+Utilizei um `for` para percorrer os products:
+
+```python
+for item in items:
+    products.append(item)
+```
+
+Isso permitiu enviar vários products em uma única requisição.
 
 ---
 
-# 5. 🔎 Busca de produto por ID
+# 5. 🔎 Busca de product por ID
 
 Foi criado o endpoint:
 
 ```text
-GET /produtos/{id}
+GET /products/{id}
 ```
 
-A rota procura o produto pelo ID informado.
+A rota procura o product pelo ID informado.
 
 Também implementei tratamento de erro:
 
 ```python
 raise HTTPException(
     status_code=404,
-    detail="Produto não encontrado."
+    detail="product não encontrado."
 )
 ```
 
-Assim, quando um produto não existe, a API retorna HTTP 404.
+Assim, quando um product não existe, a API retorna HTTP 404.
 
 ---
 
@@ -131,7 +131,7 @@ Depois que o CRUD em memória estava funcionando, decidi substituir a lista pelo
 Foi criado o banco:
 
 ```text
-fastapi_produtos
+fastapi_products
 ```
 
 Também foi configurado um ambiente virtual:
@@ -178,7 +178,7 @@ Psycopg
    ↓
 PostgreSQL
    ↓
-fastapi_produtos
+fastapi_products
 ```
 
 Também foi criada uma `SessionLocal` para trabalhar com sessões do banco.
@@ -202,17 +202,17 @@ class Base(DeclarativeBase):
     pass
 ```
 
-Inicialmente foi criado o model `Produto`.
+Inicialmente foi criado o model `product`.
 
 Com a evolução do projeto, novos models foram adicionados:
 
-- `Produto`
-- `Categoria`
-- `Usuario`
-- `Carrinho`
-- `ItemCarrinho`
-- `Pedido`
-- `PedidoItem`
+- `product`
+- `category`
+- `user`
+- `cart`
+- `Itemcart`
+- `order`
+- `orderItem`
 
 ---
 
@@ -224,7 +224,7 @@ Foi utilizado:
 Base.metadata.create_all(bind=engine)
 ```
 
-Com isso, o SQLAlchemy consegue criar tabelas que ainda não existem no banco com base nos models.
+Com isso, o SQLAlchemy consegue create tabelas que ainda não existem no banco com base nos models.
 
 A estrutura do banco passou a representar as entidades da aplicação.
 
@@ -263,16 +263,16 @@ O `Depends()` permite que o FastAPI injete automaticamente a sessão.
 O cadastro deixou de utilizar:
 
 ```python
-produtos.append(item)
+products.append(item)
 ```
 
-e passou a criar objetos SQLAlchemy:
+e passou a create objetos SQLAlchemy:
 
 ```python
-produto = Produto(
+product = product(
     name=item.name,
     price=item.price,
-    estoque=item.estoque,
+    stock=item.stock,
     category_id=item.category_id
 )
 ```
@@ -280,13 +280,13 @@ produto = Produto(
 Depois:
 
 ```python
-db.add(produto)
+db.add(product)
 db.commit()
 ```
 
-Assim, os produtos passaram a ser armazenados permanentemente no PostgreSQL.
+Assim, os products passaram a ser armazenados permanentemente no PostgreSQL.
 
-Durante o desenvolvimento também foram cadastrados produtos de teste, incluindo livros da saga Jogos Vorazes 😂📚.
+Durante o desenvolvimento também foram cadastrados products de teste, incluindo livros da saga Jogos Vorazes 😂📚.
 
 ---
 
@@ -295,45 +295,45 @@ Durante o desenvolvimento também foram cadastrados produtos de teste, incluindo
 O endpoint:
 
 ```text
-GET /produtos
+GET /products
 ```
 
 passou a consultar o banco:
 
 ```python
-resultado = db.execute(select(Produto))
+resultado = db.execute(select(product))
 ```
 
 E os registros foram convertidos para uma lista:
 
 ```python
-produtos = resultado.scalars().all()
+products = resultado.scalars().all()
 ```
 
 ---
 
 # 13. 🔎 Migração do GET por ID
 
-Para buscar um produto específico:
+Para buscar um product específico:
 
 ```python
 resultado = db.execute(
-    select(Produto).where(Produto.id == id)
+    select(product).where(product.id == id)
 )
 ```
 
 Depois:
 
 ```python
-produto = resultado.scalar_one_or_none()
+product = resultado.scalar_one_or_none()
 ```
 
-Caso o produto não exista:
+Caso o product não exista:
 
 ```python
 raise HTTPException(
     status_code=404,
-    detail="Produto não encontrado."
+    detail="product não encontrado."
 )
 ```
 
@@ -344,14 +344,14 @@ raise HTTPException(
 Foi criado um schema específico para atualização de preço:
 
 ```python
-class AtualizarPreco(BaseModel):
+class updatePreco(BaseModel):
     price: Decimal = Field(gt=0)
 ```
 
-A API busca o produto pelo ID e altera somente o preço:
+A API busca o product pelo ID e altera somente o preço:
 
 ```python
-produto.price = item.price
+product.price = item.price
 ```
 
 Depois confirma a alteração:
@@ -368,24 +368,24 @@ Dessa forma, o PATCH possui uma responsabilidade específica e não permite alte
 
 O DELETE também passou a trabalhar diretamente com o banco.
 
-Primeiro o produto é localizado:
+Primeiro o product é localizado:
 
 ```python
 resultado = db.execute(
-    select(Produto).where(Produto.id == id)
+    select(product).where(product.id == id)
 )
 ```
 
 Depois:
 
 ```python
-produto = resultado.scalar_one_or_none()
+product = resultado.scalar_one_or_none()
 ```
 
 Se existir:
 
 ```python
-db.delete(produto)
+db.delete(product)
 db.commit()
 ```
 
@@ -393,25 +393,25 @@ O registro é removido do PostgreSQL.
 
 ---
 
-# 16. 🏷️ Criação de categorias
+# 16. 🏷️ Criação de categorys
 
-O projeto evoluiu para trabalhar com categorias de produtos.
+O projeto evoluiu para trabalhar com categorys de products.
 
 Foi criado o model:
 
 ```text
-Categoria
+category
 ```
 
 E estabelecida uma relação:
 
 ```text
-Categoria
+category
     │
-    └── vários Produtos
+    └── vários products
 ```
 
-No produto foi adicionada:
+No product foi adicionada:
 
 ```python
 category_id
@@ -420,53 +420,53 @@ category_id
 utilizando uma Foreign Key:
 
 ```python
-ForeignKey("categorias.id")
+ForeignKey("categorys.id")
 ```
 
 Também foi criada a relação ORM:
 
 ```python
-categoria = relationship(
-    back_populates="produtos"
+category = relationship(
+    back_populates="products"
 )
 ```
 
-Enquanto a categoria possui:
+Enquanto a category possui:
 
 ```python
-produtos = relationship(
-    back_populates="categoria"
+products = relationship(
+    back_populates="category"
 )
 ```
 
-Isso permite navegar entre categoria e produtos utilizando o SQLAlchemy.
+Isso permite navegar entre category e products utilizando o SQLAlchemy.
 
 ---
 
-# 17. 📦 Controle de estoque
+# 17. 📦 Controle de stock
 
-Os produtos passaram a possuir:
+Os products passaram a possuir:
 
 ```python
-estoque: Mapped[int]
+stock: Mapped[int]
 ```
 
 Também foi criado um endpoint específico para atualização:
 
 ```text
-PATCH /produtos/{id}/estoque
+PATCH /products/{id}/stock
 ```
 
 Foi criado o schema:
 
 ```python
-class AtualizarEstoque(BaseModel):
-    estoque: int = Field(ge=0)
+class updatestock(BaseModel):
+    stock: int = Field(ge=0)
 ```
 
-Assim, o estoque não pode receber valores negativos.
+Assim, o stock não pode receber valores negativos.
 
-O estoque também passou a ser considerado nas operações do carrinho e na criação de pedidos.
+O stock também passou a ser considerado nas operações do cart e na criação de orders.
 
 ---
 
@@ -475,7 +475,7 @@ O estoque também passou a ser considerado nas operações do carrinho e na cria
 Foi criado o model:
 
 ```text
-Usuario
+user
 ```
 
 com os principais campos:
@@ -498,30 +498,30 @@ Isso impede o cadastro de dois usuários utilizando o mesmo email.
 
 ---
 
-# 19. 🔒 Hash e validação de senha com bcrypt
+# 19. 🔒 Hash e validação de password com bcrypt
 
-A senha não é armazenada diretamente no banco.
+A password não é armazenada diretamente no banco.
 
-Durante o cadastro, primeiro a senha passa pelas validações do Pydantic.
+Durante o cadastro, primeiro a password passa pelas validações do Pydantic.
 
-A senha precisa possuir:
+A password precisa possuir:
 
 - pelo menos 8 caracteres;
 - pelo menos uma letra maiúscula;
 - pelo menos um número;
 - pelo menos um caractere especial.
 
-Exemplo de senha válida:
+Exemplo de password válida:
 
 ```text
 Lavinha123!
 ```
 
-Depois da validação, a senha passa pelo bcrypt:
+Depois da validação, a password passa pelo bcrypt:
 
 ```python
-senha_hash = bcrypt.hashpw(
-    usuario.password.encode("utf-8"),
+password_hash = bcrypt.hashpw(
+    user.password.encode("utf-8"),
     bcrypt.gensalt()
 ).decode("utf-8")
 ```
@@ -529,7 +529,7 @@ senha_hash = bcrypt.hashpw(
 O banco armazena apenas o hash:
 
 ```text
-senha original
+password original
       ↓
 validação
       ↓
@@ -538,13 +538,13 @@ validação
 password_hash
 ```
 
-Durante o login, a senha informada é comparada com o hash utilizando:
+Durante o login, a password informada é comparada com o hash utilizando:
 
 ```python
 bcrypt.checkpw()
 ```
 
-A senha em texto puro nunca é armazenada no banco.
+A password em texto puro nunca é armazenada no banco.
 
 ---
 
@@ -569,13 +569,13 @@ Foi implementado login utilizando JWT.
 Endpoint:
 
 ```text
-POST /usuarios/login
+POST /users/login
 ```
 
-Após validar email e senha, a API gera um token:
+Após validar email e password, a API gera um token:
 
 ```python
-token = criar_token(usuario_db.id)
+token = create_token(user_db.id)
 ```
 
 O token contém informações como:
@@ -643,25 +643,25 @@ role
 
 Pode:
 
-- visualizar produtos;
-- visualizar categorias;
-- utilizar o carrinho;
+- get products;
+- get categorys;
+- utilizar o cart;
 - realizar compras;
-- visualizar seus próprios pedidos.
+- get seus próprios orders.
 
 ### Administrador
 
 Pode realizar todas as operações do usuário comum e também:
 
-- cadastrar produtos;
-- alterar produtos;
-- excluir produtos;
-- alterar estoque;
-- cadastrar categorias;
-- alterar categorias;
-- excluir categorias;
-- gerenciar pedidos;
-- visualizar usuários;
+- create products;
+- alterar products;
+- excluir products;
+- alterar stock;
+- create categorys;
+- alterar categorys;
+- excluir categorys;
+- gerenciar orders;
+- get usuários;
 - alterar permissões de usuários.
 
 A autorização utiliza:
@@ -685,30 +685,30 @@ Também foi aplicada a separação entre:
 
 ---
 
-# 24. 🛒 Criação do carrinho
+# 24. 🛒 Criação do cart
 
-O projeto agora possui um sistema de carrinho.
+O projeto agora possui um sistema de cart.
 
 Foram criados dois models:
 
 ```text
-Carrinho
+cart
 ├── id
-└── usuario_id
+└── user_id
 
-ItemCarrinho
+Itemcart
 ├── id
-├── carrinho_id
-├── produto_id
-├── quantidade
-└── preco_adicionado
+├── cart_id
+├── product_id
+├── quantity
+└── added_price
 ```
 
-Cada usuário possui um único carrinho através de:
+Cada usuário possui um único cart através de:
 
 ```python
-usuario_id = mapped_column(
-    ForeignKey("usuarios.id"),
+user_id = mapped_column(
+    ForeignKey("users.id"),
     unique=True
 )
 ```
@@ -718,83 +718,83 @@ A relação ficou:
 ```text
 Usuário
    ↓
-Carrinho
+cart
    ↓
-Itens do carrinho
+items do cart
    ↓
-Produtos
+products
 ```
 
-O campo `preco_adicionado` guarda o preço do produto no momento em que ele foi colocado no carrinho.
+O campo `added_price` guarda o preço do product no momento em que ele foi colocado no cart.
 
-Isso permite detectar alterações de preço enquanto o produto permanece no carrinho.
+Isso permite detectar alterações de preço enquanto o product permanece no cart.
 
 ---
 
-# 25. 🛍️ Operações do carrinho
+# 25. 🛍️ Operações do cart
 
 Foram criados os principais endpoints:
 
-| Método | Endpoint                 | Função              |
-| ------ | ------------------------ | ------------------- |
-| GET    | `/carrinho`              | Visualizar carrinho |
-| POST   | `/carrinho`              | Adicionar produto   |
-| PATCH  | `/carrinho/{produto_id}` | Alterar quantidade  |
-| DELETE | `/carrinho/{produto_id}` | Remover produto     |
+| Método | Endpoint             | Função            |
+| ------ | -------------------- | ----------------- |
+| GET    | `/cart`              | get cart          |
+| POST   | `/cart`              | Adicionar product |
+| PATCH  | `/cart/{product_id}` | Alterar quantity  |
+| DELETE | `/cart/{product_id}` | Remover product   |
 
 Todos exigem um usuário autenticado.
 
 ---
 
-# 26. ➕ Regra para adicionar produtos
+# 26. ➕ Regra para adicionar products
 
-Ao adicionar um produto, a API verifica:
+Ao adicionar um product, a API verifica:
 
 1. se o usuário está autenticado;
-2. se o carrinho existe;
-3. se o produto existe;
-4. se existe estoque suficiente;
-5. se o produto já está no carrinho.
+2. se o cart existe;
+3. se o product existe;
+4. se existe stock suficiente;
+5. se o product já está no cart.
 
-Um mesmo produto **não pode aparecer duplicado no carrinho**.
+Um mesmo product **não pode aparecer duplicado no cart**.
 
-A quantidade é controlada pelo endpoint de alteração de quantidade.
+A quantity é controlada pelo endpoint de alteração de quantity.
 
 ---
 
-# 27. 🔢 Alteração de quantidade
+# 27. 🔢 Alteração de quantity
 
 O endpoint:
 
 ```text
-PATCH /carrinho/{produto_id}
+PATCH /cart/{product_id}
 ```
 
-permite alterar a quantidade de um produto.
+permite alterar a quantity de um product.
 
-A quantidade precisa ser maior que zero:
+A quantity precisa ser maior que zero:
 
 ```python
-quantidade > 0
+quantity > 0
 ```
 
-Também é feita uma nova verificação do estoque.
+Também é feita uma nova verificação do stock.
 
-Assim, o usuário não consegue colocar no carrinho uma quantidade maior que o estoque disponível.
+Assim, o usuário não consegue colocar no cart uma quantity maior que o stock disponível.
 
 ---
 
-# 28. 🗑️ Remoção de produtos do carrinho
+# 28. 🗑️ Remoção de products do cart
 
 O endpoint:
 
 ```text
-DELETE /carrinho/{produto_id}
+DELETE /cart/{product_id}
 ```
 
-localiza o item pertencente ao carrinho do usuário e o remove.
+localiza o item pertencente ao cart do usuário e o remove.
 
-A operação não interfere no carrinho de outros usuários.
+A operação não interfere no cart de outros usuários.
 
 ---
 
@@ -813,10 +813,10 @@ Numeric(10, 2)
 Os principais campos são:
 
 ```text
-Produto.price
-ItemCarrinho.preco_adicionado
-Pedido.total
-PedidoItem.preco
+product.price
+Itemcart.added_price
+order.total
+orderItem.preco
 ```
 
 No Pydantic, os valores passaram a utilizar:
@@ -837,124 +837,124 @@ SQLAlchemy Numeric(10,2)
 PostgreSQL numeric(10,2)
 ```
 
-Foi testado o cálculo de subtotais e totais dos pedidos com valores decimais, confirmando que os cálculos permanecem corretos.
+Foi testado o cálculo de subtotais e totais dos orders com valores decimais, confirmando que os cálculos permanecem corretos.
 
 ---
 
-# 30. 💵 Preço, subtotal e total do carrinho
+# 30. 💵 Preço, subtotal e total do cart
 
-Cada item do carrinho possui:
+Cada item do cart possui:
 
 ```text
-produto_id
-nome
+product_id
+name
 preco
-quantidade
+quantity
 subtotal
 ```
 
 O subtotal é calculado:
 
 ```python
-subtotal = item.produto.price * item.quantidade
+subtotal = item.product.price * item.quantity
 ```
 
-E o total do carrinho:
+E o total do cart:
 
 ```python
-total = sum(item["subtotal"] for item in itens)
+total = sum(item["subtotal"] for item in items)
 ```
 
 O preço utilizado para o cálculo vem do banco de dados, e não de um valor enviado pelo frontend.
 
-Além disso, o sistema mantém o preço no momento em que o item foi adicionado ao carrinho através de:
+Além disso, o sistema mantém o preço no momento em que o item foi adicionado ao cart através de:
 
 ```text
-preco_adicionado
+added_price
 ```
 
 Dessa forma, é possível detectar alterações posteriores no preço.
 
 ---
 
-# 31. 📦 Criação de pedidos
+# 31. 📦 Criação de orders
 
 O projeto passou a possuir os models:
 
 ```text
-Pedido
-PedidoItem
+order
+orderItem
 ```
 
 A estrutura permite armazenar:
 
-### Pedido
+### order
 
 ```text
 id
-usuario_id
+user_id
 status
 total
 ```
 
-### PedidoItem
+### orderItem
 
 ```text
 id
-pedido_id
-produto_id
-quantidade
+order_id
+product_id
+quantity
 preco
 ```
 
-O pedido é criado a partir do carrinho.
+O order é criado a partir do cart.
 
 Durante a criação:
 
-1. o carrinho do usuário é localizado;
-2. é verificado se existem itens;
-3. o estoque atual é verificado novamente;
-4. o preço atual do produto é utilizado;
-5. o pedido é criado;
-6. os itens são registrados;
-7. o estoque é diminuído;
-8. os itens do carrinho são removidos;
+1. o cart do usuário é localizado;
+2. é verificado se existem items;
+3. o stock atual é verificado novamente;
+4. o preço atual do product é utilizado;
+5. o order é criado;
+6. os items são registrados;
+7. o stock é diminuído;
+8. os items do cart são removidos;
 9. a transação é confirmada.
 
-O preço armazenado em `PedidoItem.preco` representa o preço no momento da compra.
+O preço armazenado em `orderItem.preco` representa o preço no momento da compra.
 
-Isso permite que o histórico do pedido continue correto mesmo que o preço do produto seja alterado posteriormente.
+Isso permite que o histórico do order continue correto mesmo que o preço do product seja alterado posteriormente.
 
 ---
 
-# 32. 🧾 Visualização de pedidos
+# 32. 🧾 Visualização de orders
 
-O usuário possui acesso aos seus próprios pedidos.
+O usuário possui acesso aos seus próprios orders.
 
 Foram implementados:
 
 ```text
-GET /pedidos
-GET /pedidos/{pedido_id}
+GET /orders
+GET /orders/{order_id}
 ```
 
-O sistema garante que o usuário só consiga acessar pedidos pertencentes a ele.
+O sistema garante que o usuário só consiga acessar orders pertencentes a ele.
 
 A response contém:
 
 ```text
 id
 status
-itens
+items
 total
 ```
 
 Cada item apresenta:
 
 ```text
-produto_id
-nome
-quantidade
+product_id
+name
+quantity
 preco
 subtotal
 ```
@@ -968,10 +968,10 @@ Não foi utilizado um gateway de pagamento real.
 Foi implementado um pagamento simulado através de:
 
 ```text
-POST /pedidos/{pedido_id}/pagar
+POST /orders/{order_id}/pay
 ```
 
-O pedido só pode ser pago quando estiver:
+O order só pode ser pago quando estiver:
 
 ```text
 PENDENTE
@@ -989,7 +989,7 @@ O pagamento não movimenta dinheiro real.
 
 ---
 
-# 34. 🔄 Status dos pedidos
+# 34. 🔄 Status dos orders
 
 Foi estabelecido um fluxo de status:
 
@@ -1024,9 +1024,9 @@ PAGO → CANCELADO
 ENVIADO → ENTREGUE
 ```
 
-Pedidos `ENTREGUE` ou `CANCELADO` não podem avançar para outro status.
+orders `ENTREGUE` ou `CANCELADO` não podem avançar para outro status.
 
-Quando um pedido é cancelado, os produtos são devolvidos ao estoque.
+Quando um order é cancelado, os products são devolvidos ao stock.
 
 ---
 
@@ -1035,7 +1035,7 @@ Quando um pedido é cancelado, os produtos são devolvidos ao estoque.
 O endpoint:
 
 ```text
-GET /produtos
+GET /products
 ```
 
 foi expandido para permitir filtros.
@@ -1043,8 +1043,8 @@ foi expandido para permitir filtros.
 É possível utilizar:
 
 ```text
-nome
-categoria
+name
+category
 min_price
 max_price
 skip
@@ -1054,39 +1054,39 @@ limit
 Exemplos:
 
 ```text
-/produtos?nome=harry
+/products?name=harry
 ```
 
 ```text
-/produtos?categoria=livros
+/products?category=livros
 ```
 
 ```text
-/produtos?min_price=30&max_price=100
+/products?min_price=30&max_price=100
 ```
 
 Os filtros podem ser combinados:
 
 ```text
-/produtos?nome=harry&categoria=livros&min_price=30
+/products?name=harry&category=livros&min_price=30
 ```
 
-A categoria é pesquisada pelo **nome**, e não pelo ID.
+A category é pesquisada pelo **name**, e não pelo ID.
 
 Isso evita que o usuário precise conhecer detalhes internos do banco.
 
 Internamente, o relacionamento continua utilizando:
 
 ```text
-Produto.category_id
+product.category_id
       ↓
-Categoria.id
+category.id
 ```
 
 Mas a API pública permite:
 
 ```text
-categoria=livros
+category=livros
 ```
 
 em vez de exigir:
@@ -1120,29 +1120,29 @@ O router utiliza:
 /admin
 ```
 
-### Administração de pedidos
+### Administração de orders
 
 Foram implementados:
 
 ```text
-GET   /admin/pedidos
-GET   /admin/pedidos/{pedido_id}
-PATCH /admin/pedidos/{pedido_id}/status
+GET   /admin/orders
+GET   /admin/orders/{order_id}
+PATCH /admin/orders/{order_id}/status
 ```
 
-O administrador consegue visualizar todos os pedidos, visualizar um pedido específico e atualizar o status respeitando as transições válidas.
+O administrador consegue get todos os orders, get um order específico e update o status respeitando as transições válidas.
 
 ### Administração de usuários
 
 Também foram implementados:
 
 ```text
-GET   /admin/usuarios
-GET   /admin/usuarios/{usuario_id}
-PATCH /admin/usuarios/{usuario_id}/role
+GET   /admin/users
+GET   /admin/users/{user_id}
+PATCH /admin/users/{user_id}/role
 ```
 
-O administrador pode visualizar usuários e alterar suas permissões entre:
+O administrador pode get usuários e alterar suas permissões entre:
 
 ```text
 user
@@ -1209,11 +1209,11 @@ python/
 ├── auth.py
 │
 └── routers/
-    ├── produtos.py
-    ├── categorias.py
-    ├── usuarios.py
-    ├── carrinho.py
-    ├── pedidos.py
+    ├── products.py
+    ├── categorys.py
+    ├── users.py
+    ├── cart.py
+    ├── orders.py
     └── admin.py
 ```
 
@@ -1250,8 +1250,8 @@ A aplicação atualmente segue aproximadamente:
 
 Até o momento, foram implementados:
 
-- hash de senha com bcrypt;
-- validação de senha;
+- hash de password com bcrypt;
+- validação de password;
 - validação de email;
 - JWT para autenticação;
 - expiração de token;
@@ -1264,7 +1264,7 @@ Até o momento, foram implementados:
 - `.env` protegido pelo `.gitignore`;
 - separação entre erros HTTP 401 e 403.
 
-A senha de usuário também não é aceita como `role` no cadastro público, evitando que alguém tente se cadastrar diretamente como administrador.
+A password de usuário também não é aceita como `role` no cadastro público, evitando que alguém tente se create diretamente como administrador.
 
 ---
 
@@ -1281,26 +1281,26 @@ Foi implementada uma suíte de testes utilizando `pytest` para validar os princi
 O ambiente de testes utiliza um banco PostgreSQL separado:
 
 ```text
-fastapi_produtos_test
+fastapi_products_test
 ```
 
 Foram testados fluxos envolvendo:
 
 - cadastro de usuários;
 - validação de email;
-- validação de senha;
+- validação de password;
 - login;
 - JWT;
 - autenticação;
 - autorização;
-- produtos;
-- categorias;
+- products;
+- categorys;
 - filtros;
 - paginação;
-- estoque;
-- carrinho;
-- controle de quantidade;
-- pedidos;
+- stock;
+- cart;
+- controle de quantity;
+- orders;
 - pagamento;
 - cancelamento;
 - área administrativa;
@@ -1328,10 +1328,10 @@ Exemplo:
 
 ```text
 migration 001 → estrutura inicial
-migration 002 → estoque
+migration 002 → stock
 migration 003 → usuários
 migration 004 → roles
-migration 005 → pedidos
+migration 005 → orders
 migration 006 → Numeric para valores monetários
 ```
 
@@ -1345,16 +1345,16 @@ Serão avaliados:
 
 - organização dos routers;
 - schemas;
-- nomes de variáveis;
+- names de variáveis;
 - funções;
 - responses;
 - tratamento de erros;
 - regras duplicadas;
 - consultas SQLAlchemy;
 - organização dos arquivos;
-- padronização de nomes.
+- padronização de names.
 
-Também será tomada a decisão definitiva sobre utilizar português ou inglês nos nomes do projeto.
+Também será tomada a decisão definitiva sobre utilizar português ou inglês nos names do projeto.
 
 A intenção é evitar refatorações constantes durante o desenvolvimento.
 
@@ -1362,7 +1362,7 @@ A intenção é evitar refatorações constantes durante o desenvolvimento.
 
 ## 🐳 4. Docker
 
-Criar a infraestrutura utilizando:
+create a infraestrutura utilizando:
 
 ```text
 Docker
@@ -1398,12 +1398,12 @@ O frontend será responsável por:
 - catálogo;
 - busca;
 - filtros;
-- categorias;
+- categorys;
 - login;
 - cadastro;
-- carrinho;
+- cart;
 - checkout;
-- pedidos;
+- orders;
 - área do usuário;
 - área administrativa.
 
@@ -1424,16 +1424,16 @@ para:
                             │
           ┌─────────────────┼─────────────────┐
           │                 │                 │
-      Produtos          Categorias        Usuários
+      products          categorys        Usuários
           │                 │                 │
-       Estoque              │            JWT + bcrypt
+       stock              │            JWT + bcrypt
           │                 │                 │
           └─────────────────┼─────────────────┘
                             │
-                         Carrinho
+                         cart
                             │
                             ▼
-                          Pedido
+                          order
                             │
                             ▼
                     Pagamento simulado
@@ -1447,23 +1447,23 @@ para:
 
 O backend já possui:
 
-- CRUD de produtos;
-- categorias;
-- relacionamento entre categorias e produtos;
-- controle de estoque;
+- CRUD de products;
+- categorys;
+- relacionamento entre categorys e products;
+- controle de stock;
 - usuários;
 - validação de email;
-- validação de senha;
+- validação de password;
 - bcrypt;
 - JWT;
 - autenticação;
 - autorização;
 - roles;
-- carrinho;
-- controle de quantidade;
-- controle de estoque no carrinho;
-- pedidos;
-- histórico de pedidos;
+- cart;
+- controle de quantity;
+- controle de stock no cart;
+- orders;
+- histórico de orders;
 - pagamento simulado;
 - cancelamento;
 - fluxo de status;
@@ -1497,18 +1497,18 @@ O desenvolvimento permitiu sair de um CRUD básico e estudar conceitos presentes
 - `commit`, `rollback`, `flush` e `refresh`;
 - validação de dados;
 - validação de email;
-- validação de senha;
-- hash de senhas;
+- validação de password;
+- hash de passwords;
 - bcrypt;
 - JWT;
 - autenticação;
 - autorização;
 - roles;
 - dependências do FastAPI;
-- controle de estoque;
+- controle de stock;
 - regras de negócio;
-- carrinho de compras;
-- pedidos;
+- cart de compras;
+- orders;
 - pagamento simulado;
 - controle de status;
 - filtros;

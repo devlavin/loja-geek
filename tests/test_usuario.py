@@ -1,14 +1,14 @@
 from fastapi.testclient import TestClient
 
 from main import app
-from models import Usuario
+from models import user
 
 client = TestClient(app)
 
-def test_criar_usuario():
+def test_create_user():
 
     response = client.post(
-        f"/usuarios",
+        f"/users",
         json={
             "name": "Pedro Hall",
             "email": "pedro@teste.com",
@@ -20,10 +20,10 @@ def test_criar_usuario():
     
     assert response.status_code == 200
 
-def test_criar_usuario_email_invalido():
+def test_create_user_email_invalido():
 
     response = client.post(
-        f"/usuarios",
+        f"/users",
         json={
             "name": "Pedro Hall",
             "email": "pedro_teste.com",
@@ -33,10 +33,10 @@ def test_criar_usuario_email_invalido():
     
     assert response.status_code == 422
 
-def test_criar_usuario_com_senha_invalida():
+def test_create_user_com_password_invalida():
 
     response = client.post(
-        f"/usuarios",
+        f"/users",
         json={
             "name": "Pedro Hall",
             "email": "pedro@teste.com",
@@ -46,19 +46,19 @@ def test_criar_usuario_com_senha_invalida():
     
     assert response.status_code == 422
     
-def test_criar_usuario_duplicado(db):
-    usuario = Usuario(
+def test_create_user_duplicado(db):
+    user = user(
         name = "Pedro Hall",
         email = "pedro@teste.com",
         password_hash = "Pedro123@"
     )
     
-    db.add(usuario)
+    db.add(user)
     db.commit()
-    db.refresh(usuario)
+    db.refresh(user)
 
     response = client.post(
-        f"/usuarios",
+        f"/users",
         json={
             "name": "Pedro Hall",
             "email": "pedro@teste.com",
@@ -72,7 +72,7 @@ def test_criar_usuario_duplicado(db):
     
 def test_login():
     client.post(
-        "/usuarios",
+        "/users",
         json={
             "name": "Pedro Hall",
             "email": "pedro@teste.com",
@@ -81,7 +81,7 @@ def test_login():
     )
     
     response = client.post(
-        f"/usuarios/login",
+        f"/users/login",
         json={
             "email": "pedro@teste.com",
             "password": "Pedro123@"
@@ -95,9 +95,9 @@ def test_login():
     assert "access_token" in dados
     assert dados["token_type"] == "bearer"
 
-def test_login_senha_invalida():
+def test_login_password_invalida():
     client.post(
-        "/usuarios",
+        "/users",
         json={
             "name": "Pedro Hall",
             "email": "pedro@teste.com",
@@ -106,7 +106,7 @@ def test_login_senha_invalida():
     )
     
     response = client.post(
-        f"/usuarios/login",
+        f"/users/login",
         json={
             "email": "pedro@teste.com",
             "password": "pedro123"
@@ -115,9 +115,9 @@ def test_login_senha_invalida():
     
     assert response.status_code == 401
 
-def test_usuario_atual():
+def test_user_atual():
     client.post(
-    "/usuarios",
+    "/users",
         json={
             "name": "Pedro Hall",
             "email": "pedro@teste.com",
@@ -126,7 +126,7 @@ def test_usuario_atual():
     )
     
     response = client.post(
-        f"/usuarios/login",
+        f"/users/login",
         json={
             "email": "pedro@teste.com",
             "password": "Pedro123@"
@@ -141,7 +141,7 @@ def test_usuario_atual():
     }
     
     response = client.get(
-        f"/usuarios/me",
+        f"/users/me",
         headers = headers
     )
     
@@ -152,9 +152,9 @@ def test_usuario_atual():
     assert dados ["name"] == "Pedro Hall"
     assert dados ["email"] == "pedro@teste.com"
 
-def test_atualizar_email():
+def test_update_email():
     response = client.post(
-        "/usuarios",
+        "/users",
         json={
             "name": "Pedro",
             "email": "pedro@email.com",
@@ -162,10 +162,10 @@ def test_atualizar_email():
         }
     )
 
-    usuario = response.json()
+    user = response.json()
 
     login = client.post(
-        "/usuarios/login",
+        "/users/login",
         json={
             "email": "pedro@email.com",
             "password": "Pedro123@"
@@ -175,7 +175,7 @@ def test_atualizar_email():
     token = login.json()["access_token"]
 
     response = client.patch(
-        f"/usuarios/{usuario['id']}",
+        f"/users/{user['id']}",
         json={
             "email": "pedronovo@email.com"
         },
@@ -187,9 +187,9 @@ def test_atualizar_email():
     assert response.status_code == 200
     assert response.json()["email"] == "pedronovo@email.com"
     
-def test_atualizar_senha():
+def test_update_password():
     response = client.post(
-        "/usuarios",
+        "/users",
         json={
             "name": "Pedro",
             "email": "pedro@email.com",
@@ -197,10 +197,10 @@ def test_atualizar_senha():
         }
     )
 
-    usuario = response.json()
+    user = response.json()
 
     login = client.post(
-        "/usuarios/login",
+        "/users/login",
         json={
             "email": "pedro@email.com",
             "password": "Pedro123@"
@@ -210,7 +210,7 @@ def test_atualizar_senha():
     token = login.json()["access_token"]
 
     response = client.patch(
-        f"/usuarios/{usuario['id']}",
+        f"/users/{user['id']}",
         json={
             "password": "Pedro123!"
         },
@@ -222,7 +222,7 @@ def test_atualizar_senha():
     assert response.status_code == 200
 
     login_novo = client.post(
-        "/usuarios/login",
+        "/users/login",
         json={
             "email": "pedro@email.com",
             "password": "Pedro123!"
@@ -231,9 +231,9 @@ def test_atualizar_senha():
 
     assert login_novo.status_code == 200
     
-def test_deletar_usuario():
+def test_deletar_user():
     response = client.post(
-        "/usuarios",
+        "/users",
         json={
             "name": "Pedro",
             "email": "pedro@email.com",
@@ -241,10 +241,10 @@ def test_deletar_usuario():
         }
     )
 
-    usuario = response.json()
+    user = response.json()
 
     login = client.post(
-        "/usuarios/login",
+        "/users/login",
         json={
             "email": "pedro@email.com",
             "password": "Pedro123@"
@@ -254,7 +254,7 @@ def test_deletar_usuario():
     token = login.json()["access_token"]
 
     response = client.delete(
-        f"/usuarios/{usuario['id']}",
+        f"/users/{user['id']}",
         headers={
             "Authorization": f"Bearer {token}"
         }
@@ -263,7 +263,7 @@ def test_deletar_usuario():
     assert response.status_code == 200
     
     login_depois = client.post(
-        "/usuarios/login",
+        "/users/login",
         json={
             "email": "pedro@email.com",
             "password": "Pedro123@"

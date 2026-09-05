@@ -1,14 +1,14 @@
 from fastapi.testclient import TestClient
 
 from main import app
-from models import Produto, Categoria
+from models import product, category
 
 client = TestClient(app)
 
 
-def criar_pedido_teste(db):
+def create_order_teste(db):
     client.post(
-        "/usuarios",
+        "/users",
         json={
             "name": "Pedro",
             "email": "pedro@teste.com",
@@ -17,7 +17,7 @@ def criar_pedido_teste(db):
     )
 
     login = client.post(
-        "/usuarios/login",
+        "/users/login",
         json={
             "email": "pedro@teste.com",
             "password": "Pedro123@"
@@ -30,79 +30,79 @@ def criar_pedido_teste(db):
         "Authorization": f"Bearer {token}"
     }
 
-    categoria = Categoria(name="Geek")
+    category = category(name="Geek")
 
-    db.add(categoria)
+    db.add(category)
     db.commit()
-    db.refresh(categoria)
+    db.refresh(category)
 
-    produto = Produto(
+    product = product(
         name="Caneca Naruto",
         price=50,
-        estoque=10,
-        category_id=categoria.id
+        stock=10,
+        category_id=category.id
     )
 
-    db.add(produto)
+    db.add(product)
     db.commit()
-    db.refresh(produto)
+    db.refresh(product)
 
     client.post(
-        "/carrinho",
+        "/cart",
         json={
-            "produto_id": produto.id,
-            "quantidade": 2
+            "product_id": product.id,
+            "quantity": 2
         },
         headers=headers
     )
 
-    pedido = client.post(
-        "/pedidos",
+    order = client.post(
+        "/orders",
         headers=headers
     )
 
-    pedido_id = pedido.json()["id"]
+    order_id = order.json()["id"]
 
-    return headers, pedido_id, produto
+    return headers, order_id, product
 
 
-def test_cancelar_pedido_pendente(db):
-    headers, pedido_id, produto = criar_pedido_teste(db)
+def test_cancel_order_pendente(db):
+    headers, order_id, product = create_order_teste(db)
     
-    db.refresh(produto)
+    db.refresh(product)
 
-    assert produto.estoque == 8
+    assert product.stock == 8
 
     response = client.patch(
-        f"/pedidos/{pedido_id}/cancelar",
+        f"/orders/{order_id}/cancel",
         headers=headers
     )
 
     assert response.status_code == 200
     
-    db.refresh(produto)
+    db.refresh(product)
 
-    assert produto.estoque == 10
+    assert product.stock == 10
 
     data = response.json()
 
-    assert data["message"] == "Pedido cancelado com sucesso."
-    assert data["pedido_id"] == pedido_id
+    assert data["message"] == "order cancelado com sucesso."
+    assert data["order_id"] == order_id
     assert data["status"] == "CANCELADO"
 
 
-def test_cancelar_pedido_pago(db):
-    headers, pedido_id, produto = criar_pedido_teste(db)
+def test_cancel_order_pago(db):
+    headers, order_id, product = create_order_teste(db)
 
     response = client.post(
-        f"/pedidos/{pedido_id}/pagar",
+        f"/orders/{order_id}/pay",
         headers=headers
     )
 
     assert response.status_code == 200
 
     response = client.patch(
-        f"/pedidos/{pedido_id}/cancelar",
+        f"/orders/{order_id}/cancel",
         headers=headers
     )
 
@@ -112,50 +112,50 @@ def test_cancelar_pedido_pago(db):
 
     assert data["status"] == "CANCELADO"
 
-    # Estoque volta
-    db.refresh(produto)
+    # stock volta
+    db.refresh(product)
 
-    assert produto.estoque == 10
+    assert product.stock == 10
 
 
-def test_cancelar_pedido_ja_cancelado(db):
-    headers, pedido_id, _ = criar_pedido_teste(db)
+def test_cancel_order_ja_cancelado(db):
+    headers, order_id, _ = create_order_teste(db)
 
     response = client.patch(
-        f"/pedidos/{pedido_id}/cancelar",
+        f"/orders/{order_id}/cancel",
         headers=headers
     )
 
     assert response.status_code == 200
 
     response = client.patch(
-        f"/pedidos/{pedido_id}/cancelar",
+        f"/orders/{order_id}/cancel",
         headers=headers
     )
 
     assert response.status_code == 400
     assert response.json()["detail"] == (
-        "Este pedido não pode ser cancelado."
+        "Este order não pode ser cancelado."
     )
 
 
-def test_cancelar_pedido_inexistente(db):
-    headers, _, _ = criar_pedido_teste(db)
+def test_cancel_order_inexistente(db):
+    headers, _, _ = create_order_teste(db)
 
     response = client.patch(
-        "/pedidos/999/cancelar",
+        "/orders/999/cancel",
         headers=headers
     )
 
     assert response.status_code == 404
-    assert response.json()["detail"] == "Pedido não encontrado."
+    assert response.json()["detail"] == "order não encontrado."
 
 
-def test_usuario_nao_pode_cancelar_pedido_de_outro_usuario(db):
-    headers_pedro, pedido_id, _ = criar_pedido_teste(db)
+def test_user_nao_pode_cancel_order_de_outro_user(db):
+    headers_pedro, order_id, _ = create_order_teste(db)
 
     client.post(
-        "/usuarios",
+        "/users",
         json={
             "name": "Maria",
             "email": "maria@teste.com",
@@ -164,7 +164,7 @@ def test_usuario_nao_pode_cancelar_pedido_de_outro_usuario(db):
     )
 
     login = client.post(
-        "/usuarios/login",
+        "/users/login",
         json={
             "email": "maria@teste.com",
             "password": "Maria123@"
@@ -177,11 +177,11 @@ def test_usuario_nao_pode_cancelar_pedido_de_outro_usuario(db):
         "Authorization": f"Bearer {token_maria}"
     }
 
-    # Maria tenta cancelar pedido de Pedro
+    # Maria tenta cancel order de Pedro
     response = client.patch(
-        f"/pedidos/{pedido_id}/cancelar",
+        f"/orders/{order_id}/cancel",
         headers=headers_maria
     )
 
     assert response.status_code == 404
-    assert response.json()["detail"] == "Pedido não encontrado."
+    assert response.json()["detail"] == "order não encontrado."

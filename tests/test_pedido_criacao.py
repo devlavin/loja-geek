@@ -1,15 +1,15 @@
 from fastapi.testclient import TestClient
 
 from main import app
-from models import Produto, Categoria
+from models import product, category
 
 client = TestClient(app)
 
 
-def test_criar_pedido_com_carrinho_vazio(db):
+def test_create_order_com_cart_vazio(db):
     
     client.post(
-        "/usuarios",
+        "/users",
         json={
             "name": "Pedro",
             "email": "pedro@teste.com",
@@ -18,7 +18,7 @@ def test_criar_pedido_com_carrinho_vazio(db):
     )
 
     login = client.post(
-        "/usuarios/login",
+        "/users/login",
         json={
             "email": "pedro@teste.com",
             "password": "Pedro123@"
@@ -32,18 +32,18 @@ def test_criar_pedido_com_carrinho_vazio(db):
     }
 
     response = client.post(
-        "/pedidos",
+        "/orders",
         headers=headers
     )
 
     assert response.status_code == 400
-    assert response.json()["detail"] == "Carrinho vazio."
+    assert response.json()["detail"] == "cart vazio."
 
 
-def test_criar_pedido_com_estoque_insuficiente(db):
+def test_create_order_com_stock_insuficiente(db):
 
     client.post(
-        "/usuarios",
+        "/users",
         json={
             "name": "Pedro",
             "email": "pedro@teste.com",
@@ -52,7 +52,7 @@ def test_criar_pedido_com_estoque_insuficiente(db):
     )
 
     login = client.post(
-        "/usuarios/login",
+        "/users/login",
         json={
             "email": "pedro@teste.com",
             "password": "Pedro123@"
@@ -65,43 +65,43 @@ def test_criar_pedido_com_estoque_insuficiente(db):
         "Authorization": f"Bearer {token}"
     }
 
-    categoria = Categoria(name="Geek")
+    category = category(name="Geek")
 
-    db.add(categoria)
+    db.add(category)
     db.commit()
-    db.refresh(categoria)
+    db.refresh(category)
 
-    produto = Produto(
+    product = product(
         name="Caneca Naruto",
         price=50,
-        estoque=1,
-        category_id=categoria.id
+        stock=1,
+        category_id=category.id
     )
 
-    db.add(produto)
+    db.add(product)
     db.commit()
-    db.refresh(produto)
+    db.refresh(product)
 
     response = client.post(
-        "/carrinho",
+        "/cart",
         json={
-            "produto_id": produto.id,
-            "quantidade": 1
+            "product_id": product.id,
+            "quantity": 1
         },
         headers=headers
     )
 
     assert response.status_code == 200
 
-    produto.estoque = 0
+    product.stock = 0
     db.commit()
 
     response = client.post(
-        "/pedidos",
+        "/orders",
         headers=headers
     )
 
     assert response.status_code == 400
     assert response.json()["detail"] == (
-        "Estoque insuficiente para o produto: Caneca Naruto."
+        "stock insuficiente para o product: Caneca Naruto."
     )

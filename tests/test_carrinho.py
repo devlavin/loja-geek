@@ -1,14 +1,14 @@
 from fastapi.testclient import TestClient
 
 from main import app
-from models import Categoria, Produto
+from models import category, product
 
 client = TestClient(app)
 
-def test_adicionar_produto_carrinho(db):
+def test_adicionar_product_cart(db):
 
     response = client.post(
-        "/usuarios",
+        "/users",
         json={
             "name": "Pedro",
             "email": "pedro@teste.com",
@@ -19,7 +19,7 @@ def test_adicionar_produto_carrinho(db):
     assert response.status_code == 200
 
     login = client.post(
-        "/usuarios/login",
+        "/users/login",
         json={
             "email": "pedro@teste.com",
             "password": "Pedro123@"
@@ -32,30 +32,30 @@ def test_adicionar_produto_carrinho(db):
         "Authorization": f"Bearer {token}"
     }
     
-    categoria = Categoria(
+    category = category(
         name="Canecas"
     )
 
-    db.add(categoria)
+    db.add(category)
     db.commit()
-    db.refresh(categoria)
+    db.refresh(category)
     
-    produto = Produto(
+    product = product(
         name="Caneca Naruto",
         price=50,
-        estoque=10,
-        category_id=categoria.id
+        stock=10,
+        category_id=category.id
     )
 
-    db.add(produto)
+    db.add(product)
     db.commit()
-    db.refresh(produto)
+    db.refresh(product)
     
     response = client.post(
-        "/carrinho",
+        "/cart",
         json={
-            "produto_id": produto.id,
-            "quantidade": 2
+            "product_id": product.id,
+            "quantity": 2
         },
         headers=headers
     )
@@ -64,17 +64,17 @@ def test_adicionar_produto_carrinho(db):
 
     dados = response.json()
 
-    assert len(dados["itens"]) == 1
-    assert dados["itens"][0]["produto_id"] == produto.id
-    assert dados["itens"][0]["quantidade"] == 2
-    assert dados["itens"][0]["preco"] == "50.00"
-    assert dados["itens"][0]["subtotal"] == "100.00"
+    assert len(dados["items"]) == 1
+    assert dados["items"][0]["product_id"] == product.id
+    assert dados["items"][0]["quantity"] == 2
+    assert dados["items"][0]["preco"] == "50.00"
+    assert dados["items"][0]["subtotal"] == "100.00"
     assert dados["total"] == "100.00"
     
-def test_nao_adicionar_quantidade_maior_que_estoque(db):
+def test_nao_adicionar_quantity_maior_que_stock(db):
 
     response = client.post(
-        "/usuarios",
+        "/users",
         json={
             "name": "Pedro",
             "email": "pedro@teste.com",
@@ -83,7 +83,7 @@ def test_nao_adicionar_quantidade_maior_que_estoque(db):
     )
 
     login = client.post(
-        "/usuarios/login",
+        "/users/login",
         json={
             "email": "pedro@teste.com",
             "password": "Pedro123@"
@@ -96,43 +96,43 @@ def test_nao_adicionar_quantidade_maior_que_estoque(db):
         "Authorization": f"Bearer {token}"
     }
 
-    categoria = Categoria(
+    category = category(
         name="Canecas"
     )
 
-    db.add(categoria)
+    db.add(category)
     db.commit()
-    db.refresh(categoria)
+    db.refresh(category)
 
-    produto = Produto(
+    product = product(
         name="Caneca Naruto",
         price=50,
-        estoque=5,
-        category_id=categoria.id
+        stock=5,
+        category_id=category.id
     )
 
-    db.add(produto)
+    db.add(product)
     db.commit()
-    db.refresh(produto)
+    db.refresh(product)
 
     response = client.post(
-        "/carrinho",
+        "/cart",
         json={
-            "produto_id": produto.id,
-            "quantidade": 6
+            "product_id": product.id,
+            "quantity": 6
         },
         headers=headers
     )
 
     assert response.status_code == 400
     assert response.json()["detail"] == (
-        "Quantidade solicitada maior que o estoque disponível."
+        "quantity solicitada maior que o stock disponível."
     )
 
-def test_adicionar_produto_inexistente():
+def test_adicionar_product_inexistente():
 
     response = client.post(
-        "/usuarios",
+        "/users",
         json={
             "name": "Pedro",
             "email": "pedro@teste.com",
@@ -141,7 +141,7 @@ def test_adicionar_produto_inexistente():
     )
 
     login = client.post(
-        "/usuarios/login",
+        "/users/login",
         json={
             "email": "pedro@teste.com",
             "password": "Pedro123@"
@@ -155,21 +155,21 @@ def test_adicionar_produto_inexistente():
     }
 
     response = client.post(
-        "/carrinho",
+        "/cart",
         json={
-            "produto_id": 9999,
-            "quantidade": 1
+            "product_id": 9999,
+            "quantity": 1
         },
         headers=headers
     )
 
     assert response.status_code == 404
-    assert response.json()["detail"] == "Produto não encontrado."
+    assert response.json()["detail"] == "product não encontrado."
     
-def test_adicionar_produto_sem_estoque(db):
+def test_adicionar_product_sem_stock(db):
 
     client.post(
-        "/usuarios",
+        "/users",
         json={
             "name": "Pedro",
             "email": "pedro@teste.com",
@@ -178,7 +178,7 @@ def test_adicionar_produto_sem_estoque(db):
     )
 
     login = client.post(
-        "/usuarios/login",
+        "/users/login",
         json={
             "email": "pedro@teste.com",
             "password": "Pedro123@"
@@ -191,43 +191,43 @@ def test_adicionar_produto_sem_estoque(db):
         "Authorization": f"Bearer {token}"
     }
 
-    categoria = Categoria(
+    category = category(
         name="Canecas"
     )
 
-    db.add(categoria)
+    db.add(category)
     db.commit()
-    db.refresh(categoria)
+    db.refresh(category)
 
-    produto = Produto(
+    product = product(
         name="Caneca Naruto",
         price=50,
-        estoque=0,
-        category_id=categoria.id
+        stock=0,
+        category_id=category.id
     )
 
-    db.add(produto)
+    db.add(product)
     db.commit()
-    db.refresh(produto)
+    db.refresh(product)
 
     response = client.post(
-        "/carrinho",
+        "/cart",
         json={
-            "produto_id": produto.id,
-            "quantidade": 1
+            "product_id": product.id,
+            "quantity": 1
         },
         headers=headers
     )
 
     assert response.status_code == 400
     assert response.json()["detail"] == (
-        "Quantidade solicitada maior que o estoque disponível."
+        "quantity solicitada maior que o stock disponível."
     )
     
-def test_nao_adicionar_produto_duplicado(db):
+def test_nao_adicionar_product_duplicado(db):
 
     client.post(
-        "/usuarios",
+        "/users",
         json={
             "name": "Pedro",
             "email": "pedro@teste.com",
@@ -236,7 +236,7 @@ def test_nao_adicionar_produto_duplicado(db):
     )
 
     login = client.post(
-        "/usuarios/login",
+        "/users/login",
         json={
             "email": "pedro@teste.com",
             "password": "Pedro123@"
@@ -249,54 +249,54 @@ def test_nao_adicionar_produto_duplicado(db):
         "Authorization": f"Bearer {token}"
     }
 
-    categoria = Categoria(
+    category = category(
         name="Canecas"
     )
 
-    db.add(categoria)
+    db.add(category)
     db.commit()
-    db.refresh(categoria)
+    db.refresh(category)
 
-    produto = Produto(
+    product = product(
         name="Caneca Naruto",
         price=50,
-        estoque=10,
-        category_id=categoria.id
+        stock=10,
+        category_id=category.id
     )
 
-    db.add(produto)
+    db.add(product)
     db.commit()
-    db.refresh(produto)
+    db.refresh(product)
 
     # Primeira vez: deve funcionar
     response = client.post(
-        "/carrinho",
+        "/cart",
         json={
-            "produto_id": produto.id,
-            "quantidade": 2
+            "product_id": product.id,
+            "quantity": 2
         },
         headers=headers
     )
 
     assert response.status_code == 200
 
-    # Segunda vez: não deve criar outro item
+    # Segunda vez: não deve create outro item
     response = client.post(
-        "/carrinho",
+        "/cart",
         json={
-            "produto_id": produto.id,
-            "quantidade": 1
+            "product_id": product.id,
+            "quantity": 1
         },
         headers=headers
     )
 
     assert response.status_code == 400
-    assert response.json()["detail"] == "Produto já está no carrinho."
+    assert response.json()["detail"] == "product já está no cart."
 
-def test_visualizar_carrinho(db):
+def test_get_cart(db):
 
     client.post(
-        "/usuarios",
+        "/users",
         json={
             "name": "Pedro",
             "email": "pedro@teste.com",
@@ -305,7 +305,7 @@ def test_visualizar_carrinho(db):
     )
 
     login = client.post(
-        "/usuarios/login",
+        "/users/login",
         json={
             "email": "pedro@teste.com",
             "password": "Pedro123@"
@@ -318,30 +318,30 @@ def test_visualizar_carrinho(db):
         "Authorization": f"Bearer {token}"
     }
 
-    categoria = Categoria(
+    category = category(
         name="Canecas"
     )
 
-    db.add(categoria)
+    db.add(category)
     db.commit()
-    db.refresh(categoria)
+    db.refresh(category)
 
-    produto = Produto(
+    product = product(
         name="Caneca Naruto",
         price=50,
-        estoque=10,
-        category_id=categoria.id
+        stock=10,
+        category_id=category.id
     )
 
-    db.add(produto)
+    db.add(product)
     db.commit()
-    db.refresh(produto)
+    db.refresh(product)
 
     response = client.post(
-        "/carrinho",
+        "/cart",
         json={
-            "produto_id": produto.id,
-            "quantidade": 2
+            "product_id": product.id,
+            "quantity": 2
         },
         headers=headers
     )
@@ -349,7 +349,7 @@ def test_visualizar_carrinho(db):
     assert response.status_code == 200
 
     response = client.get(
-        "/carrinho",
+        "/cart",
         headers=headers
     )
 
@@ -357,22 +357,22 @@ def test_visualizar_carrinho(db):
 
     dados = response.json()
 
-    assert len(dados["itens"]) == 1
+    assert len(dados["items"]) == 1
 
-    item = dados["itens"][0]
+    item = dados["items"][0]
 
-    assert item["produto_id"] == produto.id
-    assert item["nome"] == "Caneca Naruto"
+    assert item["product_id"] == product.id
+    assert item["name"] == "Caneca Naruto"
     assert item["preco"] == "50.00"
-    assert item["quantidade"] == 2
+    assert item["quantity"] == 2
     assert item["subtotal"] == "100.00"
 
     assert dados["total"] == "100.00"
     
-def test_alterar_quantidade(db):
+def test_alterar_quantity(db):
 
     client.post(
-        "/usuarios",
+        "/users",
         json={
             "name": "Pedro",
             "email": "pedro@teste.com",
@@ -381,7 +381,7 @@ def test_alterar_quantidade(db):
     )
 
     login = client.post(
-        "/usuarios/login",
+        "/users/login",
         json={
             "email": "pedro@teste.com",
             "password": "Pedro123@"
@@ -394,28 +394,28 @@ def test_alterar_quantidade(db):
         "Authorization": f"Bearer {token}"
     }
 
-    categoria = Categoria(name="Canecas")
+    category = category(name="Canecas")
 
-    db.add(categoria)
+    db.add(category)
     db.commit()
-    db.refresh(categoria)
+    db.refresh(category)
 
-    produto = Produto(
+    product = product(
         name="Caneca Naruto",
         price=50,
-        estoque=10,
-        category_id=categoria.id
+        stock=10,
+        category_id=category.id
     )
 
-    db.add(produto)
+    db.add(product)
     db.commit()
-    db.refresh(produto)
+    db.refresh(product)
 
     response = client.post(
-        "/carrinho",
+        "/cart",
         json={
-            "produto_id": produto.id,
-            "quantidade": 2
+            "product_id": product.id,
+            "quantity": 2
         },
         headers=headers
     )
@@ -423,9 +423,9 @@ def test_alterar_quantidade(db):
     assert response.status_code == 200
 
     response = client.patch(
-        f"/carrinho/{produto.id}",
+        f"/cart/{product.id}",
         params={
-            "quantidade": 5
+            "quantity": 5
         },
         headers=headers
     )
@@ -434,13 +434,13 @@ def test_alterar_quantidade(db):
 
     dados = response.json()
 
-    assert dados["produto_id"] == produto.id
-    assert dados["quantidade"] == 5
+    assert dados["product_id"] == product.id
+    assert dados["quantity"] == 5
 
-def test_alterar_quantidade_zero(db):
+def test_alterar_quantity_zero(db):
 
     client.post(
-        "/usuarios",
+        "/users",
         json={
             "name": "Pedro",
             "email": "pedro@teste.com",
@@ -449,7 +449,7 @@ def test_alterar_quantidade_zero(db):
     )
 
     login = client.post(
-        "/usuarios/login",
+        "/users/login",
         json={
             "email": "pedro@teste.com",
             "password": "Pedro123@"
@@ -462,49 +462,49 @@ def test_alterar_quantidade_zero(db):
         "Authorization": f"Bearer {token}"
     }
 
-    categoria = Categoria(name="Canecas")
+    category = category(name="Canecas")
 
-    db.add(categoria)
+    db.add(category)
     db.commit()
-    db.refresh(categoria)
+    db.refresh(category)
 
-    produto = Produto(
+    product = product(
         name="Caneca Naruto",
         price=50,
-        estoque=10,
-        category_id=categoria.id
+        stock=10,
+        category_id=category.id
     )
 
-    db.add(produto)
+    db.add(product)
     db.commit()
-    db.refresh(produto)
+    db.refresh(product)
 
     client.post(
-        "/carrinho",
+        "/cart",
         json={
-            "produto_id": produto.id,
-            "quantidade": 2
+            "product_id": product.id,
+            "quantity": 2
         },
         headers=headers
     )
 
     response = client.patch(
-        f"/carrinho/{produto.id}",
+        f"/cart/{product.id}",
         params={
-            "quantidade": 0
+            "quantity": 0
         },
         headers=headers
     )
 
     assert response.status_code == 400
     assert response.json()["detail"] == (
-        "A quantidade deve ser maior que zero."
+        "A quantity deve ser maior que zero."
     )
 
-def test_alterar_quantidade_maior_que_estoque(db):
+def test_alterar_quantity_maior_que_stock(db):
 
     client.post(
-        "/usuarios",
+        "/users",
         json={
             "name": "Pedro",
             "email": "pedro@teste.com",
@@ -513,7 +513,7 @@ def test_alterar_quantidade_maior_que_estoque(db):
     )
 
     login = client.post(
-        "/usuarios/login",
+        "/users/login",
         json={
             "email": "pedro@teste.com",
             "password": "Pedro123@"
@@ -526,49 +526,49 @@ def test_alterar_quantidade_maior_que_estoque(db):
         "Authorization": f"Bearer {token}"
     }
 
-    categoria = Categoria(name="Canecas")
+    category = category(name="Canecas")
 
-    db.add(categoria)
+    db.add(category)
     db.commit()
-    db.refresh(categoria)
+    db.refresh(category)
 
-    produto = Produto(
+    product = product(
         name="Caneca Naruto",
         price=50,
-        estoque=5,
-        category_id=categoria.id
+        stock=5,
+        category_id=category.id
     )
 
-    db.add(produto)
+    db.add(product)
     db.commit()
-    db.refresh(produto)
+    db.refresh(product)
 
     client.post(
-        "/carrinho",
+        "/cart",
         json={
-            "produto_id": produto.id,
-            "quantidade": 2
+            "product_id": product.id,
+            "quantity": 2
         },
         headers=headers
     )
 
     response = client.patch(
-        f"/carrinho/{produto.id}",
+        f"/cart/{product.id}",
         params={
-            "quantidade": 6
+            "quantity": 6
         },
         headers=headers
     )
 
     assert response.status_code == 400
     assert response.json()["detail"] == (
-        "Quantidade solicitada maior que o estoque disponível."
+        "quantity solicitada maior que o stock disponível."
     )
     
-def test_alterar_produto_que_nao_esta_no_carrinho(db):
+def test_alterar_product_que_nao_esta_no_cart(db):
 
     client.post(
-        "/usuarios",
+        "/users",
         json={
             "name": "Pedro",
             "email": "pedro@teste.com",
@@ -577,7 +577,7 @@ def test_alterar_produto_que_nao_esta_no_carrinho(db):
     )
 
     login = client.post(
-        "/usuarios/login",
+        "/users/login",
         json={
             "email": "pedro@teste.com",
             "password": "Pedro123@"
@@ -590,46 +590,46 @@ def test_alterar_produto_que_nao_esta_no_carrinho(db):
         "Authorization": f"Bearer {token}"
     }
 
-    # Cria o carrinho vazio
+    # Cria o cart vazio
     client.get(
-        "/carrinho",
+        "/cart",
         headers=headers
     )
 
-    categoria = Categoria(name="Canecas")
+    category = category(name="Canecas")
 
-    db.add(categoria)
+    db.add(category)
     db.commit()
-    db.refresh(categoria)
+    db.refresh(category)
 
-    produto = Produto(
+    product = product(
         name="Caneca Naruto",
         price=50,
-        estoque=10,
-        category_id=categoria.id
+        stock=10,
+        category_id=category.id
     )
 
-    db.add(produto)
+    db.add(product)
     db.commit()
-    db.refresh(produto)
+    db.refresh(product)
 
     response = client.patch(
-        f"/carrinho/{produto.id}",
+        f"/cart/{product.id}",
         params={
-            "quantidade": 5
+            "quantity": 5
         },
         headers=headers
     )
 
     assert response.status_code == 404
     assert response.json()["detail"] == (
-        "Produto não está no carrinho."
+        "product não está no cart."
     )
     
-def test_remover_produto_carrinho(db):
+def test_remover_product_cart(db):
 
     client.post(
-        "/usuarios",
+        "/users",
         json={
             "name": "Pedro",
             "email": "pedro@teste.com",
@@ -638,7 +638,7 @@ def test_remover_produto_carrinho(db):
     )
 
     login = client.post(
-        "/usuarios/login",
+        "/users/login",
         json={
             "email": "pedro@teste.com",
             "password": "Pedro123@"
@@ -651,28 +651,28 @@ def test_remover_produto_carrinho(db):
         "Authorization": f"Bearer {token}"
     }
 
-    categoria = Categoria(name="Canecas")
+    category = category(name="Canecas")
 
-    db.add(categoria)
+    db.add(category)
     db.commit()
-    db.refresh(categoria)
+    db.refresh(category)
 
-    produto = Produto(
+    product = product(
         name="Caneca Naruto",
         price=50,
-        estoque=10,
-        category_id=categoria.id
+        stock=10,
+        category_id=category.id
     )
 
-    db.add(produto)
+    db.add(product)
     db.commit()
-    db.refresh(produto)
+    db.refresh(product)
 
     response = client.post(
-        "/carrinho",
+        "/cart",
         json={
-            "produto_id": produto.id,
-            "quantidade": 2
+            "product_id": product.id,
+            "quantity": 2
         },
         headers=headers
     )
@@ -681,28 +681,28 @@ def test_remover_produto_carrinho(db):
 
     # Remove
     response = client.delete(
-        f"/carrinho/{produto.id}",
+        f"/cart/{product.id}",
         headers=headers
     )
 
     assert response.status_code == 200
     assert response.json()["message"] == (
-        "Produto removido do carrinho."
+        "product removido do cart."
     )
 
     response = client.get(
-        "/carrinho",
+        "/cart",
         headers=headers
     )
 
     assert response.status_code == 200
-    assert response.json()["itens"] == []
+    assert response.json()["items"] == []
     assert response.json()["total"] == "0"
     
-def test_remover_produto_que_nao_esta_no_carrinho(db):
+def test_remover_product_que_nao_esta_no_cart(db):
 
     client.post(
-        "/usuarios",
+        "/users",
         json={
             "name": "Pedro",
             "email": "pedro@teste.com",
@@ -711,7 +711,7 @@ def test_remover_produto_que_nao_esta_no_carrinho(db):
     )
     
     login = client.post(
-        "/usuarios/login",
+        "/users/login",
         json={
             "email": "pedro@teste.com",
             "password": "Pedro123@"
@@ -725,41 +725,41 @@ def test_remover_produto_que_nao_esta_no_carrinho(db):
     }
     
     client.get(
-        "/carrinho",
+        "/cart",
         headers=headers
     )
 
-    categoria = Categoria(name="Canecas")
+    category = category(name="Canecas")
 
-    db.add(categoria)
+    db.add(category)
     db.commit()
-    db.refresh(categoria)
+    db.refresh(category)
 
-    produto = Produto(
+    product = product(
         name="Caneca Naruto",
         price=50,
-        estoque=10,
-        category_id=categoria.id
+        stock=10,
+        category_id=category.id
     )
 
-    db.add(produto)
+    db.add(product)
     db.commit()
-    db.refresh(produto)
+    db.refresh(product)
 
     response = client.delete(
-        f"/carrinho/{produto.id}",
+        f"/cart/{product.id}",
         headers=headers
     )
 
     assert response.status_code == 404
     assert response.json()["detail"] == (
-        "Produto não está no carrinho."
+        "product não está no cart."
     )
     
-def test_visualizar_carrinho_vazio():
+def test_get_cart_vazio():
 
     client.post(
-        "/usuarios",
+        "/users",
         json={
             "name": "Pedro",
             "email": "pedro@teste.com",
@@ -768,7 +768,7 @@ def test_visualizar_carrinho_vazio():
     )
 
     login = client.post(
-        "/usuarios/login",
+        "/users/login",
         json={
             "email": "pedro@teste.com",
             "password": "Pedro123@"
@@ -782,7 +782,7 @@ def test_visualizar_carrinho_vazio():
     }
 
     response = client.get(
-        "/carrinho",
+        "/cart",
         headers=headers
     )
 
@@ -790,5 +790,5 @@ def test_visualizar_carrinho_vazio():
 
     dados = response.json()
 
-    assert dados["itens"] == []
+    assert dados["items"] == []
     assert dados["total"] == "0"

@@ -5,35 +5,39 @@ from decimal import Decimal
 class Base(DeclarativeBase):
     pass
 
-class Produto(Base):
-    __tablename__ = "produtos"
+class Product(Base):
+    __tablename__ = "products"
     
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(100))
+    description: Mapped[str | None] = mapped_column(
+        String(500),
+        nullable=True
+    )
     price: Mapped[Decimal] = mapped_column(
         Numeric(10, 2)
     )
-    estoque: Mapped[int] = mapped_column(default=0)
+    stock: Mapped[int] = mapped_column(default=0)
     
     category_id: Mapped[int] = mapped_column(
-        ForeignKey("categorias.id")
+        ForeignKey("categories.id")
     )
-    categoria: Mapped["Categoria"] = relationship(
-        back_populates="produtos"
+    category: Mapped["Category"] = relationship(
+        back_populates="products"
     )
     
-class Categoria(Base):
-    __tablename__ = "categorias"
+class Category(Base):
+    __tablename__ = "categories"
     
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(50))
     
-    produtos: Mapped[list["Produto"]] = relationship(
-        back_populates="categoria"
+    products: Mapped[list["Product"]] = relationship(
+        back_populates="category"
     )
 
-class Usuario(Base):
-    __tablename__ = "usuarios"
+class User(Base):
+    __tablename__ = "users"
     
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(100))
@@ -45,54 +49,54 @@ class Usuario(Base):
         default="user"
     )
     
-class Carrinho(Base):
-    __tablename__ = "carrinhos"
+class Cart(Base):
+    __tablename__ = "carts"
     
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    usuario_id: Mapped[int] = mapped_column(
-        ForeignKey("usuarios.id"),
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id"),
         unique=True
     )
 
-    itens: Mapped[list["ItemCarrinho"]] = relationship(
-        back_populates="carrinho"
+    items: Mapped[list["CartItem"]] = relationship(
+        back_populates="cart"
     )
     
-class ItemCarrinho(Base):
-    __tablename__ = "itens_carrinho"
+class CartItem(Base):
+    __tablename__ = "cart_items"
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    carrinho_id: Mapped[int] = mapped_column(
-        ForeignKey("carrinhos.id")
+    cart_id: Mapped[int] = mapped_column(
+        ForeignKey("carts.id")
     )
 
-    produto_id: Mapped[int] = mapped_column(
-        ForeignKey("produtos.id")
+    product_id: Mapped[int] = mapped_column(
+        ForeignKey("products.id")
     )
 
-    quantidade: Mapped[int] = mapped_column(
+    quantity: Mapped[int] = mapped_column(
         default=1
     )
 
-    preco_adicionado: Mapped[Decimal] = mapped_column(
+    added_price: Mapped[Decimal] = mapped_column(
     Numeric(10, 2)
     )
 
-    carrinho: Mapped["Carrinho"] = relationship(
-        back_populates="itens"
+    cart: Mapped["Cart"] = relationship(
+        back_populates="items"
     )
 
-    produto: Mapped["Produto"] = relationship()
+    product: Mapped["Product"] = relationship()
     
-class Pedido(Base):
-    __tablename__ = "pedidos"
+class Order(Base):
+    __tablename__ = "orders"
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    usuario_id: Mapped[int] = mapped_column(
-        ForeignKey("usuarios.id")
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id")
     )
 
     status: Mapped[str] = mapped_column(
@@ -104,32 +108,32 @@ class Pedido(Base):
         Numeric(10, 2)
     )
 
-    itens: Mapped[list["PedidoItem"]] = relationship(
-        back_populates="pedido"
+    items: Mapped[list["OrderItem"]] = relationship(
+        back_populates="order"
     )
 
 
-class PedidoItem(Base):
-    __tablename__ = "pedido_itens"
+class OrderItem(Base):
+    __tablename__ = "order_items"
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    pedido_id: Mapped[int] = mapped_column(
-        ForeignKey("pedidos.id")
+    order_id: Mapped[int] = mapped_column(
+        ForeignKey("orders.id")
     )
 
-    produto_id: Mapped[int] = mapped_column(
-        ForeignKey("produtos.id")
+    product_id: Mapped[int] = mapped_column(
+        ForeignKey("products.id")
     )
 
-    quantidade: Mapped[int] = mapped_column()
+    quantity: Mapped[int] = mapped_column()
 
-    preco: Mapped[Decimal] = mapped_column(
+    price: Mapped[Decimal] = mapped_column(
         Numeric(10, 2)
     )
 
-    pedido: Mapped["Pedido"] = relationship(
-        back_populates="itens"
+    order: Mapped["Order"] = relationship(
+        back_populates="items"
     )
 
-    produto: Mapped["Produto"] = relationship()
+    product: Mapped["Product"] = relationship()

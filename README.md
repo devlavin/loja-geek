@@ -1,4 +1,4 @@
-# CRUD Produtos — FastAPI + PostgreSQL
+# CRUD products — FastAPI + PostgreSQL
 
 API REST desenvolvida para praticar desenvolvimento backend com Python, FastAPI e PostgreSQL.
 
@@ -6,13 +6,13 @@ O projeto começou como um CRUD utilizando uma lista em memória e, posteriormen
 
 ## Tecnologias
 
-* Python
-* FastAPI
-* Pydantic
-* SQLAlchemy
-* Psycopg
-* PostgreSQL
-* Git e GitHub
+- Python
+- FastAPI
+- Pydantic
+- SQLAlchemy
+- Psycopg
+- PostgreSQL
+- Git e GitHub
 
 ## Sobre o projeto
 
@@ -23,13 +23,13 @@ Durante o desenvolvimento, o projeto passou por algumas etapas:
 1. Criação da API utilizando FastAPI.
 2. Criação dos modelos de dados com Pydantic.
 3. Implementação de um CRUD utilizando uma lista em memória.
-4. Implementação de cadastro de múltiplos produtos.
-5. Adição de busca de produto por ID.
+4. Implementação de cadastro de múltiplos products.
+5. Adição de busca de product por ID.
 6. Implementação de tratamento de erros com HTTP 404.
 7. Criação de um banco de dados PostgreSQL.
 8. Integração do PostgreSQL com SQLAlchemy.
-9. Criação do modelo `Produto` utilizando SQLAlchemy.
-10. Criação da tabela `produtos` no banco de dados.
+9. Criação do modelo `product` utilizando SQLAlchemy.
+10. Criação da tabela `products` no banco de dados.
 11. Implementação de sessões de banco de dados.
 12. Migração do CRUD da memória para o PostgreSQL.
 13. Configuração das credenciais através de variáveis de ambiente.
@@ -53,13 +53,13 @@ PostgreSQL
 
 ## Endpoints
 
-### Cadastrar produtos
+### create products
 
 ```http
-POST /produtos
+POST /products
 ```
 
-Permite cadastrar um ou vários produtos.
+Permite create um ou vários products.
 
 Exemplo:
 
@@ -68,72 +68,72 @@ Exemplo:
   {
     "id": 1,
     "name": "Jogos Vorazes",
-    "price": 39.90
+    "price": 39.9
   },
   {
     "id": 2,
     "name": "Em Chamas",
-    "price": 42.90
+    "price": 42.9
   }
 ]
 ```
 
-### Listar produtos
+### list products
 
 ```http
-GET /produtos
+GET /products
 ```
 
-Retorna todos os produtos cadastrados.
+Retorna todos os products cadastrados.
 
-### Buscar produto por ID
+### Buscar product por ID
 
 ```http
-GET /produtos/{id}
+GET /products/{id}
 ```
 
-Retorna um produto específico.
+Retorna um product específico.
 
-Caso o produto não exista, a API retorna:
+Caso o product não exista, a API retorna:
 
 ```http
 404 Not Found
 ```
 
-### Atualizar preço
+### update preço
 
 ```http
-PATCH /produtos/{id}
+PATCH /products/{id}
 ```
 
-Atualiza o preço de um produto.
+Atualiza o preço de um product.
 
 Exemplo:
 
 ```json
 {
-  "price": 49.90
+  "price": 49.9
 }
 ```
 
-### Excluir produto
+### Excluir product
 
 ```http
-DELETE /produtos/{id}
+DELETE /products/{id}
 ```
 
-Remove um produto do banco de dados.
+Remove um product do banco de dados.
 
 ## Como executar o projeto
 
 ### 1. Clonar o repositório
 
 ```bash
-git clone https://github.com/devlavin/crud-produtos.git
-cd crud-produtos
+git clone https://github.com/devlavin/crud-products.git
+cd crud-products
 ```
 
-### 2. Criar e ativar o ambiente virtual
+### 2. create e ativar o ambiente virtual
 
 No Windows:
 
@@ -153,16 +153,16 @@ pip install fastapi sqlalchemy psycopg python-dotenv
 Crie um arquivo `.env` na raiz do projeto:
 
 ```env
-DATABASE_URL=postgresql+psycopg://postgres:SUA_SENHA@localhost:5432/fastapi_produtos
+DATABASE_URL=postgresql+psycopg://postgres:SUA_password@localhost:5432/fastapi_products
 ```
 
 O arquivo `.env` não deve ser enviado para o GitHub.
 
 Utilize o `.env.example` como referência.
 
-### 5. Criar a tabela no banco
+### 5. create a tabela no banco
 
-Com o PostgreSQL configurado e o banco `fastapi_produtos` criado:
+Com o PostgreSQL configurado e o banco `fastapi_products` criado:
 
 ```powershell
 python database.py
@@ -203,7 +203,7 @@ O projeto utiliza PostgreSQL como banco de dados.
 Tabela principal:
 
 ```text
-produtos
+products
 ├── id
 ├── name
 └── price
@@ -223,31 +223,31 @@ O arquivo `.env.example` é disponibilizado apenas como modelo de configuração
 
 Este projeto faz parte dos estudos de desenvolvimento backend e tem como objetivo consolidar conhecimentos em:
 
-* APIs REST
-* FastAPI
-* Python
-* CRUD
-* PostgreSQL
-* SQLAlchemy
-* ORM
-* Pydantic
-* Variáveis de ambiente
-* Git e GitHub
-* Estruturação de aplicações backend
+- APIs REST
+- FastAPI
+- Python
+- CRUD
+- PostgreSQL
+- SQLAlchemy
+- ORM
+- Pydantic
+- Variáveis de ambiente
+- Git e GitHub
+- Estruturação de aplicações backend
 
 ## Próximos passos
 
 Algumas melhorias planejadas para o projeto:
 
-* [ ] Separar schemas, models e rotas
-* [ ] Criar uma estrutura de routers
-* [ ] Melhorar validações dos dados
-* [ ] Adicionar migrations com Alembic
-* [ ] Criar testes automatizados
-* [ ] Melhorar tratamento de erros
-* [ ] Adicionar autenticação
-* [ ] Criar frontend para consumir a API
-* [ ] Containerizar a aplicação com Docker
+- [ ] Separar schemas, models e rotas
+- [ ] create uma estrutura de routers
+- [ ] Melhorar validações dos dados
+- [ ] Adicionar migrations com Alembic
+- [ ] create testes automatizados
+- [ ] Melhorar tratamento de erros
+- [ ] Adicionar autenticação
+- [ ] create frontend para consumir a API
+- [ ] Containerizar a aplicação com Docker
 
 ---
 

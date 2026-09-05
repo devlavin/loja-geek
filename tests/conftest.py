@@ -3,11 +3,11 @@ from sqlalchemy.orm import sessionmaker
 from main import app
 from database import get_db
 
-from models import Base, Usuario, Produto
-from auth import criar_token
+from models import Base, user, product
+from auth import create_token
 from fastapi import Query
 
-DATABASE_URL_TEST = "postgresql+psycopg://postgres:kryptonianke@localhost:5432/fastapi_produtos_test"
+DATABASE_URL_TEST = "postgresql+psycopg://postgres:kryptonianke@localhost:5432/fastapi_products_test"
 
 engine_test = create_engine(DATABASE_URL_TEST)
 
@@ -42,10 +42,10 @@ def db():
 
 @pytest.fixture
 def admin_token(db):
-    admin = Usuario(
+    admin = user(
         name="Admin Teste",
         email="admin@test.com",
-        password_hash="senha_hash_teste",
+        password_hash="password_hash_teste",
         role="admin"
     )
 
@@ -53,7 +53,7 @@ def admin_token(db):
     db.commit()
     db.refresh(admin)
 
-    token = criar_token(admin.id)
+    token = create_token(admin.id)
 
     return token
 

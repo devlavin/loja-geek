@@ -5,83 +5,83 @@ from decimal import Decimal
 class Item(BaseModel):
     name: str
     price: Decimal = Field(gt=0)
-    estoque: int = Field(ge=0)
+    stock: int = Field(ge=0)
     category_id: int
 
-class AtualizarPreco(BaseModel):
+class UpdatePrice(BaseModel):
     price: Decimal = Field(gt=0)
 
-class ProdutoResponse(BaseModel):
+class ProductResponse(BaseModel):
     id: int
     name: str
     price: Decimal
-    estoque: int
+    stock: int
     category_id: int
     
     model_config = ConfigDict(from_attributes=True)
     
-class CategoriaCreate(BaseModel):
+class CategoryCreate(BaseModel):
     name: str
 
-class AtualizarCategoria(BaseModel):
+class UpdateCategory(BaseModel):
     name: str
 
-class CategoriaResponse(BaseModel):
+class CategoryResponse(BaseModel):
     id: int
     name: str
         
     model_config = ConfigDict(from_attributes=True)
     
-class CategoriaComProdutosResponse(BaseModel):
+class CategoryWithProductsResponse(BaseModel):
     id: int
     name: str
-    produtos: list[ProdutoResponse]
+    products: list[ProductResponse]
     
     model_config = ConfigDict(from_attributes=True)
     
-class ProdutoComCategoriaResponse(BaseModel):
+class ProductWithCategoryResponse(BaseModel):
     id: int
     name: str
     price: Decimal = Field(gt=0)
-    estoque: int = Field(ge=0)
+    stock: int = Field(ge=0)
     category_id: int
-    categoria: CategoriaResponse
+    category: CategoryResponse
 
     model_config = ConfigDict(from_attributes=True)
     
-class AtualizarEstoque(BaseModel):
-    estoque: int = Field(ge=0)
+class UpdateStock(BaseModel):
+    stock: int = Field(ge=0)
     
-class UsuarioCreate(BaseModel):
+class UserCreate(BaseModel):
     name: str
     email: EmailStr
     password: str = Field(min_length=8)
     
     @field_validator("password")
     @classmethod
-    def validar_senha(cls, senha):
-        if not re.search(r"[A-Z]", senha):
+    def validate_password(cls, password):
+        if not re.search(r"[A-Z]", password):
             raise ValueError(
                 "A senha deve conter pelo menos uma letra maiuscula."
             )
 
-        if not re.search(r"\d", senha):
+        if not re.search(r"\d", password):
             raise ValueError(
                 "A senha deve conter pelo menos um número."
             )
 
-        if not re.search(r"[^A-Za-z0-9]", senha):
+        if not re.search(r"[^A-Za-z0-9]", password):
             raise ValueError(
                 "A senha deve conter pelo menos um caractere especial."
             )
 
-        return senha
+        return password
 
-class UsuarioLogin(BaseModel):
+class UserLogin(BaseModel):
     email: str
     password: str
     
-class AtualizarUsuario(BaseModel):
+class UpdateUser(BaseModel):
     email: EmailStr | None = None
     password: str | None = Field(
         default=None,
@@ -90,67 +90,67 @@ class AtualizarUsuario(BaseModel):
 
     @field_validator("password")
     @classmethod
-    def validar_senha(cls, senha):
-        if senha is None:
-            return senha
+    def validate_password(cls, password):
+        if password is None:
+            return password
 
-        if not re.search(r"[A-Z]", senha):
+        if not re.search(r"[A-Z]", password):
             raise ValueError(
                 "A senha deve conter pelo menos uma letra maiuscula."
             )
 
-        if not re.search(r"\d", senha):
+        if not re.search(r"\d", password):
             raise ValueError(
                 "A senha deve conter pelo menos um número."
             )
 
-        if not re.search(r"[^A-Za-z0-9]", senha):
+        if not re.search(r"[^A-Za-z0-9]", password):
             raise ValueError(
                 "A senha deve conter pelo menos um caractere especial."
             )
 
-        return senha
+        return password
     
-class UsuarioResponse(BaseModel):
+class UserResponse(BaseModel):
     id: int
     name: str
     email: str
     
     model_config = ConfigDict(from_attributes=True)
     
-class ItemCarrinhoCreate(BaseModel):
-    produto_id: int
-    quantidade: int = Field(gt=0)
+class CartItemCreate(BaseModel):
+    product_id: int
+    quantity: int = Field(gt=0)
 
 
-class ItemCarrinhoResponse(BaseModel):
-    produto_id: int
-    nome: str
-    preco: Decimal
-    quantidade: int
+class CartItemResponse(BaseModel):
+    product_id: int
+    name: str
+    price: Decimal
+    quantity: int
     subtotal: Decimal
 
     model_config = ConfigDict(from_attributes=True)
 
 
-class CarrinhoResponse(BaseModel):
+class CartResponse(BaseModel):
     id: int
-    itens: list[ItemCarrinhoResponse]
+    items: list[CartItemResponse]
     total: Decimal
 
-class PedidoItemResponse(BaseModel):
-    produto_id: int
-    nome: str
-    quantidade: int
-    preco: Decimal
+class OrderItemResponse(BaseModel):
+    product_id: int
+    name: str
+    quantity: int
+    price: Decimal
     subtotal: Decimal
 
 
-class PedidoResponse(BaseModel):
+class OrderResponse(BaseModel):
     id: int
     status: str
-    itens: list[PedidoItemResponse]
+    items: list[OrderItemResponse]
     total: Decimal
 
-class AtualizarStatusPedido(BaseModel):
+class UpdateStatusOrder(BaseModel):
     status: str

@@ -1,14 +1,14 @@
 from fastapi.testclient import TestClient
 
 from main import app
-from models import Produto, Categoria, Carrinho, Usuario
+from models import product, category, cart, user
 from sqlalchemy import select
 
 client = TestClient(app)
 
-def test_criar_pedido(db):
+def test_create_order(db):
     response = client.post(
-        "/usuarios",
+        "/users",
         json={
             "name": "Pedro",
             "email": "pedro@teste.com",
@@ -17,7 +17,7 @@ def test_criar_pedido(db):
     )
     
     login = client.post(
-        "/usuarios/login",
+        "/users/login",
         json={
             "email": "pedro@teste.com",
             "password": "Pedro123@"
@@ -30,30 +30,30 @@ def test_criar_pedido(db):
         "Authorization": f"Bearer {token}"
     }
     
-    categoria = Categoria(
+    category = category(
         name="Geek"
     )
 
-    db.add(categoria)
+    db.add(category)
     db.commit()
-    db.refresh(categoria)
+    db.refresh(category)
     
-    produto = Produto(
+    product = product(
         name="Caneca Naruto",
         price=50,
-        estoque=10,
-        category_id=categoria.id
+        stock=10,
+        category_id=category.id
     )
 
-    db.add(produto)
+    db.add(product)
     db.commit()
-    db.refresh(produto)
+    db.refresh(product)
     
     response = client.post(
-        "/carrinho",
+        "/cart",
         json={
-            "produto_id": produto.id,
-            "quantidade": 2
+            "product_id": product.id,
+            "quantity": 2
         },
         headers=headers
     )
@@ -61,7 +61,7 @@ def test_criar_pedido(db):
     assert response.status_code == 200
     
     response = client.post(
-        "/pedidos",
+        "/orders",
         headers=headers
     )
 
@@ -70,40 +70,40 @@ def test_criar_pedido(db):
     data = response.json()
     
     assert data["status"] == "PENDENTE"
-    assert len(data["itens"]) == 1
-    assert data["itens"][0]["produto_id"] == produto.id
-    assert data["itens"][0]["quantidade"] == 2
-    assert data["itens"][0]["preco"] == "50.00"
-    assert data["itens"][0]["subtotal"] == "100.00"
+    assert len(data["items"]) == 1
+    assert data["items"][0]["product_id"] == product.id
+    assert data["items"][0]["quantity"] == 2
+    assert data["items"][0]["preco"] == "50.00"
+    assert data["items"][0]["subtotal"] == "100.00"
     assert data["total"] == "100.00"
     
-    # Verifica estoque
-    db.refresh(produto)
+    # Verifica stock
+    db.refresh(product)
 
-    assert produto.estoque == 8
+    assert product.stock == 8
 
-    # Verifica se o carrinho foi esvaziado
+    # Verifica se o cart foi esvaziado
     resultado = db.execute(
-        select(Usuario).where(
-            Usuario.email == "pedro@teste.com"
+        select(user).where(
+            user.email == "pedro@teste.com"
         )
     )
 
-    usuario = resultado.scalar_one()
+    user = resultado.scalar_one()
 
     resultado = db.execute(
-        select(Carrinho).where(
-            Carrinho.usuario_id == usuario.id
+        select(cart).where(
+            cart.user_id == user.id
         )
     )
 
-    carrinho = resultado.scalar_one()
+    cart = resultado.scalar_one()
 
-    assert len(carrinho.itens) == 0
+    assert len(cart.items) == 0
     
-def test_ver_pedidos(db):
+def test_ver_orders(db):
     response = client.post(
-        "/usuarios",
+        "/users",
         json={
             "name": "Pedro",
             "email": "pedro@teste.com",
@@ -112,7 +112,7 @@ def test_ver_pedidos(db):
     )
         
     login = client.post(
-        "/usuarios/login",
+        "/users/login",
         json={
             "email": "pedro@teste.com",
             "password": "Pedro123@"
@@ -125,30 +125,30 @@ def test_ver_pedidos(db):
         "Authorization": f"Bearer {token}"
     }
     
-    categoria = Categoria(
+    category = category(
             name="Geek"
         )
     
-    db.add(categoria)
+    db.add(category)
     db.commit()
-    db.refresh(categoria)
+    db.refresh(category)
     
-    produto = Produto(
+    product = product(
         name="Caneca Naruto",
         price=50,
-        estoque=10,
-        category_id=categoria.id
+        stock=10,
+        category_id=category.id
     )
 
-    db.add(produto)
+    db.add(product)
     db.commit()
-    db.refresh(produto)
+    db.refresh(product)
     
     response = client.post(
-        "/carrinho",
+        "/cart",
         json={
-            "produto_id": produto.id,
-            "quantidade": 2
+            "product_id": product.id,
+            "quantity": 2
         },
         headers=headers
     )
@@ -156,14 +156,14 @@ def test_ver_pedidos(db):
     assert response.status_code == 200
     
     response = client.post(
-        "/pedidos",
+        "/orders",
         headers=headers
     )
 
     assert response.status_code == 200
     
     response = client.get(
-        "/pedidos",
+        "/orders",
         headers=headers
     )
 
@@ -173,13 +173,13 @@ def test_ver_pedidos(db):
 
     assert len(data) == 1
     assert data[0]["status"] == "PENDENTE"
-    assert data[0]["itens"][0]["produto_id"] == produto.id
-    assert data[0]["itens"][0]["quantidade"] == 2
+    assert data[0]["items"][0]["product_id"] == product.id
+    assert data[0]["items"][0]["quantity"] == 2
     assert data[0]["total"] == "100.00"
     
-def test_visualizar_pedido(db):
+def test_get_order(db):
     response = client.post(
-        "/usuarios",
+        "/users",
         json={
             "name": "Pedro Hall",
             "email": "pedro@teste.com",
@@ -188,7 +188,7 @@ def test_visualizar_pedido(db):
     )
     
     login = client.post(
-        "/usuarios/login",
+        "/users/login",
         json={
             "email": "pedro@teste.com",
             "password": "Pedro123@"
@@ -201,30 +201,30 @@ def test_visualizar_pedido(db):
         "Authorization": f"Bearer {token}"
     }
     
-    categoria = Categoria(
+    category = category(
         name = "Distopic"
     )
     
-    db.add(categoria)
+    db.add(category)
     db.commit()
-    db.refresh(categoria)
+    db.refresh(category)
     
-    produto = Produto(
+    product = product(
         name = "Box Divergente",
         price = 214.99,
-        estoque = 8,
-        category_id = categoria.id
+        stock = 8,
+        category_id = category.id
     )
     
-    db.add(produto)
+    db.add(product)
     db.commit()
-    db.refresh(produto)
+    db.refresh(product)
     
     response = client.post(
-        "/carrinho/",
+        "/cart/",
         json={
-            "produto_id": produto.id,
-            "quantidade": 1
+            "product_id": product.id,
+            "quantity": 1
         },
         headers = headers
     )
@@ -232,7 +232,7 @@ def test_visualizar_pedido(db):
     assert response.status_code == 200
     
     response = client.post(
-        "/pedidos",
+        "/orders",
         headers=headers
     )
 
@@ -240,10 +240,10 @@ def test_visualizar_pedido(db):
     
     data = response.json()
 
-    pedido_id = data["id"]
+    order_id = data["id"]
     
     response = client.get(
-        f"/pedidos/{pedido_id}",
+        f"/orders/{order_id}",
         headers = headers
     )
     
@@ -251,12 +251,12 @@ def test_visualizar_pedido(db):
     
     data = response.json()
     
-    assert data["id"] == pedido_id
+    assert data["id"] == order_id
     assert data["status"] == "PENDENTE"
-    assert len(data["itens"]) == 1
-    assert data["itens"][0]["produto_id"] == produto.id
-    assert data["itens"][0]["nome"] == "Box Divergente"
-    assert data["itens"][0]["quantidade"] == 1
-    assert data["itens"][0]["preco"] == "214.99"
-    assert data["itens"][0]["subtotal"] == "214.99"
+    assert len(data["items"]) == 1
+    assert data["items"][0]["product_id"] == product.id
+    assert data["items"][0]["name"] == "Box Divergente"
+    assert data["items"][0]["quantity"] == 1
+    assert data["items"][0]["preco"] == "214.99"
+    assert data["items"][0]["subtotal"] == "214.99"
     assert data["total"] == "214.99"

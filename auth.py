@@ -4,45 +4,50 @@ from datetime import datetime, timedelta, timezone
 import jwt
 from dotenv import load_dotenv
 from fastapi import Depends, HTTPException
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from database import get_db
-from models import Usuario
+from models import User
+
 
 load_dotenv()
 
+
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 ALGORITHM = "HS256"
-ACESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 bearer_scheme = HTTPBearer()
 
-def criar_token(usuario_id: int):
-    expiracao = datetime.now(timezone.utc) + timedelta(
-        minutes = ACESS_TOKEN_EXPIRE_MINUTES
+
+def create_token(user_id: int):
+    expiration = datetime.now(timezone.utc) + timedelta(
+        minutes=ACCESS_TOKEN_EXPIRE_MINUTES
     )
-    
+
     payload = {
-        "sub": str(usuario_id),
-        "exp": expiracao
+        "sub": str(user_id),
+        "exp": expiration
     }
-    
+
     token = jwt.encode(
         payload,
         JWT_SECRET_KEY,
         algorithm=ALGORITHM
     )
-    
+
     return token
+
 
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
     db: Session = Depends(get_db)
 ):
     token = credentials.credentials
-    credenciais_invalidas = HTTPException(
+
+    invalid_credentials = HTTPException(
         status_code=401,
         detail="Token inválido ou expirado."
     )
@@ -54,31 +59,35 @@ def get_current_user(
             algorithms=[ALGORITHM]
         )
 
-        usuario_id = payload.get("sub")
+        user_id = payload.get("sub")
 
-        if usuario_id is None:
-            raise credenciais_invalidas
+        if user_id is None:
+            raise invalid_credentials
 
     except jwt.InvalidTokenError:
-        raise credenciais_invalidas
+        raise invalid_credentials
 
-    resultado = db.execute(
-        select(Usuario).where(Usuario.id == int(usuario_id))
+    result = db.execute(
+        select(User).where(
+            User.id == int(user_id)
+        )
     )
 
-    usuario = resultado.scalar_one_or_none()
+    user = result.scalar_one_or_none()
 
-    if usuario is None:
-        raise credenciais_invalidas
+    if user is None:
+        raise invalid_credentials
 
-    return usuario
+    return user
+
 
 def get_current_admin(
-    usuario: Usuario = Depends(get_current_user)
+    user: User = Depends(get_current_user)
 ):
-    if usuario.role != "admin":
+    if user.role != "admin":
         raise HTTPException(
             status_code=403,
             detail="Acesso permitido apenas para administradores."
         )
-    return usuario
+
+    return user
