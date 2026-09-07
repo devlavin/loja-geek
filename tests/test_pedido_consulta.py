@@ -1,13 +1,13 @@
 from fastapi.testclient import TestClient
 
 from main import app
-from models import product, category
+from models import Category, Product
 
 client = TestClient(app)
 
 
-def test_get_order_inexistente(db):
-    client.post(
+def test_get_nonexistent_order(db):
+    response = client.post(
         "/users",
         json={
             "name": "Pedro",
@@ -16,6 +16,8 @@ def test_get_order_inexistente(db):
         }
     )
 
+    assert response.status_code == 200
+
     login = client.post(
         "/users/login",
         json={
@@ -23,6 +25,8 @@ def test_get_order_inexistente(db):
             "password": "Pedro123@"
         }
     )
+
+    assert login.status_code == 200
 
     token = login.json()["access_token"]
 
@@ -36,12 +40,11 @@ def test_get_order_inexistente(db):
     )
 
     assert response.status_code == 404
-    assert response.json()["detail"] == "order não encontrado."
+    assert response.json()["detail"] == "Pedido não encontrado."
 
 
-def test_user_nao_pode_get_order_de_outro_user(db):
-    
-    client.post(
+def test_user_cannot_get_another_users_order(db):
+    response = client.post(
         "/users",
         json={
             "name": "Pedro",
@@ -49,6 +52,8 @@ def test_user_nao_pode_get_order_de_outro_user(db):
             "password": "Pedro123@"
         }
     )
+
+    assert response.status_code == 200
 
     login_pedro = client.post(
         "/users/login",
@@ -58,19 +63,21 @@ def test_user_nao_pode_get_order_de_outro_user(db):
         }
     )
 
+    assert login_pedro.status_code == 200
+
     token_pedro = login_pedro.json()["access_token"]
 
     headers_pedro = {
         "Authorization": f"Bearer {token_pedro}"
     }
 
-    category = category(name="Geek")
+    category = Category(name="Geek")
 
     db.add(category)
     db.commit()
     db.refresh(category)
 
-    product = product(
+    product = Product(
         name="Caneca Naruto",
         price=50,
         stock=10,
@@ -81,7 +88,7 @@ def test_user_nao_pode_get_order_de_outro_user(db):
     db.commit()
     db.refresh(product)
 
-    client.post(
+    response = client.post(
         "/cart",
         json={
             "product_id": product.id,
@@ -90,14 +97,18 @@ def test_user_nao_pode_get_order_de_outro_user(db):
         headers=headers_pedro
     )
 
+    assert response.status_code == 200
+
     order = client.post(
         "/orders",
         headers=headers_pedro
     )
 
+    assert order.status_code == 200
+
     order_id = order.json()["id"]
-    
-    client.post(
+
+    response = client.post(
         "/users",
         json={
             "name": "Maria",
@@ -105,6 +116,8 @@ def test_user_nao_pode_get_order_de_outro_user(db):
             "password": "Maria123@"
         }
     )
+
+    assert response.status_code == 200
 
     login_maria = client.post(
         "/users/login",
@@ -114,17 +127,19 @@ def test_user_nao_pode_get_order_de_outro_user(db):
         }
     )
 
+    assert login_maria.status_code == 200
+
     token_maria = login_maria.json()["access_token"]
 
     headers_maria = {
         "Authorization": f"Bearer {token_maria}"
     }
 
-    # Maria tenta acessar o order de Pedro
+    # Maria tries to access Pedro's order
     response = client.get(
         f"/orders/{order_id}",
         headers=headers_maria
     )
 
     assert response.status_code == 404
-    assert response.json()["detail"] == "order não encontrado."
+    assert response.json()["detail"] == "Pedido não encontrado."

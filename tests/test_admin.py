@@ -1,12 +1,15 @@
 from fastapi.testclient import TestClient
 
-from main import app
-from models import user, category, product, order
 from sqlalchemy import select
+
+from main import app
+from models import User, Category, Product
+
 
 client = TestClient(app)
 
-def test_user_nao_pode_list_orders_admin(db):
+
+def test_user_cannot_list_admin_orders():
     response = client.post(
         "/users",
         json={
@@ -38,8 +41,9 @@ def test_user_nao_pode_list_orders_admin(db):
     )
 
     assert response.status_code == 403
-    
-def create_order_para_admin(db, admin_token):
+
+
+def create_order_for_admin(db, admin_token):
     response = client.post(
         "/users",
         json={
@@ -61,11 +65,11 @@ def create_order_para_admin(db, admin_token):
 
     token = login.json()["access_token"]
 
-    headers_user = {
+    user_headers = {
         "Authorization": f"Bearer {token}"
     }
 
-    category = category(
+    category = Category(
         name="Geek"
     )
 
@@ -73,7 +77,7 @@ def create_order_para_admin(db, admin_token):
     db.commit()
     db.refresh(category)
 
-    product = product(
+    product = Product(
         name="Caneca Naruto",
         price=50,
         stock=10,
@@ -90,28 +94,29 @@ def create_order_para_admin(db, admin_token):
             "product_id": product.id,
             "quantity": 2
         },
-        headers=headers_user
+        headers=user_headers
     )
 
     assert response.status_code == 200
 
     response = client.post(
         "/orders",
-        headers=headers_user
+        headers=user_headers
     )
 
     assert response.status_code == 200
 
     order_id = response.json()["id"]
 
-    headers_admin = {
+    admin_headers = {
         "Authorization": f"Bearer {admin_token}"
     }
 
-    return headers_admin, order_id, product
-    
-def test_admin_list_todos_orders(db, admin_token):
-    headers, order_id, product = create_order_para_admin(
+    return admin_headers, order_id, product
+
+
+def test_admin_list_all_orders(db, admin_token):
+    headers, order_id, product = create_order_for_admin(
         db,
         admin_token
     )
@@ -134,12 +139,13 @@ def test_admin_list_todos_orders(db, admin_token):
     assert data[0]["items"][0]["product_id"] == product.id
     assert data[0]["items"][0]["name"] == "Caneca Naruto"
     assert data[0]["items"][0]["quantity"] == 2
-    assert data[0]["items"][0]["preco"] == 50.0
+    assert data[0]["items"][0]["price"] == 50.0
     assert data[0]["items"][0]["subtotal"] == 100.0
 
     assert data[0]["total"] == 100.0
-    
-def test_admin_get_order_inexistente(
+
+
+def test_admin_get_nonexistent_order(
     db,
     admin_token
 ):
@@ -153,13 +159,14 @@ def test_admin_get_order_inexistente(
     )
 
     assert response.status_code == 404
-    assert response.json()["detail"] == "order não encontrado."
-    
-def test_admin_alterar_status_pendente_para_pago(
+    assert response.json()["detail"] == "Pedido não encontrado."
+
+
+def test_admin_update_order_status_pending_to_paid(
     db,
     admin_token
 ):
-    headers, order_id, product = create_order_para_admin(
+    headers, order_id, product = create_order_for_admin(
         db,
         admin_token
     )
@@ -180,11 +187,12 @@ def test_admin_alterar_status_pendente_para_pago(
     assert data["order_id"] == order_id
     assert data["status"] == "PAGO"
 
-def test_admin_nao_pode_pular_status(
+
+def test_admin_cannot_skip_order_status(
     db,
     admin_token
 ):
-    headers, order_id, product = create_order_para_admin(
+    headers, order_id, product = create_order_for_admin(
         db,
         admin_token
     )
@@ -200,15 +208,16 @@ def test_admin_nao_pode_pular_status(
     assert response.status_code == 400
 
     assert response.json()["detail"] == (
-        "Não é possível alterar o order de "
+        "Não é possível alterar o pedido de "
         "PENDENTE para ENVIADO."
     )
-    
-def test_admin_status_invalido(
+
+
+def test_admin_invalid_order_status(
     db,
     admin_token
 ):
-    headers, order_id, product = create_order_para_admin(
+    headers, order_id, product = create_order_for_admin(
         db,
         admin_token
     )
@@ -223,8 +232,9 @@ def test_admin_status_invalido(
 
     assert response.status_code == 400
     assert response.json()["detail"] == "Status inválido."
-    
-def test_admin_alterar_status_order_inexistente(
+
+
+def test_admin_update_nonexistent_order_status(
     db,
     admin_token
 ):
@@ -241,8 +251,9 @@ def test_admin_alterar_status_order_inexistente(
     )
 
     assert response.status_code == 404
-    assert response.json()["detail"] == "order não encontrado."
-    
+    assert response.json()["detail"] == "Pedido não encontrado."
+
+
 def test_admin_list_users(db, admin_token):
     response = client.post(
         "/users",
@@ -274,7 +285,8 @@ def test_admin_list_users(db, admin_token):
 
     assert "pedro@teste.com" in emails
     assert "admin@test.com" in emails
-    
+
+
 def test_admin_get_user(db, admin_token):
     response = client.post(
         "/users",
@@ -287,13 +299,13 @@ def test_admin_get_user(db, admin_token):
 
     assert response.status_code == 200
 
-    resultado = db.execute(
-        select(user).where(
-            user.email == "pedro@teste.com"
+    result = db.execute(
+        select(User).where(
+            User.email == "pedro@teste.com"
         )
     )
 
-    user = resultado.scalar_one()
+    user = result.scalar_one()
 
     headers = {
         "Authorization": f"Bearer {admin_token}"
@@ -312,8 +324,9 @@ def test_admin_get_user(db, admin_token):
     assert data["name"] == "Pedro"
     assert data["email"] == "pedro@teste.com"
     assert data["role"] == "user"
-    
-def test_admin_get_user_inexistente(
+
+
+def test_admin_get_nonexistent_user(
     db,
     admin_token
 ):
@@ -328,8 +341,9 @@ def test_admin_get_user_inexistente(
 
     assert response.status_code == 404
     assert response.json()["detail"] == "Usuário não encontrado."
-    
-def test_admin_promover_user(
+
+
+def test_admin_promote_user(
     db,
     admin_token
 ):
@@ -344,13 +358,13 @@ def test_admin_promover_user(
 
     assert response.status_code == 200
 
-    resultado = db.execute(
-        select(user).where(
-            user.email == "pedro@teste.com"
+    result = db.execute(
+        select(User).where(
+            User.email == "pedro@teste.com"
         )
     )
 
-    user = resultado.scalar_one()
+    user = result.scalar_one()
 
     headers = {
         "Authorization": f"Bearer {admin_token}"
@@ -375,8 +389,9 @@ def test_admin_promover_user(
     db.refresh(user)
 
     assert user.role == "admin"
-    
-def test_admin_rebaixar_user(
+
+
+def test_admin_demote_user(
     db,
     admin_token
 ):
@@ -391,13 +406,13 @@ def test_admin_rebaixar_user(
 
     assert response.status_code == 200
 
-    resultado = db.execute(
-        select(user).where(
-            user.email == "pedro@teste.com"
+    result = db.execute(
+        select(User).where(
+            User.email == "pedro@teste.com"
         )
     )
 
-    user = resultado.scalar_one()
+    user = result.scalar_one()
 
     user.role = "admin"
     db.commit()
@@ -423,8 +438,9 @@ def test_admin_rebaixar_user(
     db.refresh(user)
 
     assert user.role == "user"
-    
-def test_admin_role_invalida(
+
+
+def test_admin_invalid_role(
     db,
     admin_token
 ):
@@ -439,13 +455,13 @@ def test_admin_role_invalida(
 
     assert response.status_code == 200
 
-    resultado = db.execute(
-        select(user).where(
-            user.email == "pedro@teste.com"
+    result = db.execute(
+        select(User).where(
+            User.email == "pedro@teste.com"
         )
     )
 
-    user = resultado.scalar_one()
+    user = result.scalar_one()
 
     headers = {
         "Authorization": f"Bearer {admin_token}"
@@ -461,18 +477,19 @@ def test_admin_role_invalida(
 
     assert response.status_code == 400
     assert response.json()["detail"] == "Role inválida."
-    
-def test_admin_nao_pode_remover_propria_role(
+
+
+def test_admin_cannot_remove_own_admin_role(
     db,
     admin_token
 ):
-    resultado = db.execute(
-        select(user).where(
-            user.email == "admin@test.com"
+    result = db.execute(
+        select(User).where(
+            User.email == "admin@test.com"
         )
     )
 
-    admin = resultado.scalar_one()
+    admin = result.scalar_one()
 
     headers = {
         "Authorization": f"Bearer {admin_token}"

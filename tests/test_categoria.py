@@ -1,136 +1,142 @@
 from fastapi.testclient import TestClient
 
 from main import app
-from models import product, category
+from models import Category, Product
 
 client = TestClient(app)
 
-def test_list_categorys():
-    response = client.get("/categorys")
-    
+
+def test_list_categories():
+    response = client.get("/categories")
+
     assert response.status_code == 200
-    
-def test_create_category_no_banco(admin_token, db):
-    
+
+
+def test_create_category_in_database(admin_token, db):
     headers = {
         "Authorization": f"Bearer {admin_token}"
     }
-    
+
     response = client.post(
-        f"/categorys",
+        "/categories",
         json={
-                "name": "Jogos"
-            },
-            headers = headers
+            "name": "Jogos"
+        },
+        headers=headers
     )
-    
+
     assert response.status_code == 200
-    
-def test_buscar_category(admin_token, db):
-    category = category(
-        name = "Jogos"
+
+
+def test_get_category(admin_token, db):
+    category = Category(
+        name="Jogos"
     )
-    
+
     db.add(category)
     db.commit()
     db.refresh(category)
-    
+
     headers = {
         "Authorization": f"Bearer {admin_token}"
     }
-    
+
     response = client.get(
-        f"/categorys/{category.id}",
-        headers = headers
+        f"/categories/{category.id}",
+        headers=headers
     )
-    
+
     assert response.status_code == 200
-    
+
+
 def test_update_category(admin_token, db):
-    category = category(
-        name = "Chaveiros"
+    category = Category(
+        name="Chaveiros"
     )
-    
+
     db.add(category)
     db.commit()
     db.refresh(category)
-    
+
     headers = {
         "Authorization": f"Bearer {admin_token}"
     }
-    
+
     response = client.patch(
-        f"/categorys/{category.id}",
-        json = {
+        f"/categories/{category.id}",
+        json={
             "name": "Chaveirinhos"
         },
-        headers = headers
+        headers=headers
     )
-    
+
     assert response.status_code == 200
-    
-def test_deletar_category(admin_token, db):
-    category = category(
-        name = "Filmes"
+
+
+def test_delete_category(admin_token, db):
+    category = Category(
+        name="Filmes"
     )
-    
+
     db.add(category)
     db.commit()
     db.refresh(category)
-    
+
+    category_id = category.id
+
     headers = {
         "Authorization": f"Bearer {admin_token}"
     }
-    
+
     response = client.delete(
-        f"/categorys/{category.id}",
-        headers = headers
+        f"/categories/{category_id}",
+        headers=headers
     )
-    
+
     assert response.status_code == 200
-    
-    category_excluida = db.query(category).filter(
-        category.id == category.id
+
+    deleted_category = db.query(Category).filter(
+        Category.id == category_id
     ).first()
-    
-    assert category_excluida is None
-    
-def test_nao_deletar_category_com_products(admin_token, db):
-    category = category(
-        name = "Chinelo"
+
+    assert deleted_category is None
+
+
+def test_cannot_delete_category_with_products(admin_token, db):
+    category = Category(
+        name="Chinelo"
     )
-    
+
     db.add(category)
     db.commit()
     db.refresh(category)
-    
-    product = product(
-        name = "Chinelo Sonserina",
-        price = 99.99,
-        stock = 25,
-        category_id = category.id
+
+    product = Product(
+        name="Chinelo Sonserina",
+        price=99.99,
+        stock=25,
+        category_id=category.id
     )
-    
+
     db.add(product)
     db.commit()
     db.refresh(product)
-    
+
+    category_id = category.id
+
     headers = {
         "Authorization": f"Bearer {admin_token}"
     }
-    
+
     response = client.delete(
-        f"/categorys/{category.id}",
-        headers = headers
+        f"/categories/{category_id}",
+        headers=headers
     )
-    
-    
+
     assert response.status_code == 400
-    
-    category_excluida = db.query(category).filter(
-        category.id == category.id
+
+    category_in_database = db.query(Category).filter(
+        Category.id == category_id
     ).first()
-    
-    assert category_excluida is not None
-    
-    
+
+    assert category_in_database is not None

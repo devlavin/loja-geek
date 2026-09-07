@@ -1,14 +1,13 @@
 from fastapi.testclient import TestClient
 
 from main import app
-from models import product, category
+from models import Category, Product
 
 client = TestClient(app)
 
 
-def test_create_order_com_cart_vazio(db):
-    
-    client.post(
+def test_create_order_with_empty_cart(db):
+    response = client.post(
         "/users",
         json={
             "name": "Pedro",
@@ -16,6 +15,8 @@ def test_create_order_com_cart_vazio(db):
             "password": "Pedro123@"
         }
     )
+
+    assert response.status_code == 200
 
     login = client.post(
         "/users/login",
@@ -37,12 +38,11 @@ def test_create_order_com_cart_vazio(db):
     )
 
     assert response.status_code == 400
-    assert response.json()["detail"] == "cart vazio."
+    assert response.json()["detail"] == "Carrinho vazio."
 
 
-def test_create_order_com_stock_insuficiente(db):
-
-    client.post(
+def test_create_order_with_insufficient_stock(db):
+    response = client.post(
         "/users",
         json={
             "name": "Pedro",
@@ -50,6 +50,8 @@ def test_create_order_com_stock_insuficiente(db):
             "password": "Pedro123@"
         }
     )
+
+    assert response.status_code == 200
 
     login = client.post(
         "/users/login",
@@ -65,13 +67,13 @@ def test_create_order_com_stock_insuficiente(db):
         "Authorization": f"Bearer {token}"
     }
 
-    category = category(name="Geek")
+    category = Category(name="Geek")
 
     db.add(category)
     db.commit()
     db.refresh(category)
 
-    product = product(
+    product = Product(
         name="Caneca Naruto",
         price=50,
         stock=1,
@@ -103,5 +105,5 @@ def test_create_order_com_stock_insuficiente(db):
 
     assert response.status_code == 400
     assert response.json()["detail"] == (
-        "stock insuficiente para o product: Caneca Naruto."
+        "Estoque insuficiente para o produto: Caneca Naruto."
     )
