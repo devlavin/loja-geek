@@ -5,89 +5,10 @@ from sqlalchemy import select
 from main import app
 from models import User, Category, Product
 
-
 client = TestClient(app)
 
 
-def test_user_cannot_list_admin_orders():
-    response = client.post(
-        "/users",
-        json={
-            "name": "Pedro",
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    assert response.status_code == 200
-
-    login = client.post(
-        "/users/login",
-        json={
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    token = login.json()["access_token"]
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-
-    response = client.get(
-        "/admin/orders",
-        headers=headers
-    )
-
-    assert response.status_code == 403
-
-
-def create_order_for_admin(db, admin_token):
-    response = client.post(
-        "/users",
-        json={
-            "name": "Pedro",
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    assert response.status_code == 200
-
-    login = client.post(
-        "/users/login",
-        json={
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    token = login.json()["access_token"]
-
-    user_headers = {
-        "Authorization": f"Bearer {token}"
-    }
-
-    category = Category(
-        name="Geek"
-    )
-
-    db.add(category)
-    db.commit()
-    db.refresh(category)
-
-    product = Product(
-        name="Caneca Naruto",
-        price=50,
-        stock=10,
-        category_id=category.id
-    )
-
-    db.add(product)
-    db.commit()
-    db.refresh(product)
-
+def create_order_for_admin(user_headers, product):
     response = client.post(
         "/cart",
         json={
@@ -106,24 +27,31 @@ def create_order_for_admin(db, admin_token):
 
     assert response.status_code == 200
 
-    order_id = response.json()["id"]
-
-    admin_headers = {
-        "Authorization": f"Bearer {admin_token}"
-    }
-
-    return admin_headers, order_id, product
+    return response.json()["id"]
 
 
-def test_admin_list_all_orders(db, admin_token):
-    headers, order_id, product = create_order_for_admin(
-        db,
-        admin_token
+def test_user_cannot_list_admin_orders(user_headers):
+    response = client.get(
+        "/admin/orders",
+        headers=user_headers
+    )
+
+    assert response.status_code == 403
+
+
+def test_admin_list_all_orders(
+    admin_headers,
+    user_headers,
+    product
+):
+    order_id = create_order_for_admin(
+        user_headers,
+        product
     )
 
     response = client.get(
         "/admin/orders",
-        headers=headers
+        headers=admin_headers
     )
 
     assert response.status_code == 200
@@ -145,17 +73,10 @@ def test_admin_list_all_orders(db, admin_token):
     assert data[0]["total"] == 100.0
 
 
-def test_admin_get_nonexistent_order(
-    db,
-    admin_token
-):
-    headers = {
-        "Authorization": f"Bearer {admin_token}"
-    }
-
+def test_admin_get_nonexistent_order(admin_headers):
     response = client.get(
         "/admin/orders/999999",
-        headers=headers
+        headers=admin_headers
     )
 
     assert response.status_code == 404
@@ -163,12 +84,13 @@ def test_admin_get_nonexistent_order(
 
 
 def test_admin_update_order_status_pending_to_paid(
-    db,
-    admin_token
+    admin_headers,
+    user_headers,
+    product
 ):
-    headers, order_id, product = create_order_for_admin(
-        db,
-        admin_token
+    order_id = create_order_for_admin(
+        user_headers,
+        product
     )
 
     response = client.patch(
@@ -176,7 +98,7 @@ def test_admin_update_order_status_pending_to_paid(
         json={
             "status": "PAGO"
         },
-        headers=headers
+        headers=admin_headers
     )
 
     assert response.status_code == 200
@@ -189,12 +111,13 @@ def test_admin_update_order_status_pending_to_paid(
 
 
 def test_admin_cannot_skip_order_status(
-    db,
-    admin_token
+    admin_headers,
+    user_headers,
+    product
 ):
-    headers, order_id, product = create_order_for_admin(
-        db,
-        admin_token
+    order_id = create_order_for_admin(
+        user_headers,
+        product
     )
 
     response = client.patch(
@@ -202,11 +125,10 @@ def test_admin_cannot_skip_order_status(
         json={
             "status": "ENVIADO"
         },
-        headers=headers
+        headers=admin_headers
     )
 
     assert response.status_code == 400
-
     assert response.json()["detail"] == (
         "Não é possível alterar o pedido de "
         "PENDENTE para ENVIADO."
@@ -214,12 +136,13 @@ def test_admin_cannot_skip_order_status(
 
 
 def test_admin_invalid_order_status(
-    db,
-    admin_token
+    admin_headers,
+    user_headers,
+    product
 ):
-    headers, order_id, product = create_order_for_admin(
-        db,
-        admin_token
+    order_id = create_order_for_admin(
+        user_headers,
+        product
     )
 
     response = client.patch(
@@ -227,34 +150,27 @@ def test_admin_invalid_order_status(
         json={
             "status": "QUALQUER_COISA"
         },
-        headers=headers
+        headers=admin_headers
     )
 
     assert response.status_code == 400
     assert response.json()["detail"] == "Status inválido."
 
 
-def test_admin_update_nonexistent_order_status(
-    db,
-    admin_token
-):
-    headers = {
-        "Authorization": f"Bearer {admin_token}"
-    }
-
+def test_admin_update_nonexistent_order_status(admin_headers):
     response = client.patch(
         "/admin/orders/999999/status",
         json={
             "status": "PAGO"
         },
-        headers=headers
+        headers=admin_headers
     )
 
     assert response.status_code == 404
     assert response.json()["detail"] == "Pedido não encontrado."
 
 
-def test_admin_list_users(db, admin_token):
+def test_admin_list_users(admin_headers):
     response = client.post(
         "/users",
         json={
@@ -266,13 +182,9 @@ def test_admin_list_users(db, admin_token):
 
     assert response.status_code == 200
 
-    headers = {
-        "Authorization": f"Bearer {admin_token}"
-    }
-
     response = client.get(
         "/admin/users",
-        headers=headers
+        headers=admin_headers
     )
 
     assert response.status_code == 200
@@ -287,7 +199,7 @@ def test_admin_list_users(db, admin_token):
     assert "admin@test.com" in emails
 
 
-def test_admin_get_user(db, admin_token):
+def test_admin_get_user(admin_headers, db):
     response = client.post(
         "/users",
         json={
@@ -307,13 +219,9 @@ def test_admin_get_user(db, admin_token):
 
     user = result.scalar_one()
 
-    headers = {
-        "Authorization": f"Bearer {admin_token}"
-    }
-
     response = client.get(
         f"/admin/users/{user.id}",
-        headers=headers
+        headers=admin_headers
     )
 
     assert response.status_code == 200
@@ -326,27 +234,17 @@ def test_admin_get_user(db, admin_token):
     assert data["role"] == "user"
 
 
-def test_admin_get_nonexistent_user(
-    db,
-    admin_token
-):
-    headers = {
-        "Authorization": f"Bearer {admin_token}"
-    }
-
+def test_admin_get_nonexistent_user(admin_headers):
     response = client.get(
         "/admin/users/999999",
-        headers=headers
+        headers=admin_headers
     )
 
     assert response.status_code == 404
     assert response.json()["detail"] == "Usuário não encontrado."
 
 
-def test_admin_promote_user(
-    db,
-    admin_token
-):
+def test_admin_promote_user(admin_headers, db):
     response = client.post(
         "/users",
         json={
@@ -366,16 +264,12 @@ def test_admin_promote_user(
 
     user = result.scalar_one()
 
-    headers = {
-        "Authorization": f"Bearer {admin_token}"
-    }
-
     response = client.patch(
         f"/admin/users/{user.id}/role",
         params={
             "role": "admin"
         },
-        headers=headers
+        headers=admin_headers
     )
 
     assert response.status_code == 200
@@ -391,10 +285,7 @@ def test_admin_promote_user(
     assert user.role == "admin"
 
 
-def test_admin_demote_user(
-    db,
-    admin_token
-):
+def test_admin_demote_user(admin_headers, db):
     response = client.post(
         "/users",
         json={
@@ -417,16 +308,12 @@ def test_admin_demote_user(
     user.role = "admin"
     db.commit()
 
-    headers = {
-        "Authorization": f"Bearer {admin_token}"
-    }
-
     response = client.patch(
         f"/admin/users/{user.id}/role",
         params={
             "role": "user"
         },
-        headers=headers
+        headers=admin_headers
     )
 
     assert response.status_code == 200
@@ -440,10 +327,7 @@ def test_admin_demote_user(
     assert user.role == "user"
 
 
-def test_admin_invalid_role(
-    db,
-    admin_token
-):
+def test_admin_invalid_role(admin_headers, db):
     response = client.post(
         "/users",
         json={
@@ -463,16 +347,12 @@ def test_admin_invalid_role(
 
     user = result.scalar_one()
 
-    headers = {
-        "Authorization": f"Bearer {admin_token}"
-    }
-
     response = client.patch(
         f"/admin/users/{user.id}/role",
         params={
             "role": "superadmin"
         },
-        headers=headers
+        headers=admin_headers
     )
 
     assert response.status_code == 400
@@ -480,8 +360,8 @@ def test_admin_invalid_role(
 
 
 def test_admin_cannot_remove_own_admin_role(
-    db,
-    admin_token
+    admin_headers,
+    db
 ):
     result = db.execute(
         select(User).where(
@@ -491,20 +371,15 @@ def test_admin_cannot_remove_own_admin_role(
 
     admin = result.scalar_one()
 
-    headers = {
-        "Authorization": f"Bearer {admin_token}"
-    }
-
     response = client.patch(
         f"/admin/users/{admin.id}/role",
         params={
             "role": "user"
         },
-        headers=headers
+        headers=admin_headers
     )
 
     assert response.status_code == 400
-
     assert response.json()["detail"] == (
         "Você não pode remover sua própria "
         "permissão de administrador."

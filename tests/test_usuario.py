@@ -16,8 +16,6 @@ def test_create_user():
         }
     )
 
-    print(response.json())
-
     assert response.status_code == 200
 
 
@@ -47,7 +45,7 @@ def test_create_user_invalid_password():
     assert response.status_code == 422
 
 
-def test_create_duplicate_user(db):
+def test_create_duplicate_user():
     response = client.post(
         "/users",
         json={
@@ -67,8 +65,6 @@ def test_create_duplicate_user(db):
             "password": "Pedro123@"
         }
     )
-
-    print(response.json())
 
     assert response.status_code == 400
 
@@ -130,7 +126,7 @@ def test_get_current_user():
         }
     )
 
-    response = client.post(
+    login = client.post(
         "/users/login",
         json={
             "email": "pedro@teste.com",
@@ -138,16 +134,13 @@ def test_get_current_user():
         }
     )
 
-    data = response.json()
-    token = data["access_token"]
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
+    token = login.json()["access_token"]
 
     response = client.get(
         "/users/me",
-        headers=headers
+        headers={
+            "Authorization": f"Bearer {token}"
+        }
     )
 
     assert response.status_code == 200

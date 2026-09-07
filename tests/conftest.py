@@ -1,17 +1,17 @@
+import pytest
+import os
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
-import pytest
 
 from main import app
 from database import get_db
 from models import Base, User, Category, Product
 from auth import create_token
 
+load_dotenv()
 
-DATABASE_URL_TEST = (
-    "postgresql+psycopg://postgres:minha_senha@localhost:5433/fastapi_produtos_test"
-)
+DATABASE_URL_TEST = os.getenv("DATABASE_URL_TEST")
 
 engine_test = create_engine(DATABASE_URL_TEST)
 

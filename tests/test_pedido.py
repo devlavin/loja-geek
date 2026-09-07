@@ -2,70 +2,26 @@ from fastapi.testclient import TestClient
 from sqlalchemy import select
 
 from main import app
-from models import Product, Category, Cart, User
+from models import Cart, User
 
 client = TestClient(app)
 
 
-def test_create_order(db):
-    response = client.post(
-        "/users",
-        json={
-            "name": "Pedro",
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    assert response.status_code == 200
-
-    login = client.post(
-        "/users/login",
-        json={
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    token = login.json()["access_token"]
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-
-    category = Category(
-        name="Geek"
-    )
-
-    db.add(category)
-    db.commit()
-    db.refresh(category)
-
-    product = Product(
-        name="Caneca Naruto",
-        price=50,
-        stock=10,
-        category_id=category.id
-    )
-
-    db.add(product)
-    db.commit()
-    db.refresh(product)
-
+def test_create_order(db, user_headers, product):
     response = client.post(
         "/cart",
         json={
             "product_id": product.id,
             "quantity": 2
         },
-        headers=headers
+        headers=user_headers
     )
 
     assert response.status_code == 200
 
     response = client.post(
         "/orders",
-        headers=headers
+        headers=user_headers
     )
 
     assert response.status_code == 200
@@ -105,72 +61,28 @@ def test_create_order(db):
     assert len(cart.items) == 0
 
 
-def test_list_orders(db):
-    response = client.post(
-        "/users",
-        json={
-            "name": "Pedro",
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    assert response.status_code == 200
-
-    login = client.post(
-        "/users/login",
-        json={
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    token = login.json()["access_token"]
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-
-    category = Category(
-        name="Geek"
-    )
-
-    db.add(category)
-    db.commit()
-    db.refresh(category)
-
-    product = Product(
-        name="Caneca Naruto",
-        price=50,
-        stock=10,
-        category_id=category.id
-    )
-
-    db.add(product)
-    db.commit()
-    db.refresh(product)
-
+def test_list_orders(user_headers, product):
     response = client.post(
         "/cart",
         json={
             "product_id": product.id,
             "quantity": 2
         },
-        headers=headers
+        headers=user_headers
     )
 
     assert response.status_code == 200
 
     response = client.post(
         "/orders",
-        headers=headers
+        headers=user_headers
     )
 
     assert response.status_code == 200
 
     response = client.get(
         "/orders",
-        headers=headers
+        headers=user_headers
     )
 
     assert response.status_code == 200
@@ -184,39 +96,10 @@ def test_list_orders(db):
     assert data[0]["total"] == "100.00"
 
 
-def test_get_order(db):
-    response = client.post(
-        "/users",
-        json={
-            "name": "Pedro Hall",
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    assert response.status_code == 200
-
-    login = client.post(
-        "/users/login",
-        json={
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    token = login.json()["access_token"]
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-
-    category = Category(
-        name="Dystopian"
-    )
-
-    db.add(category)
-    db.commit()
-    db.refresh(category)
+def test_get_order(user_headers, db, category):
+    # Esse teste precisa de um produto específico,
+    # então criamos ele usando a fixture de categoria.
+    from models import Product
 
     product = Product(
         name="Box Divergente",
@@ -235,14 +118,14 @@ def test_get_order(db):
             "product_id": product.id,
             "quantity": 1
         },
-        headers=headers
+        headers=user_headers
     )
 
     assert response.status_code == 200
 
     response = client.post(
         "/orders",
-        headers=headers
+        headers=user_headers
     )
 
     assert response.status_code == 200
@@ -253,7 +136,7 @@ def test_get_order(db):
 
     response = client.get(
         f"/orders/{order_id}",
-        headers=headers
+        headers=user_headers
     )
 
     assert response.status_code == 200

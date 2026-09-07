@@ -1,113 +1,45 @@
 from fastapi.testclient import TestClient
 
 from main import app
-from models import Category, Product
 
 client = TestClient(app)
 
 
-def test_get_nonexistent_order(db):
-    response = client.post(
-        "/users",
-        json={
-            "name": "Pedro",
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    assert response.status_code == 200
-
-    login = client.post(
-        "/users/login",
-        json={
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    assert login.status_code == 200
-
-    token = login.json()["access_token"]
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-
+def test_get_nonexistent_order(user_headers):
     response = client.get(
         "/orders/999",
-        headers=headers
+        headers=user_headers
     )
 
     assert response.status_code == 404
     assert response.json()["detail"] == "Pedido não encontrado."
 
 
-def test_user_cannot_get_another_users_order(db):
-    response = client.post(
-        "/users",
-        json={
-            "name": "Pedro",
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    assert response.status_code == 200
-
-    login_pedro = client.post(
-        "/users/login",
-        json={
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    assert login_pedro.status_code == 200
-
-    token_pedro = login_pedro.json()["access_token"]
-
-    headers_pedro = {
-        "Authorization": f"Bearer {token_pedro}"
-    }
-
-    category = Category(name="Geek")
-
-    db.add(category)
-    db.commit()
-    db.refresh(category)
-
-    product = Product(
-        name="Caneca Naruto",
-        price=50,
-        stock=10,
-        category_id=category.id
-    )
-
-    db.add(product)
-    db.commit()
-    db.refresh(product)
-
+def test_user_cannot_get_another_users_order(
+    user_headers,
+    product
+):
     response = client.post(
         "/cart",
         json={
             "product_id": product.id,
             "quantity": 2
         },
-        headers=headers_pedro
+        headers=user_headers
     )
 
     assert response.status_code == 200
 
     order = client.post(
         "/orders",
-        headers=headers_pedro
+        headers=user_headers
     )
 
     assert order.status_code == 200
 
     order_id = order.json()["id"]
 
+    # Create another user
     response = client.post(
         "/users",
         json={

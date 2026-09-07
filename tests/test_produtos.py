@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 
 from main import app
-from models import Product, Category
+from models import Product
 
 
 client = TestClient(app)
@@ -13,15 +13,7 @@ def test_list_products():
     assert response.status_code == 200
 
 
-def test_get_product(admin_token, db):
-    category = Category(
-        name="Chinelo"
-    )
-
-    db.add(category)
-    db.commit()
-    db.refresh(category)
-
+def test_get_product(admin_headers, db, category):
     product = Product(
         name="Chinelo Grifinoria",
         price=99.99,
@@ -33,27 +25,15 @@ def test_get_product(admin_token, db):
     db.commit()
     db.refresh(product)
 
-    headers = {
-        "Authorization": f"Bearer {admin_token}"
-    }
-
     response = client.get(
         f"/products/{product.id}",
-        headers=headers
+        headers=admin_headers
     )
 
     assert response.status_code == 200
 
 
-def test_create_product_in_database(db):
-    category = Category(
-        name="Category Test"
-    )
-
-    db.add(category)
-    db.commit()
-    db.refresh(category)
-
+def test_create_product_in_database(db, category):
     product = Product(
         name="Camiseta Teste",
         price=39.99,
@@ -71,19 +51,7 @@ def test_create_product_in_database(db):
     assert product.category_id == category.id
 
 
-def test_create_product(admin_token, db):
-    category = Category(
-        name="Harry Potter"
-    )
-
-    db.add(category)
-    db.commit()
-    db.refresh(category)
-
-    headers = {
-        "Authorization": f"Bearer {admin_token}"
-    }
-
+def test_create_product(admin_headers, category):
     response = client.post(
         "/products",
         json=[
@@ -94,21 +62,13 @@ def test_create_product(admin_token, db):
                 "category_id": category.id
             }
         ],
-        headers=headers
+        headers=admin_headers
     )
 
     assert response.status_code == 200
 
 
-def test_update_product_price(admin_token, db):
-    category = Category(
-        name="Jogos Vorazes"
-    )
-
-    db.add(category)
-    db.commit()
-    db.refresh(category)
-
+def test_update_product_price(admin_headers, db, category):
     product = Product(
         name="Caneca Snow",
         price=35.89,
@@ -120,30 +80,18 @@ def test_update_product_price(admin_token, db):
     db.commit()
     db.refresh(product)
 
-    headers = {
-        "Authorization": f"Bearer {admin_token}"
-    }
-
     response = client.patch(
         f"/products/{product.id}",
         json={
             "price": 39.99
         },
-        headers=headers
+        headers=admin_headers
     )
 
     assert response.status_code == 200
 
 
-def test_update_product_stock(admin_token, db):
-    category = Category(
-        name="Maze Runner"
-    )
-
-    db.add(category)
-    db.commit()
-    db.refresh(category)
-
+def test_update_product_stock(admin_headers, db, category):
     product = Product(
         name="Maze Runner: Correr ou Morrer",
         price=45.79,
@@ -155,30 +103,18 @@ def test_update_product_stock(admin_token, db):
     db.commit()
     db.refresh(product)
 
-    headers = {
-        "Authorization": f"Bearer {admin_token}"
-    }
-
     response = client.patch(
         f"/products/{product.id}/stock",
         json={
             "stock": 15
         },
-        headers=headers
+        headers=admin_headers
     )
 
     assert response.status_code == 200
 
 
-def test_delete_product(admin_token, db):
-    category = Category(
-        name="Percy Jackson"
-    )
-
-    db.add(category)
-    db.commit()
-    db.refresh(category)
-
+def test_delete_product(admin_headers, db, category):
     product = Product(
         name="Camiseta Tridente Poseidon",
         price=57.99,
@@ -192,13 +128,9 @@ def test_delete_product(admin_token, db):
 
     product_id = product.id
 
-    headers = {
-        "Authorization": f"Bearer {admin_token}"
-    }
-
     response = client.delete(
         f"/products/{product_id}",
-        headers=headers
+        headers=admin_headers
     )
 
     assert response.status_code == 200

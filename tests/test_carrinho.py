@@ -1,61 +1,18 @@
 from fastapi.testclient import TestClient
 
 from main import app
-from models import Category, Product
 
 client = TestClient(app)
 
 
-def test_add_product_to_cart(db):
-    response = client.post(
-        "/users",
-        json={
-            "name": "Pedro",
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    assert response.status_code == 200
-
-    login = client.post(
-        "/users/login",
-        json={
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    token = login.json()["access_token"]
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-
-    category = Category(name="Canecas")
-
-    db.add(category)
-    db.commit()
-    db.refresh(category)
-
-    product = Product(
-        name="Caneca Naruto",
-        price=50,
-        stock=10,
-        category_id=category.id
-    )
-
-    db.add(product)
-    db.commit()
-    db.refresh(product)
-
+def test_add_product_to_cart(user_headers, product):
     response = client.post(
         "/cart",
         json={
             "product_id": product.id,
             "quantity": 2
         },
-        headers=headers
+        headers=user_headers
     )
 
     assert response.status_code == 200
@@ -70,48 +27,9 @@ def test_add_product_to_cart(db):
     assert data["total"] == "100.00"
 
 
-def test_cannot_add_quantity_greater_than_stock(db):
-    response = client.post(
-        "/users",
-        json={
-            "name": "Pedro",
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    assert response.status_code == 200
-
-    login = client.post(
-        "/users/login",
-        json={
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    token = login.json()["access_token"]
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-
-    category = Category(name="Canecas")
-
-    db.add(category)
+def test_cannot_add_quantity_greater_than_stock(db, user_headers, product):
+    product.stock = 5
     db.commit()
-    db.refresh(category)
-
-    product = Product(
-        name="Caneca Naruto",
-        price=50,
-        stock=5,
-        category_id=category.id
-    )
-
-    db.add(product)
-    db.commit()
-    db.refresh(product)
 
     response = client.post(
         "/cart",
@@ -119,7 +37,7 @@ def test_cannot_add_quantity_greater_than_stock(db):
             "product_id": product.id,
             "quantity": 6
         },
-        headers=headers
+        headers=user_headers
     )
 
     assert response.status_code == 400
@@ -128,87 +46,23 @@ def test_cannot_add_quantity_greater_than_stock(db):
     )
 
 
-def test_add_nonexistent_product_to_cart():
-    response = client.post(
-        "/users",
-        json={
-            "name": "Pedro",
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    assert response.status_code == 200
-
-    login = client.post(
-        "/users/login",
-        json={
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    token = login.json()["access_token"]
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-
+def test_add_nonexistent_product_to_cart(user_headers):
     response = client.post(
         "/cart",
         json={
             "product_id": 9999,
             "quantity": 1
         },
-        headers=headers
+        headers=user_headers
     )
 
     assert response.status_code == 404
     assert response.json()["detail"] == "Produto não encontrado."
 
 
-def test_add_product_without_stock(db):
-    response = client.post(
-        "/users",
-        json={
-            "name": "Pedro",
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    assert response.status_code == 200
-
-    login = client.post(
-        "/users/login",
-        json={
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    token = login.json()["access_token"]
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-
-    category = Category(name="Canecas")
-
-    db.add(category)
+def test_add_product_without_stock(db, user_headers, product):
+    product.stock = 0
     db.commit()
-    db.refresh(category)
-
-    product = Product(
-        name="Caneca Naruto",
-        price=50,
-        stock=0,
-        category_id=category.id
-    )
-
-    db.add(product)
-    db.commit()
-    db.refresh(product)
 
     response = client.post(
         "/cart",
@@ -216,7 +70,7 @@ def test_add_product_without_stock(db):
             "product_id": product.id,
             "quantity": 1
         },
-        headers=headers
+        headers=user_headers
     )
 
     assert response.status_code == 400
@@ -225,132 +79,46 @@ def test_add_product_without_stock(db):
     )
 
 
-def test_cannot_add_duplicate_product_to_cart(db):
-    response = client.post(
-        "/users",
-        json={
-            "name": "Pedro",
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    assert response.status_code == 200
-
-    login = client.post(
-        "/users/login",
-        json={
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    token = login.json()["access_token"]
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-
-    category = Category(name="Canecas")
-
-    db.add(category)
-    db.commit()
-    db.refresh(category)
-
-    product = Product(
-        name="Caneca Naruto",
-        price=50,
-        stock=10,
-        category_id=category.id
-    )
-
-    db.add(product)
-    db.commit()
-    db.refresh(product)
-
-    # First time: should work
+def test_cannot_add_duplicate_product_to_cart(user_headers, product):
     response = client.post(
         "/cart",
         json={
             "product_id": product.id,
             "quantity": 2
         },
-        headers=headers
+        headers=user_headers
     )
 
     assert response.status_code == 200
 
-    # Second time: should not create another item
     response = client.post(
         "/cart",
         json={
             "product_id": product.id,
             "quantity": 1
         },
-        headers=headers
+        headers=user_headers
     )
 
     assert response.status_code == 400
     assert response.json()["detail"] == "Produto já está no carrinho."
 
 
-def test_get_cart(db):
-    response = client.post(
-        "/users",
-        json={
-            "name": "Pedro",
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    assert response.status_code == 200
-
-    login = client.post(
-        "/users/login",
-        json={
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    token = login.json()["access_token"]
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-
-    category = Category(name="Canecas")
-
-    db.add(category)
-    db.commit()
-    db.refresh(category)
-
-    product = Product(
-        name="Caneca Naruto",
-        price=50,
-        stock=10,
-        category_id=category.id
-    )
-
-    db.add(product)
-    db.commit()
-    db.refresh(product)
-
+def test_get_cart(user_headers, product):
     response = client.post(
         "/cart",
         json={
             "product_id": product.id,
             "quantity": 2
         },
-        headers=headers
+        headers=user_headers
     )
 
     assert response.status_code == 200
 
     response = client.get(
         "/cart",
-        headers=headers
+        headers=user_headers
     )
 
     assert response.status_code == 200
@@ -370,56 +138,14 @@ def test_get_cart(db):
     assert data["total"] == "100.00"
 
 
-def test_update_cart_quantity(db):
-    response = client.post(
-        "/users",
-        json={
-            "name": "Pedro",
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    assert response.status_code == 200
-
-    login = client.post(
-        "/users/login",
-        json={
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    token = login.json()["access_token"]
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-
-    category = Category(name="Canecas")
-
-    db.add(category)
-    db.commit()
-    db.refresh(category)
-
-    product = Product(
-        name="Caneca Naruto",
-        price=50,
-        stock=10,
-        category_id=category.id
-    )
-
-    db.add(product)
-    db.commit()
-    db.refresh(product)
-
+def test_update_cart_quantity(user_headers, product):
     response = client.post(
         "/cart",
         json={
             "product_id": product.id,
             "quantity": 2
         },
-        headers=headers
+        headers=user_headers
     )
 
     assert response.status_code == 200
@@ -429,7 +155,7 @@ def test_update_cart_quantity(db):
         params={
             "quantity": 5
         },
-        headers=headers
+        headers=user_headers
     )
 
     assert response.status_code == 200
@@ -440,56 +166,14 @@ def test_update_cart_quantity(db):
     assert data["quantity"] == 5
 
 
-def test_update_cart_quantity_to_zero(db):
-    response = client.post(
-        "/users",
-        json={
-            "name": "Pedro",
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    assert response.status_code == 200
-
-    login = client.post(
-        "/users/login",
-        json={
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    token = login.json()["access_token"]
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-
-    category = Category(name="Canecas")
-
-    db.add(category)
-    db.commit()
-    db.refresh(category)
-
-    product = Product(
-        name="Caneca Naruto",
-        price=50,
-        stock=10,
-        category_id=category.id
-    )
-
-    db.add(product)
-    db.commit()
-    db.refresh(product)
-
+def test_update_cart_quantity_to_zero(user_headers, product):
     client.post(
         "/cart",
         json={
             "product_id": product.id,
             "quantity": 2
         },
-        headers=headers
+        headers=user_headers
     )
 
     response = client.patch(
@@ -497,7 +181,7 @@ def test_update_cart_quantity_to_zero(db):
         params={
             "quantity": 0
         },
-        headers=headers
+        headers=user_headers
     )
 
     assert response.status_code == 400
@@ -506,64 +190,31 @@ def test_update_cart_quantity_to_zero(db):
     )
 
 
-def test_update_cart_quantity_greater_than_stock(db):
+def test_update_cart_quantity_greater_than_stock(
+    db,
+    user_headers,
+    product
+):
+    product.stock = 5
+    db.commit()
+
     response = client.post(
-        "/users",
-        json={
-            "name": "Pedro",
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    assert response.status_code == 200
-
-    login = client.post(
-        "/users/login",
-        json={
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    token = login.json()["access_token"]
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-
-    category = Category(name="Canecas")
-
-    db.add(category)
-    db.commit()
-    db.refresh(category)
-
-    product = Product(
-        name="Caneca Naruto",
-        price=50,
-        stock=5,
-        category_id=category.id
-    )
-
-    db.add(product)
-    db.commit()
-    db.refresh(product)
-
-    client.post(
         "/cart",
         json={
             "product_id": product.id,
             "quantity": 2
         },
-        headers=headers
+        headers=user_headers
     )
+
+    assert response.status_code == 200
 
     response = client.patch(
         f"/cart/{product.id}",
         params={
             "quantity": 6
         },
-        headers=headers
+        headers=user_headers
     )
 
     assert response.status_code == 400
@@ -572,61 +223,18 @@ def test_update_cart_quantity_greater_than_stock(db):
     )
 
 
-def test_update_product_not_in_cart(db):
-    response = client.post(
-        "/users",
-        json={
-            "name": "Pedro",
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    assert response.status_code == 200
-
-    login = client.post(
-        "/users/login",
-        json={
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    token = login.json()["access_token"]
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-
-    # Create an empty cart
+def test_update_product_not_in_cart(user_headers, product):
     client.get(
         "/cart",
-        headers=headers
+        headers=user_headers
     )
-
-    category = Category(name="Canecas")
-
-    db.add(category)
-    db.commit()
-    db.refresh(category)
-
-    product = Product(
-        name="Caneca Naruto",
-        price=50,
-        stock=10,
-        category_id=category.id
-    )
-
-    db.add(product)
-    db.commit()
-    db.refresh(product)
 
     response = client.patch(
         f"/cart/{product.id}",
         params={
             "quantity": 5
         },
-        headers=headers
+        headers=user_headers
     )
 
     assert response.status_code == 404
@@ -635,64 +243,21 @@ def test_update_product_not_in_cart(db):
     )
 
 
-def test_remove_product_from_cart(db):
-    response = client.post(
-        "/users",
-        json={
-            "name": "Pedro",
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    assert response.status_code == 200
-
-    login = client.post(
-        "/users/login",
-        json={
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    token = login.json()["access_token"]
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-
-    category = Category(name="Canecas")
-
-    db.add(category)
-    db.commit()
-    db.refresh(category)
-
-    product = Product(
-        name="Caneca Naruto",
-        price=50,
-        stock=10,
-        category_id=category.id
-    )
-
-    db.add(product)
-    db.commit()
-    db.refresh(product)
-
+def test_remove_product_from_cart(user_headers, product):
     response = client.post(
         "/cart",
         json={
             "product_id": product.id,
             "quantity": 2
         },
-        headers=headers
+        headers=user_headers
     )
 
     assert response.status_code == 200
 
-    # Remove product
     response = client.delete(
         f"/cart/{product.id}",
-        headers=headers
+        headers=user_headers
     )
 
     assert response.status_code == 200
@@ -702,7 +267,7 @@ def test_remove_product_from_cart(db):
 
     response = client.get(
         "/cart",
-        headers=headers
+        headers=user_headers
     )
 
     assert response.status_code == 200
@@ -710,57 +275,15 @@ def test_remove_product_from_cart(db):
     assert response.json()["total"] == "0"
 
 
-def test_remove_product_not_in_cart(db):
-    response = client.post(
-        "/users",
-        json={
-            "name": "Pedro",
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    assert response.status_code == 200
-
-    login = client.post(
-        "/users/login",
-        json={
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    token = login.json()["access_token"]
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-
+def test_remove_product_not_in_cart(user_headers, product):
     client.get(
         "/cart",
-        headers=headers
+        headers=user_headers
     )
-
-    category = Category(name="Canecas")
-
-    db.add(category)
-    db.commit()
-    db.refresh(category)
-
-    product = Product(
-        name="Caneca Naruto",
-        price=50,
-        stock=10,
-        category_id=category.id
-    )
-
-    db.add(product)
-    db.commit()
-    db.refresh(product)
 
     response = client.delete(
         f"/cart/{product.id}",
-        headers=headers
+        headers=user_headers
     )
 
     assert response.status_code == 404
@@ -769,35 +292,10 @@ def test_remove_product_not_in_cart(db):
     )
 
 
-def test_get_empty_cart():
-    response = client.post(
-        "/users",
-        json={
-            "name": "Pedro",
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    assert response.status_code == 200
-
-    login = client.post(
-        "/users/login",
-        json={
-            "email": "pedro@teste.com",
-            "password": "Pedro123@"
-        }
-    )
-
-    token = login.json()["access_token"]
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-
+def test_get_empty_cart(user_headers):
     response = client.get(
         "/cart",
-        headers=headers
+        headers=user_headers
     )
 
     assert response.status_code == 200
