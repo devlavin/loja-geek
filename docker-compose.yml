@@ -13,7 +13,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   api:
-    build: .
+    build: ./backend
     container_name: loja-geek-api
     restart: unless-stopped
     ports:
