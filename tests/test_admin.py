@@ -266,12 +266,10 @@ def test_admin_promote_user(admin_headers, db):
 
     response = client.patch(
         f"/admin/users/{user.id}/role",
-        params={
-            "role": "admin"
-        },
+        json={"role": "admin"},
         headers=admin_headers
     )
-
+    
     assert response.status_code == 200
 
     data = response.json()
@@ -310,7 +308,7 @@ def test_admin_demote_user(admin_headers, db):
 
     response = client.patch(
         f"/admin/users/{user.id}/role",
-        params={
+        json={
             "role": "user"
         },
         headers=admin_headers
@@ -349,14 +347,13 @@ def test_admin_invalid_role(admin_headers, db):
 
     response = client.patch(
         f"/admin/users/{user.id}/role",
-        params={
+        json={
             "role": "superadmin"
         },
         headers=admin_headers
     )
 
-    assert response.status_code == 400
-    assert response.json()["detail"] == "Role inválida."
+    assert response.status_code == 422
 
 
 def test_admin_cannot_remove_own_admin_role(
@@ -373,7 +370,7 @@ def test_admin_cannot_remove_own_admin_role(
 
     response = client.patch(
         f"/admin/users/{admin.id}/role",
-        params={
+        json={
             "role": "user"
         },
         headers=admin_headers

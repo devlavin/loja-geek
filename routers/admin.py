@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from database import get_db
 from models import Order, User
 from auth import get_current_admin
-from schema import UpdateStatusOrder
+from schema import UpdateStatusOrder, UpdateRole
 
 
 router = APIRouter(
@@ -208,7 +208,7 @@ def get_user_admin(
 @router.patch("/users/{user_id}/role")
 def update_user_role(
     user_id: int,
-    role: str,
+    data: UpdateRole,
     admin: User = Depends(get_current_admin),
     db: Session = Depends(get_db)
 ):
@@ -226,24 +226,13 @@ def update_user_role(
             detail="Usuário não encontrado."
         )
 
-    valid_roles = [
-        "user",
-        "admin"
-    ]
-
-    if role not in valid_roles:
-        raise HTTPException(
-            status_code=400,
-            detail="Role inválida."
-        )
-
-    if user.id == admin.id and role != "admin":
+    if user.id == admin.id and data.role != "admin":
         raise HTTPException(
             status_code=400,
             detail="Você não pode remover sua própria permissão de administrador."
         )
 
-    user.role = role
+    user.role = data.role
 
     db.commit()
     db.refresh(user)

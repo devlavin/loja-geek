@@ -18,6 +18,7 @@ router = APIRouter(
     "",
     response_model=CartResponse
 )
+
 def get_cart(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -31,25 +32,24 @@ def get_cart(
     cart = result.scalar_one_or_none()
 
     if cart is None:
-        new_cart = Cart(
-            user_id=user.id
-        )
-
-        db.add(new_cart)
-        db.commit()
-        db.refresh(new_cart)
-
-        cart = new_cart
+        return {
+            "id": None,
+            "items": [],
+            "total": 0
+        }
 
     items = []
 
     for item in cart.items:
-        subtotal = item.product.price * item.quantity
+        current_price = item.product.price
+        subtotal = current_price * item.quantity
 
         items.append({
             "product_id": item.product.id,
             "name": item.product.name,
-            "price": item.product.price,
+            "price": current_price,
+            "added_price": item.added_price,
+            "price_changed": item.added_price != current_price,
             "quantity": item.quantity,
             "subtotal": subtotal
         })
@@ -140,14 +140,17 @@ def add_to_cart(
     db.refresh(cart)
 
     items = []
-
+    
     for item in cart.items:
-        subtotal = item.product.price * item.quantity
+        current_price = item.product.price
+        subtotal = current_price * item.quantity
 
         items.append({
             "product_id": item.product.id,
             "name": item.product.name,
-            "price": item.product.price,
+            "price": current_price,
+            "added_price": item.added_price,
+            "price_changed": item.added_price != current_price,
             "quantity": item.quantity,
             "subtotal": subtotal
         })
@@ -185,7 +188,7 @@ def update_quantity(
     if cart is None:
         raise HTTPException(
             status_code=404,
-            detail="Carrinho não encontrado."
+            detail="Produto não está no carrinho."
         )
 
     # Procura o produto no carrinho
@@ -253,7 +256,7 @@ def remove_from_cart(
     if cart is None:
         raise HTTPException(
             status_code=404,
-            detail="Carrinho não encontrado."
+            detail="Produto não está no carrinho."
         )
 
     result = db.execute(

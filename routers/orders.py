@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from database import get_db
@@ -81,7 +81,20 @@ def create_order(
 
             db.add(order_item)
 
-            product.stock -= item["quantity"]
+            result = db.execute(
+                update(Product)
+                .where(
+                    Product.id == product.id,
+                    Product.stock >= item["quantity"]
+                )
+                .values(stock=Product.stock - item["quantity"])
+            )
+
+            if result.rowcount == 0:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Estoque insuficiente para o produto: {product.name}."
+                )
 
         for item in list(cart.items):
             db.delete(item)

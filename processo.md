@@ -1,107 +1,198 @@
-# 🐍 Projeto CRUD de products — FastAPI + PostgreSQL
+# 🛒 Loja Geek API — FastAPI + PostgreSQL
 
-## 📌 Sobre o projeto
+API REST de uma loja virtual desenvolvida com **Python, FastAPI, SQLAlchemy e PostgreSQL**.
 
-Este projeto começou como um CRUD simples de products desenvolvido em Python com FastAPI, inicialmente utilizando armazenamento em memória.
+O projeto começou como um CRUD simples de produtos armazenados em memória e evoluiu gradualmente para uma API de e-commerce com **autenticação JWT, autorização por roles, categorias, estoque, carrinho, pedidos, pagamento simulado, área administrativa, testes automatizados, Docker e Alembic**.
 
-O objetivo foi compreender, de forma progressiva, como construir uma API REST, validar dados, trabalhar com banco de dados, autenticação, autorização e regras de negócio.
+O principal objetivo do projeto foi aprender, na prática, como construir uma API backend estruturada e aplicar conceitos utilizados em aplicações reais.
 
-Após validar a lógica do CRUD em memória, o projeto foi evoluído para utilizar PostgreSQL com SQLAlchemy, tornando os dados persistentes e aproximando a aplicação de uma arquitetura utilizada em aplicações reais.
+---
 
-Atualmente, o projeto evoluiu de um simples CRUD de products para uma **API de uma loja virtual**, com usuários, autenticação, categorys, stock, cart, orders, pagamento simulado e área administrativa.
+# 📌 Sobre o projeto
+
+O projeto começou com uma API simples para praticar os fundamentos de:
+
+* Python;
+* FastAPI;
+* HTTP;
+* REST;
+* CRUD;
+* Pydantic;
+* validação de dados.
+
+Inicialmente, os produtos eram armazenados em uma lista em memória.
+
+Depois, a aplicação foi evoluída para utilizar **PostgreSQL através do SQLAlchemy**, permitindo persistência dos dados e introduzindo conceitos como:
+
+* banco de dados relacional;
+* Foreign Keys;
+* relacionamentos ORM;
+* sessões;
+* transações;
+* autenticação;
+* autorização;
+* regras de negócio.
+
+Atualmente, a aplicação representa uma API de uma **loja virtual**, com fluxo de produtos, usuários, carrinho, pedidos e administração.
+
+---
+
+# 🚀 Tecnologias utilizadas
+
+* **Python**
+* **FastAPI**
+* **Pydantic**
+* **SQLAlchemy**
+* **PostgreSQL**
+* **Psycopg**
+* **Alembic**
+* **JWT**
+* **bcrypt**
+* **pytest**
+* **Docker**
+* **Docker Compose**
+* **Git**
+* **GitHub**
+
+O FastAPI também fornece documentação interativa baseada em OpenAPI, disponível através do Swagger UI e ReDoc.
+
+---
+
+# 🏗️ Evolução do projeto
+
+A evolução aconteceu aproximadamente desta forma:
+
+```text
+CRUD em memória
+      ↓
+FastAPI + Pydantic
+      ↓
+PostgreSQL
+      ↓
+SQLAlchemy
+      ↓
+Categorias
+      ↓
+Estoque
+      ↓
+Usuários
+      ↓
+bcrypt
+      ↓
+JWT
+      ↓
+Autenticação e autorização
+      ↓
+Carrinho
+      ↓
+Pedidos
+      ↓
+Pagamento simulado
+      ↓
+Área administrativa
+      ↓
+Filtros e paginação
+      ↓
+Testes automatizados
+      ↓
+Alembic
+      ↓
+Docker
+```
 
 ---
 
 # 1. 🚀 Criação da API
 
-Comecei criando uma API utilizando FastAPI.
+O projeto começou com uma API utilizando FastAPI.
 
-A primeira rota criada foi:
+A primeira rota criada tinha como objetivo entender o funcionamento básico de uma API:
 
 ```python
 @app.get("/exemplo")
-def Exemplo_1():
+def exemplo():
     return "Hello World"
 ```
 
-O objetivo inicial foi entender:
+Essa etapa permitiu compreender:
 
-- como create uma API;
-- como create endpoints;
-- como utilizar métodos HTTP;
-- como o FastAPI processa requisições;
-- como retornar responses.
+* como criar uma API;
+* como criar endpoints;
+* como utilizar métodos HTTP;
+* como o FastAPI processa requisições;
+* como retornar respostas.
+
+O FastAPI utiliza type hints do Python para declaração de parâmetros, validação e geração automática da documentação OpenAPI.
 
 ---
 
-# 2. 📦 Criação do modelo de dados
+# 2. 📦 Criação dos schemas
 
-Utilizei Pydantic para definir e validar os dados dos products:
+O Pydantic foi utilizado para definir e validar os dados recebidos pela API.
+
+Um exemplo inicial era:
 
 ```python
 class Item(BaseModel):
-    id: int
     name: str
     price: float
 ```
 
-Cada product possuía inicialmente:
+Com a evolução do projeto, os schemas passaram a representar diferentes entidades da aplicação:
 
-- `id`
-- `name`
-- `price`
+* Product;
+* Category;
+* User;
+* Cart;
+* CartItem;
+* Order;
+* OrderItem.
 
-O Pydantic ficou responsável pela validação dos dados recebidos pela API.
+Também foram adicionadas validações específicas para preços, estoque, quantidade, email e senha.
 
 ---
 
-# 3. 💾 Criação do CRUD inicialmente em memória
+# 3. 💾 CRUD inicialmente em memória
 
-Antes de utilizar um banco de dados, criei uma lista para armazenar os products:
+Antes da utilização do PostgreSQL, os produtos eram armazenados em uma lista:
 
 ```python
 products = []
 ```
 
-Isso permitiu desenvolver e testar a lógica do CRUD sem depender inicialmente de um banco.
+Isso permitiu desenvolver a lógica do CRUD sem depender inicialmente de um banco de dados.
 
-Foram criadas as operações:
+Foram implementadas operações como:
 
 | Método | Endpoint         | Função          |
 | ------ | ---------------- | --------------- |
-| POST   | `/products`      | create products |
-| GET    | `/products`      | list products   |
-| GET    | `/products/{id}` | Buscar product  |
-| PATCH  | `/products/{id}` | update preço    |
-| DELETE | `/products/{id}` | Excluir product |
+| POST   | `/products`      | Criar produtos  |
+| GET    | `/products`      | Listar produtos |
+| GET    | `/products/{id}` | Buscar produto  |
+| PATCH  | `/products/{id}` | Atualizar preço |
+| DELETE | `/products/{id}` | Excluir produto |
 
-Essa etapa foi importante para entender primeiro a lógica da aplicação antes de introduzir persistência.
+Essa etapa foi importante para compreender primeiro a lógica da aplicação antes de adicionar persistência.
 
 ---
 
-# 4. 📚 Cadastro de vários products
+# 4. 📚 Cadastro de vários produtos
 
-Inicialmente o endpoint recebia apenas um product.
+O endpoint de criação foi posteriormente alterado para permitir o cadastro de vários produtos em uma única requisição.
 
-Depois alterei para aceitar vários products de uma vez:
+Exemplo:
 
 ```python
 @app.post("/products")
-def createProd(items: list[Item]):
+def create_products(items: list[Item]):
+    ...
 ```
 
-Utilizei um `for` para percorrer os products:
-
-```python
-for item in items:
-    products.append(item)
-```
-
-Isso permitiu enviar vários products em uma única requisição.
+A aplicação percorre os itens recebidos e realiza os respectivos cadastros.
 
 ---
 
-# 5. 🔎 Busca de product por ID
+# 5. 🔎 Busca de produto por ID
 
 Foi criado o endpoint:
 
@@ -109,47 +200,48 @@ Foi criado o endpoint:
 GET /products/{id}
 ```
 
-A rota procura o product pelo ID informado.
+A rota procura o produto pelo ID informado.
 
-Também implementei tratamento de erro:
+Quando o produto não existe, a API retorna:
 
-```python
-raise HTTPException(
-    status_code=404,
-    detail="product não encontrado."
-)
+```text
+HTTP 404
 ```
 
-Assim, quando um product não existe, a API retorna HTTP 404.
+com uma resposta indicando que o produto não foi encontrado.
 
 ---
 
 # 6. 🗄️ Introdução do PostgreSQL
 
-Depois que o CRUD em memória estava funcionando, decidi substituir a lista pelo PostgreSQL.
+Depois que o CRUD em memória estava funcionando, a aplicação foi migrada para PostgreSQL.
 
-Foi criado o banco:
+O banco passou a armazenar permanentemente os dados da aplicação.
 
-```text
-fastapi_products
-```
-
-Também foi configurado um ambiente virtual:
+O projeto utiliza:
 
 ```text
-.venv
+Python
+   ↓
+FastAPI
+   ↓
+SQLAlchemy
+   ↓
+Psycopg
+   ↓
+PostgreSQL
 ```
 
-E instaladas as principais dependências:
+As informações de conexão são armazenadas através de variáveis de ambiente.
 
-- FastAPI
-- SQLAlchemy
-- Psycopg
-- python-dotenv
-- bcrypt
-- PyJWT
+Exemplo:
 
-O `psycopg` foi utilizado como driver para comunicação entre Python/SQLAlchemy e PostgreSQL.
+```env
+DATABASE_URL=...
+JWT_SECRET_KEY=...
+```
+
+O arquivo `.env` não deve ser versionado.
 
 ---
 
@@ -161,29 +253,23 @@ Foi criado o arquivo:
 database.py
 ```
 
-Nele foi configurado o engine:
+Nele é configurado o engine:
 
 ```python
 engine = create_engine(DATABASE_URL)
 ```
 
-A conexão utiliza:
+Também foi criada uma fábrica de sessões:
 
-```text
-Python
-   ↓
-SQLAlchemy
-   ↓
-Psycopg
-   ↓
-PostgreSQL
-   ↓
-fastapi_products
+```python
+SessionLocal = sessionmaker(
+    bind=engine,
+    autocommit=False,
+    autoflush=False,
+)
 ```
 
-Também foi criada uma `SessionLocal` para trabalhar com sessões do banco.
-
-As informações sensíveis de conexão foram colocadas em variáveis de ambiente através do `.env`.
+A conexão com o banco passou a ser disponibilizada através de uma dependência do FastAPI.
 
 ---
 
@@ -195,50 +281,69 @@ Foi criado o arquivo:
 models.py
 ```
 
-A Base do SQLAlchemy foi definida utilizando:
+A Base do SQLAlchemy utiliza:
 
 ```python
 class Base(DeclarativeBase):
     pass
 ```
 
-Inicialmente foi criado o model `product`.
+Os principais models atuais são:
 
-Com a evolução do projeto, novos models foram adicionados:
-
-- `product`
-- `category`
-- `user`
-- `cart`
-- `Itemcart`
-- `order`
-- `orderItem`
-
----
-
-# 9. 🏗️ Criação automática das tabelas
-
-Foi utilizado:
-
-```python
-Base.metadata.create_all(bind=engine)
+```text
+Product
+Category
+User
+Cart
+CartItem
+Order
+OrderItem
 ```
 
-Com isso, o SQLAlchemy consegue create tabelas que ainda não existem no banco com base nos models.
+---
 
-A estrutura do banco passou a representar as entidades da aplicação.
+# 9. 🗃️ Estrutura atual do banco
 
-> Observação: `create_all()` cria tabelas novas, mas não funciona como um sistema completo de migrações para alterações em tabelas existentes. Por isso, alterações posteriores foram realizadas manualmente no PostgreSQL. No futuro, o projeto deverá utilizar Alembic para migrations.
+O PostgreSQL atualmente possui as seguintes entidades:
+
+```text
+categories
+users
+products
+carts
+cart_items
+orders
+order_items
+```
+
+Os relacionamentos principais são:
+
+```text
+Category
+   │
+   └── Products
+
+
+User
+   │
+   ├── Cart
+   │     └── CartItems
+   │             └── Products
+   │
+   └── Orders
+          └── OrderItems
+                  └── Products
+```
 
 ---
 
-# 10. 🔄 Criação da Session
+# 10. 🔄 Session do banco
 
-Foi criada a função:
+Foi criada a dependência:
 
 ```python
 def get_db():
-    db = SessionLocal()
+    db: Session = SessionLocal()
 
     try:
         yield db
@@ -246,19 +351,17 @@ def get_db():
         db.close()
 ```
 
-Ela permite que o FastAPI forneça uma sessão do banco para cada requisição e depois feche essa sessão.
-
 Nas rotas:
 
 ```python
 db: Session = Depends(get_db)
 ```
 
-O `Depends()` permite que o FastAPI injete automaticamente a sessão.
+O `Depends()` permite que o FastAPI injete automaticamente a sessão necessária para cada requisição.
 
 ---
 
-# 11. 📥 Migração do POST para PostgreSQL
+# 11. 📥 Persistência dos produtos
 
 O cadastro deixou de utilizar:
 
@@ -266,10 +369,10 @@ O cadastro deixou de utilizar:
 products.append(item)
 ```
 
-e passou a create objetos SQLAlchemy:
+e passou a criar objetos SQLAlchemy:
 
 ```python
-product = product(
+product = Product(
     name=item.name,
     price=item.price,
     stock=item.stock,
@@ -284,13 +387,11 @@ db.add(product)
 db.commit()
 ```
 
-Assim, os products passaram a ser armazenados permanentemente no PostgreSQL.
-
-Durante o desenvolvimento também foram cadastrados products de teste, incluindo livros da saga Jogos Vorazes 😂📚.
+Os produtos passaram então a ser persistidos no PostgreSQL.
 
 ---
 
-# 12. 📤 Migração do GET
+# 12. 📤 Consulta de produtos
 
 O endpoint:
 
@@ -298,132 +399,130 @@ O endpoint:
 GET /products
 ```
 
-passou a consultar o banco:
+passou a consultar diretamente o banco utilizando SQLAlchemy:
 
 ```python
-resultado = db.execute(select(product))
+result = db.execute(
+    select(Product)
+)
 ```
 
-E os registros foram convertidos para uma lista:
+Os objetos são obtidos através de:
 
 ```python
-products = resultado.scalars().all()
+products = result.scalars().all()
 ```
 
 ---
 
-# 13. 🔎 Migração do GET por ID
+# 13. 🔎 Consulta de produto por ID
 
-Para buscar um product específico:
+A busca individual utiliza:
 
 ```python
-resultado = db.execute(
-    select(product).where(product.id == id)
+result = db.execute(
+    select(Product).where(Product.id == id)
 )
 ```
 
 Depois:
 
 ```python
-product = resultado.scalar_one_or_none()
+product = result.scalar_one_or_none()
 ```
 
-Caso o product não exista:
+Caso o produto não exista:
 
 ```python
 raise HTTPException(
     status_code=404,
-    detail="product não encontrado."
+    detail="Product not found."
 )
 ```
 
 ---
 
-# 14. ✏️ Migração do PATCH
+# 14. ✏️ Atualização de preço
 
-Foi criado um schema específico para atualização de preço:
+Foi criado um schema específico:
 
 ```python
-class updatePreco(BaseModel):
+class UpdatePrice(BaseModel):
     price: Decimal = Field(gt=0)
 ```
 
-A API busca o product pelo ID e altera somente o preço:
+Isso garante que o preço seja maior que zero.
+
+A atualização modifica somente o campo de preço:
 
 ```python
 product.price = item.price
 ```
 
-Depois confirma a alteração:
+Depois:
 
 ```python
 db.commit()
 ```
 
-Dessa forma, o PATCH possui uma responsabilidade específica e não permite alterar outros campos acidentalmente.
-
 ---
 
-# 15. 🗑️ Migração do DELETE
+# 15. 🗑️ Exclusão de produtos
 
-O DELETE também passou a trabalhar diretamente com o banco.
-
-Primeiro o product é localizado:
+O produto é localizado através do SQLAlchemy:
 
 ```python
-resultado = db.execute(
-    select(product).where(product.id == id)
+result = db.execute(
+    select(Product).where(Product.id == id)
 )
 ```
 
 Depois:
 
 ```python
-product = resultado.scalar_one_or_none()
+product = result.scalar_one_or_none()
 ```
 
-Se existir:
+Quando autorizado:
 
 ```python
 db.delete(product)
 db.commit()
 ```
 
-O registro é removido do PostgreSQL.
+A exclusão é protegida por autorização administrativa.
 
 ---
 
-# 16. 🏷️ Criação de categorys
+# 16. 🏷️ Categorias
 
-O projeto evoluiu para trabalhar com categorys de products.
+O projeto passou a trabalhar com categorias de produtos.
 
 Foi criado o model:
 
 ```text
-category
+Category
 ```
 
-E estabelecida uma relação:
+Um relacionamento de um-para-muitos foi estabelecido:
 
 ```text
-category
-    │
-    └── vários products
+Category
+   │
+   ├── Product
+   ├── Product
+   └── Product
 ```
 
-No product foi adicionada:
+No produto:
 
 ```python
-category_id
+category_id = mapped_column(
+    ForeignKey("categories.id")
+)
 ```
 
-utilizando uma Foreign Key:
-
-```python
-ForeignKey("categorys.id")
-```
-
-Também foi criada a relação ORM:
+E no relacionamento ORM:
 
 ```python
 category = relationship(
@@ -431,7 +530,7 @@ category = relationship(
 )
 ```
 
-Enquanto a category possui:
+A categoria possui:
 
 ```python
 products = relationship(
@@ -439,43 +538,35 @@ products = relationship(
 )
 ```
 
-Isso permite navegar entre category e products utilizando o SQLAlchemy.
-
 ---
 
-# 17. 📦 Controle de stock
+# 17. 📦 Controle de estoque
 
-Os products passaram a possuir:
+Os produtos possuem:
 
 ```python
 stock: Mapped[int]
 ```
 
-Também foi criado um endpoint específico para atualização:
+O estoque não pode ser negativo.
 
-```text
-PATCH /products/{id}/stock
-```
-
-Foi criado o schema:
+O schema utilizado para atualização é:
 
 ```python
-class updatestock(BaseModel):
+class UpdateStock(BaseModel):
     stock: int = Field(ge=0)
 ```
 
-Assim, o stock não pode receber valores negativos.
-
-O stock também passou a ser considerado nas operações do cart e na criação de orders.
+Também foram implementadas verificações de estoque durante operações do carrinho e criação de pedidos.
 
 ---
 
-# 18. 🔐 Cadastro de usuários
+# 18. 👤 Cadastro de usuários
 
 Foi criado o model:
 
 ```text
-user
+User
 ```
 
 com os principais campos:
@@ -488,77 +579,70 @@ password_hash
 role
 ```
 
-O email foi configurado como único:
+O email possui restrição de unicidade:
 
 ```python
 unique=True
 ```
 
-Isso impede o cadastro de dois usuários utilizando o mesmo email.
+Isso impede que dois usuários utilizem o mesmo email.
 
 ---
 
-# 19. 🔒 Hash e validação de password com bcrypt
+# 19. 🔐 Validação e hash de senha
 
-A password não é armazenada diretamente no banco.
+A senha não é armazenada diretamente no banco.
 
-Durante o cadastro, primeiro a password passa pelas validações do Pydantic.
+Durante o cadastro, o Pydantic valida a senha.
 
-A password precisa possuir:
+Regras:
 
-- pelo menos 8 caracteres;
-- pelo menos uma letra maiúscula;
-- pelo menos um número;
-- pelo menos um caractere especial.
+* mínimo de 8 caracteres;
+* pelo menos uma letra maiúscula;
+* pelo menos um número;
+* pelo menos um caractere especial.
 
-Exemplo de password válida:
+Exemplo:
 
 ```text
 Lavinha123!
 ```
 
-Depois da validação, a password passa pelo bcrypt:
-
-```python
-password_hash = bcrypt.hashpw(
-    user.password.encode("utf-8"),
-    bcrypt.gensalt()
-).decode("utf-8")
-```
-
-O banco armazena apenas o hash:
+Fluxo:
 
 ```text
-password original
-      ↓
-validação
-      ↓
-   bcrypt
-      ↓
+Senha
+  ↓
+Validação
+  ↓
+bcrypt
+  ↓
 password_hash
+  ↓
+PostgreSQL
 ```
 
-Durante o login, a password informada é comparada com o hash utilizando:
+Durante o login, a senha fornecida é comparada com o hash através de:
 
 ```python
 bcrypt.checkpw()
 ```
 
-A password em texto puro nunca é armazenada no banco.
+A senha em texto puro nunca é armazenada no banco.
 
 ---
 
 # 20. 📧 Validação de email
 
-O cadastro e o login passaram a utilizar validação de email através do Pydantic:
+O cadastro utiliza:
 
 ```python
 email: EmailStr
 ```
 
-Assim, a API rejeita valores que não possuem formato válido de email antes de continuar o processamento.
+O Pydantic valida o formato do email antes que a aplicação continue o processamento.
 
-Além da validação do formato, o banco continua garantindo que o email seja único.
+Além disso, o banco garante a unicidade do endereço.
 
 ---
 
@@ -572,11 +656,7 @@ Endpoint:
 POST /users/login
 ```
 
-Após validar email e password, a API gera um token:
-
-```python
-token = create_token(user_db.id)
-```
+Depois de validar as credenciais, a API gera um token.
 
 O token contém informações como:
 
@@ -585,13 +665,13 @@ sub → ID do usuário
 exp → data de expiração
 ```
 
-O token possui tempo de expiração configurado.
+O token possui tempo de expiração configurado através das configurações da aplicação.
 
 ---
 
 # 22. 🪪 Autenticação com Bearer Token
 
-Foi utilizado `HTTPBearer` para autenticação.
+A autenticação utiliza Bearer Token.
 
 O cliente envia:
 
@@ -599,7 +679,7 @@ O cliente envia:
 Authorization: Bearer TOKEN
 ```
 
-A função:
+A dependência:
 
 ```python
 get_current_user()
@@ -609,31 +689,31 @@ get_current_user()
 
 1. receber o token;
 2. validar o JWT;
-3. verificar a expiração;
+3. verificar sua expiração;
 4. obter o ID do usuário;
-5. procurar o usuário no banco;
+5. consultar o usuário no banco;
 6. retornar o usuário autenticado.
 
-Foi criado também:
+Também existe:
 
 ```python
 get_current_admin()
 ```
 
-que utiliza `get_current_user()` e verifica a função do usuário.
+para operações que exigem privilégios administrativos.
 
 ---
 
-# 23. 👤 Usuários e permissões
+# 23. 👥 Roles e autorização
 
-O projeto passou a utilizar dois tipos de usuário:
+A aplicação possui dois tipos principais de usuário:
 
 ```text
 user
 admin
 ```
 
-A diferença é baseada no campo:
+O tipo é definido pelo campo:
 
 ```text
 role
@@ -643,26 +723,26 @@ role
 
 Pode:
 
-- get products;
-- get categorys;
-- utilizar o cart;
-- realizar compras;
-- get seus próprios orders.
+* consultar produtos;
+* consultar categorias;
+* utilizar o carrinho;
+* realizar compras;
+* consultar seus próprios pedidos.
 
 ### Administrador
 
-Pode realizar todas as operações do usuário comum e também:
+Além das permissões de usuário comum, pode:
 
-- create products;
-- alterar products;
-- excluir products;
-- alterar stock;
-- create categorys;
-- alterar categorys;
-- excluir categorys;
-- gerenciar orders;
-- get usuários;
-- alterar permissões de usuários.
+* criar produtos;
+* atualizar produtos;
+* excluir produtos;
+* alterar estoque;
+* criar categorias;
+* atualizar categorias;
+* excluir categorias;
+* gerenciar pedidos;
+* consultar usuários;
+* alterar roles de usuários.
 
 A autorização utiliza:
 
@@ -670,33 +750,39 @@ A autorização utiliza:
 Depends(get_current_admin)
 ```
 
-Enquanto operações que exigem apenas login utilizam:
+Enquanto endpoints que exigem apenas autenticação utilizam:
 
 ```python
 Depends(get_current_user)
 ```
 
-Também foi aplicada a separação entre:
+A API diferencia:
 
 ```text
-401 → não autenticado / token inválido
+401 → não autenticado ou token inválido
+
 403 → autenticado, mas sem permissão
 ```
 
 ---
 
-# 24. 🛒 Criação do cart
+# 24. 🛒 Carrinho
 
-O projeto agora possui um sistema de cart.
-
-Foram criados dois models:
+Foram criados os models:
 
 ```text
-cart
+Cart
+CartItem
+```
+
+Estrutura:
+
+```text
+Cart
 ├── id
 └── user_id
 
-Itemcart
+CartItem
 ├── id
 ├── cart_id
 ├── product_id
@@ -704,7 +790,7 @@ Itemcart
 └── added_price
 ```
 
-Cada usuário possui um único cart através de:
+Cada usuário possui um único carrinho:
 
 ```python
 user_id = mapped_column(
@@ -713,56 +799,40 @@ user_id = mapped_column(
 )
 ```
 
-A relação ficou:
+---
 
-```text
-Usuário
-   ↓
-cart
-   ↓
-items do cart
-   ↓
-products
-```
+# 25. 🛍️ Operações do carrinho
 
-O campo `added_price` guarda o preço do product no momento em que ele foi colocado no cart.
+Principais endpoints:
 
-Isso permite detectar alterações de preço enquanto o product permanece no cart.
+| Método | Endpoint             | Função             |
+| ------ | -------------------- | ------------------ |
+| GET    | `/cart`              | Consultar carrinho |
+| POST   | `/cart`              | Adicionar produto  |
+| PATCH  | `/cart/{product_id}` | Alterar quantidade |
+| DELETE | `/cart/{product_id}` | Remover produto    |
+
+Todos os endpoints do carrinho exigem autenticação.
 
 ---
 
-# 25. 🛍️ Operações do cart
+# 26. ➕ Regra para adicionar produtos
 
-Foram criados os principais endpoints:
-
-| Método | Endpoint             | Função            |
-| ------ | -------------------- | ----------------- |
-| GET    | `/cart`              | get cart          |
-| POST   | `/cart`              | Adicionar product |
-| PATCH  | `/cart/{product_id}` | Alterar quantity  |
-| DELETE | `/cart/{product_id}` | Remover product   |
-
-Todos exigem um usuário autenticado.
-
----
-
-# 26. ➕ Regra para adicionar products
-
-Ao adicionar um product, a API verifica:
+Ao adicionar um produto, a API verifica:
 
 1. se o usuário está autenticado;
-2. se o cart existe;
-3. se o product existe;
-4. se existe stock suficiente;
-5. se o product já está no cart.
+2. se o carrinho existe;
+3. se o produto existe;
+4. se existe estoque suficiente;
+5. se o produto já está no carrinho.
 
-Um mesmo product **não pode aparecer duplicado no cart**.
+Um mesmo produto **não pode aparecer duplicado no carrinho**.
 
-A quantity é controlada pelo endpoint de alteração de quantity.
+Quando o produto já existe, sua quantidade deve ser atualizada através da operação específica de quantidade.
 
 ---
 
-# 27. 🔢 Alteração de quantity
+# 27. 🔢 Controle de quantidade
 
 O endpoint:
 
@@ -770,21 +840,17 @@ O endpoint:
 PATCH /cart/{product_id}
 ```
 
-permite alterar a quantity de um product.
+permite alterar a quantidade.
 
-A quantity precisa ser maior que zero:
+A quantidade deve ser maior que zero.
 
-```python
-quantity > 0
-```
+Além disso, o estoque é verificado novamente.
 
-Também é feita uma nova verificação do stock.
-
-Assim, o usuário não consegue colocar no cart uma quantity maior que o stock disponível.
+Isso impede que o usuário mantenha no carrinho uma quantidade superior ao estoque disponível.
 
 ---
 
-# 28. 🗑️ Remoção de products do cart
+# 28. 🗑️ Remoção do carrinho
 
 O endpoint:
 
@@ -792,40 +858,36 @@ O endpoint:
 DELETE /cart/{product_id}
 ```
 
-localiza o item pertencente ao cart do usuário e o remove.
+remove o item pertencente ao carrinho do usuário autenticado.
 
-A operação não interfere no cart de outros usuários.
+Um usuário não consegue remover itens do carrinho de outro usuário.
 
 ---
 
 # 29. 💰 Valores monetários com Decimal
 
-Inicialmente os valores monetários utilizavam `float`.
-
-Para evitar problemas de precisão com dinheiro, os valores foram alterados para `Decimal` na aplicação e `NUMERIC(10,2)` no PostgreSQL.
-
-No SQLAlchemy, os campos monetários utilizam:
-
-```python
-Numeric(10, 2)
-```
-
-Os principais campos são:
-
-```text
-product.price
-Itemcart.added_price
-order.total
-orderItem.preco
-```
-
-No Pydantic, os valores passaram a utilizar:
+Para evitar problemas de precisão relacionados ao uso de `float`, os valores monetários passaram a utilizar:
 
 ```python
 Decimal
 ```
 
-O fluxo ficou:
+Na camada do banco:
+
+```python
+Numeric(10, 2)
+```
+
+Os principais campos monetários são:
+
+```text
+Product.price
+CartItem.added_price
+Order.total
+OrderItem.price
+```
+
+Fluxo:
 
 ```text
 API
@@ -834,61 +896,55 @@ Decimal
  ↓
 SQLAlchemy Numeric(10,2)
  ↓
-PostgreSQL numeric(10,2)
+PostgreSQL NUMERIC(10,2)
 ```
-
-Foi testado o cálculo de subtotais e totais dos orders com valores decimais, confirmando que os cálculos permanecem corretos.
 
 ---
 
-# 30. 💵 Preço, subtotal e total do cart
+# 30. 💵 Preço, subtotal e total
 
-Cada item do cart possui:
+Os itens do carrinho possuem informações como:
 
 ```text
 product_id
 name
-preco
+price
+added_price
 quantity
 subtotal
+price_changed
 ```
 
-O subtotal é calculado:
+O subtotal é calculado com base no preço atual do produto:
 
 ```python
 subtotal = item.product.price * item.quantity
 ```
 
-E o total do cart:
+O total é calculado a partir dos subtotais.
 
-```python
-total = sum(item["subtotal"] for item in items)
-```
-
-O preço utilizado para o cálculo vem do banco de dados, e não de um valor enviado pelo frontend.
-
-Além disso, o sistema mantém o preço no momento em que o item foi adicionado ao cart através de:
+O campo:
 
 ```text
 added_price
 ```
 
-Dessa forma, é possível detectar alterações posteriores no preço.
+mantém o preço registrado no momento em que o produto foi adicionado ao carrinho.
+
+Isso permite detectar alterações posteriores de preço.
 
 ---
 
-# 31. 📦 Criação de orders
+# 31. 📦 Criação de pedidos
 
-O projeto passou a possuir os models:
+Foram criados os models:
 
 ```text
-order
-orderItem
+Order
+OrderItem
 ```
 
-A estrutura permite armazenar:
-
-### order
+### Order
 
 ```text
 id
@@ -897,50 +953,50 @@ status
 total
 ```
 
-### orderItem
+### OrderItem
 
 ```text
 id
 order_id
 product_id
 quantity
-preco
+price
 ```
 
-O order é criado a partir do cart.
+O pedido é criado a partir do carrinho.
 
 Durante a criação:
 
-1. o cart do usuário é localizado;
-2. é verificado se existem items;
-3. o stock atual é verificado novamente;
-4. o preço atual do product é utilizado;
-5. o order é criado;
-6. os items são registrados;
-7. o stock é diminuído;
-8. os items do cart são removidos;
+1. o carrinho do usuário é localizado;
+2. verifica-se se existem itens;
+3. o estoque atual é verificado novamente;
+4. o preço atual dos produtos é utilizado;
+5. o pedido é criado;
+6. os itens do pedido são registrados;
+7. o estoque é reduzido;
+8. os itens do carrinho são removidos;
 9. a transação é confirmada.
 
-O preço armazenado em `orderItem.preco` representa o preço no momento da compra.
+O preço armazenado em `OrderItem.price` representa o preço no momento da compra.
 
-Isso permite que o histórico do order continue correto mesmo que o preço do product seja alterado posteriormente.
+Dessa forma, alterações futuras no preço do produto não alteram o histórico do pedido.
 
 ---
 
-# 32. 🧾 Visualização de orders
+# 32. 🧾 Consulta de pedidos
 
-O usuário possui acesso aos seus próprios orders.
+O usuário pode consultar seus próprios pedidos.
 
-Foram implementados:
+Endpoints:
 
 ```text
 GET /orders
 GET /orders/{order_id}
 ```
 
-O sistema garante que o usuário só consiga acessar orders pertencentes a ele.
+A API garante que o usuário só consiga acessar pedidos pertencentes a ele.
 
-A response contém:
+A resposta contém:
 
 ```text
 id
@@ -955,7 +1011,7 @@ Cada item apresenta:
 product_id
 name
 quantity
-preco
+price
 subtotal
 ```
 
@@ -963,15 +1019,15 @@ subtotal
 
 # 33. 💳 Pagamento simulado
 
-Não foi utilizado um gateway de pagamento real.
+O projeto não utiliza um gateway de pagamento real.
 
-Foi implementado um pagamento simulado através de:
+Foi implementado um fluxo de pagamento simulado:
 
 ```text
 POST /orders/{order_id}/pay
 ```
 
-O order só pode ser pago quando estiver:
+Um pedido só pode ser pago quando estiver:
 
 ```text
 PENDENTE
@@ -985,13 +1041,13 @@ PENDENTE
 PAGO
 ```
 
-O pagamento não movimenta dinheiro real.
+Nenhuma transação financeira real é realizada.
 
 ---
 
-# 34. 🔄 Status dos orders
+# 34. 🔄 Status dos pedidos
 
-Foi estabelecido um fluxo de status:
+O fluxo de status implementado é:
 
 ```text
 PENDENTE
@@ -1003,14 +1059,13 @@ ENVIADO
 ENTREGUE
 ```
 
-Também existe a possibilidade de cancelamento:
+Também existe cancelamento:
 
 ```text
 PENDENTE → CANCELADO
-PAGO     → CANCELADO
-```
 
-O administrador não pode realizar transições arbitrárias.
+PAGO → CANCELADO
+```
 
 As transições válidas são:
 
@@ -1024,9 +1079,9 @@ PAGO → CANCELADO
 ENVIADO → ENTREGUE
 ```
 
-orders `ENTREGUE` ou `CANCELADO` não podem avançar para outro status.
+Pedidos `ENTREGUE` ou `CANCELADO` não podem avançar para outro status.
 
-Quando um order é cancelado, os products são devolvidos ao stock.
+Quando um pedido é cancelado, os produtos são devolvidos ao estoque.
 
 ---
 
@@ -1038,9 +1093,9 @@ O endpoint:
 GET /products
 ```
 
-foi expandido para permitir filtros.
+possui filtros e paginação.
 
-É possível utilizar:
+Parâmetros disponíveis:
 
 ```text
 name
@@ -1071,31 +1126,15 @@ Os filtros podem ser combinados:
 /products?name=harry&category=livros&min_price=30
 ```
 
-A category é pesquisada pelo **name**, e não pelo ID.
-
-Isso evita que o usuário precise conhecer detalhes internos do banco.
-
-Internamente, o relacionamento continua utilizando:
+A categoria pode ser pesquisada pelo nome, enquanto internamente o relacionamento utiliza:
 
 ```text
-product.category_id
-      ↓
-category.id
+products.category_id
+        ↓
+categories.id
 ```
 
-Mas a API pública permite:
-
-```text
-category=livros
-```
-
-em vez de exigir:
-
-```text
-category_id=1
-```
-
-Também foi implementada paginação através de:
+Também foi implementada paginação utilizando:
 
 ```text
 skip
@@ -1120,9 +1159,9 @@ O router utiliza:
 /admin
 ```
 
-### Administração de orders
+## Administração de pedidos
 
-Foram implementados:
+Endpoints:
 
 ```text
 GET   /admin/orders
@@ -1130,11 +1169,11 @@ GET   /admin/orders/{order_id}
 PATCH /admin/orders/{order_id}/status
 ```
 
-O administrador consegue get todos os orders, get um order específico e update o status respeitando as transições válidas.
+O administrador pode consultar todos os pedidos e alterar seus status respeitando as regras de transição.
 
-### Administração de usuários
+## Administração de usuários
 
-Também foram implementados:
+Endpoints:
 
 ```text
 GET   /admin/users
@@ -1142,20 +1181,20 @@ GET   /admin/users/{user_id}
 PATCH /admin/users/{user_id}/role
 ```
 
-O administrador pode get usuários e alterar suas permissões entre:
+O administrador pode consultar usuários e alterar suas roles entre:
 
 ```text
 user
 admin
 ```
 
-Também existe uma proteção para impedir que o administrador remova a própria permissão de administrador.
+Existe também uma proteção para impedir que o administrador remova a própria permissão administrativa.
 
 ---
 
-# 37. 🧠 Conceitos de SQLAlchemy aprendidos
+# 37. 🔍 Conceitos de SQLAlchemy
 
-Durante o desenvolvimento foram utilizados conceitos importantes:
+Durante o desenvolvimento foram utilizados conceitos importantes do SQLAlchemy.
 
 ### `db.add()`
 
@@ -1171,15 +1210,15 @@ Desfaz alterações ainda não confirmadas.
 
 ### `db.flush()`
 
-Envia as alterações para o banco sem finalizar a transação.
+Envia alterações para o banco sem finalizar a transação.
 
-É útil, por exemplo, quando precisamos do ID gerado pelo banco antes de executar o `commit`.
+É útil quando precisamos do ID gerado pelo banco antes do `commit`.
 
 ### `db.refresh()`
 
 Atualiza o objeto Python com os dados atuais do banco.
 
-Um resumo para memorizar:
+Resumo:
 
 ```text
 flush    → envia
@@ -1190,17 +1229,190 @@ refresh  → atualiza
 
 ---
 
-# 38. 🧱 Organização atual do projeto
+# 38. 🗃️ Alembic
 
-A estrutura atual está:
+O projeto atualmente utiliza **Alembic** para controlar a evolução do schema do banco de dados.
+
+A migration inicial foi gerada automaticamente a partir dos models:
 
 ```text
-python/
+6fdb58e707fc_initial_migration.py
+```
+
+Ela cria as principais tabelas da aplicação:
+
+```text
+categories
+users
+products
+carts
+cart_items
+orders
+order_items
+```
+
+A migration é aplicada através de:
+
+```powershell
+docker compose exec api python -m alembic upgrade head
+```
+
+Isso permite reproduzir a estrutura do banco de maneira organizada e evita depender de alterações manuais no PostgreSQL.
+
+Fluxo utilizado:
+
+```text
+Models
+   ↓
+Alembic autogenerate
+   ↓
+Migration
+   ↓
+alembic upgrade head
+   ↓
+PostgreSQL
+```
+
+---
+
+# 39. 🐳 Docker
+
+O projeto atualmente possui um ambiente Dockerizado utilizando Docker Compose.
+
+A estrutura principal é:
+
+```text
+Docker Compose
+│
+├── API
+│   └── FastAPI
+│
+└── PostgreSQL
+```
+
+Serviços:
+
+```text
+postgres
+api
+```
+
+O PostgreSQL utiliza persistência através de volume Docker.
+
+A API se conecta ao banco utilizando o hostname do serviço:
+
+```text
+postgres
+```
+
+Em vez de:
+
+```text
+localhost
+```
+
+quando a conexão acontece dentro do container.
+
+---
+
+# 40. 🐘 PostgreSQL no Docker
+
+O banco utiliza:
+
+```text
+PostgreSQL 17
+```
+
+O serviço é executado através do container:
+
+```text
+postgres-dev
+```
+
+A API é executada através do container:
+
+```text
+loja-geek-api
+```
+
+A comunicação ocorre:
+
+```text
+loja-geek-api
+       │
+       ▼
+postgres-dev
+       │
+       ▼
+PostgreSQL
+```
+
+O banco possui um volume persistente para evitar perda dos dados quando os containers são reiniciados.
+
+---
+
+# 41. 🧪 Testes automatizados
+
+Foi criada uma suíte de testes utilizando:
+
+```text
+pytest
+```
+
+Os testes utilizam um banco PostgreSQL separado do banco utilizado pela aplicação.
+
+Foram testados fluxos envolvendo:
+
+* cadastro de usuários;
+* validação de email;
+* validação de senha;
+* login;
+* JWT;
+* autenticação;
+* autorização;
+* produtos;
+* categorias;
+* filtros;
+* paginação;
+* estoque;
+* carrinho;
+* quantidade;
+* pedidos;
+* pagamento;
+* cancelamento;
+* área administrativa;
+* regras de status.
+
+### Resultado atual
+
+```text
+66 passed
+```
+
+Todos os **66 testes automatizados estão passando**.
+
+---
+
+# 42. 📁 Organização atual do projeto
+
+A estrutura atual está organizada aproximadamente da seguinte maneira:
+
+```text
+loja-geek/
 │
 ├── .venv/
 ├── .env
 ├── .env.example
 ├── .gitignore
+│
+├── Dockerfile
+├── docker-compose.yml
+├── requirements.txt
+│
+├── alembic.ini
+├── alembic/
+│   └── versions/
+│       └── 6fdb58e707fc_initial_migration.py
 │
 ├── main.py
 ├── database.py
@@ -1208,210 +1420,212 @@ python/
 ├── schema.py
 ├── auth.py
 │
-└── routers/
-    ├── products.py
-    ├── categorys.py
-    ├── users.py
-    ├── cart.py
-    ├── orders.py
-    └── admin.py
+├── routers/
+│   ├── products.py
+│   ├── categories.py
+│   ├── users.py
+│   ├── cart.py
+│   ├── orders.py
+│   └── admin.py
+│
+└── tests/
+    ├── conftest.py
+    └── ...
 ```
 
 ---
 
-# 39. 🌐 Arquitetura atual
+# 43. 🌐 Arquitetura atual
 
 A aplicação atualmente segue aproximadamente:
 
 ```text
-                    CLIENTE
-                       │
-                       ▼
-                    FastAPI
-                       │
-        ┌──────────────┼──────────────┐
-        │              │              │
-     Routers          Auth          Schemas
-        │              │              │
-        │         JWT / bcrypt        │
-        │                             │
-        └──────────────┬──────────────┘
-                       │
-                   SQLAlchemy
-                       │
-                    Psycopg
-                       │
-                  PostgreSQL
+                         CLIENTE
+                            │
+                            ▼
+                         FastAPI
+                            │
+              ┌─────────────┼─────────────┐
+              │             │             │
+           Routers         Auth         Schemas
+              │             │             │
+              │        JWT / bcrypt       │
+              │                           │
+              └─────────────┬─────────────┘
+                            │
+                        SQLAlchemy
+                            │
+                         Psycopg
+                            │
+                            ▼
+                       PostgreSQL
+                            │
+                     Docker Container
 ```
 
----
-
-# 40. 🔐 Segurança implementada
-
-Até o momento, foram implementados:
-
-- hash de password com bcrypt;
-- validação de password;
-- validação de email;
-- JWT para autenticação;
-- expiração de token;
-- autenticação com Bearer Token;
-- diferenciação entre usuário e administrador;
-- proteção de endpoints administrativos;
-- email único;
-- responses com `response_model`;
-- variáveis sensíveis armazenadas em `.env`;
-- `.env` protegido pelo `.gitignore`;
-- separação entre erros HTTP 401 e 403.
-
-A password de usuário também não é aceita como `role` no cadastro público, evitando que alguém tente se create diretamente como administrador.
-
----
-
-# 41. 📋 Próximas etapas
-
-O núcleo funcional da loja já está implementado.
-
-Os próximos passos serão voltados para **qualidade, manutenção, infraestrutura e produção**.
-
-## 🧪 1. Testes automatizados — CONCLUÍDO ✅
-
-Foi implementada uma suíte de testes utilizando `pytest` para validar os principais fluxos da API.
-
-O ambiente de testes utiliza um banco PostgreSQL separado:
+As migrations são controladas pelo Alembic:
 
 ```text
-fastapi_products_test
-```
-
-Foram testados fluxos envolvendo:
-
-- cadastro de usuários;
-- validação de email;
-- validação de password;
-- login;
-- JWT;
-- autenticação;
-- autorização;
-- products;
-- categorys;
-- filtros;
-- paginação;
-- stock;
-- cart;
-- controle de quantity;
-- orders;
-- pagamento;
-- cancelamento;
-- área administrativa;
-- regras de status.
-
-Resultado atual:
-
-```text
-36 passed
-```
-
-Todos os 36 testes automatizados estão passando.
-
-Com isso, a etapa de testes automatizados foi concluída e o projeto está pronto para avançar para Alembic.
-
----
-
-## 🗃️ 2. Alembic
-
-Adicionar Alembic para controlar alterações no banco através de migrations.
-
-Isso substituirá a necessidade de realizar manualmente alterações estruturais no banco conforme o projeto evolui.
-
-Exemplo:
-
-```text
-migration 001 → estrutura inicial
-migration 002 → stock
-migration 003 → usuários
-migration 004 → roles
-migration 005 → orders
-migration 006 → Numeric para valores monetários
+Models
+   ↓
+Alembic
+   ↓
+Migrations
+   ↓
+PostgreSQL
 ```
 
 ---
 
-## 🧹 3. Refatoração final
+# 44. 🔐 Segurança implementada
 
-Depois dos testes, será feita uma única revisão geral do projeto.
+Até o momento foram implementados:
 
-Serão avaliados:
+* hash de senha com bcrypt;
+* validação de senha;
+* validação de email;
+* JWT;
+* expiração de token;
+* autenticação com Bearer Token;
+* diferenciação entre usuário e administrador;
+* proteção de endpoints administrativos;
+* email único;
+* `response_model`;
+* variáveis sensíveis armazenadas em `.env`;
+* `.env` protegido pelo `.gitignore`;
+* diferenciação entre HTTP 401 e HTTP 403;
+* proteção contra cadastro público com role administrativa.
 
-- organização dos routers;
-- schemas;
-- names de variáveis;
-- funções;
-- responses;
-- tratamento de erros;
-- regras duplicadas;
-- consultas SQLAlchemy;
-- organização dos arquivos;
-- padronização de names.
+A role do usuário não é definida pelo cadastro público.
 
-Também será tomada a decisão definitiva sobre utilizar português ou inglês nos names do projeto.
+Dessa forma, um usuário não pode simplesmente enviar:
 
-A intenção é evitar refatorações constantes durante o desenvolvimento.
-
----
-
-## 🐳 4. Docker
-
-create a infraestrutura utilizando:
-
-```text
-Docker
-├── API FastAPI
-└── PostgreSQL
+```json
+{
+    "role": "admin"
+}
 ```
 
-Utilizando Docker Compose para facilitar o ambiente de desenvolvimento.
+para tentar criar uma conta administrativa.
 
 ---
 
-## 🚀 5. Preparação para produção
+# 45. 🧠 Regras de negócio principais
 
-Depois do backend estar concluído:
+O projeto possui diversas regras de negócio além do CRUD básico.
 
-- configurar ambiente de produção;
-- revisar variáveis de ambiente;
-- configurar banco;
-- revisar segurança;
-- executar migrations;
-- configurar logs;
-- preparar servidor;
-- preparar deploy.
+### Produtos
+
+* preço deve ser maior que zero;
+* estoque não pode ser negativo;
+* categoria deve existir;
+* exclusão é protegida por autorização.
+
+### Usuários
+
+* email deve possuir formato válido;
+* email deve ser único;
+* senha possui regras de complexidade;
+* senha é armazenada somente como hash;
+* roles são controladas.
+
+### Carrinho
+
+* usuário precisa estar autenticado;
+* produto precisa existir;
+* estoque precisa ser suficiente;
+* produto não pode aparecer duplicado;
+* quantidade deve ser maior que zero.
+
+### Pedidos
+
+* pedido precisa possuir itens;
+* estoque é verificado novamente na criação;
+* estoque é reduzido durante a compra;
+* preço da compra é armazenado no `OrderItem`;
+* apenas o dono pode consultar seus pedidos;
+* status segue transições definidas;
+* cancelamento pode devolver produtos ao estoque.
 
 ---
 
-## 🎨 6. Frontend
+# 46. 📋 Próximas etapas
 
-Após finalizar e testar o backend, será desenvolvido o frontend da loja.
+O núcleo funcional do backend já está implementado.
 
-O frontend será responsável por:
+As próximas etapas serão voltadas principalmente para **qualidade, refinamento e preparação para produção**.
 
-- catálogo;
-- busca;
-- filtros;
-- categorys;
-- login;
-- cadastro;
-- cart;
-- checkout;
-- orders;
-- área do usuário;
-- área administrativa.
+## 🧹 1. Refatoração final
+
+Realizar uma revisão geral do projeto:
+
+* organização dos routers;
+* schemas;
+* nomes de variáveis;
+* funções;
+* responses;
+* tratamento de erros;
+* regras duplicadas;
+* consultas SQLAlchemy;
+* organização dos arquivos;
+* comentários;
+* documentação;
+* padronização do código.
+
+A nomenclatura principal do projeto já foi padronizada para inglês.
 
 ---
 
-# 42. ✅ Estado atual do projeto
+## 🧪 2. Revisão dos testes
 
-O projeto já evoluiu de:
+Apesar dos 66 testes estarem passando, ainda será possível melhorar a suíte com:
+
+* cobertura de casos extremos;
+* cenários de erro adicionais;
+* testes de integração;
+* melhoria das fixtures;
+* análise de cobertura.
+
+---
+
+## 🚀 3. Preparação para produção
+
+Depois da revisão do backend:
+
+* revisar variáveis de ambiente;
+* revisar segurança;
+* configurar banco de produção;
+* executar migrations;
+* configurar logs;
+* configurar servidor;
+* revisar Docker;
+* preparar deploy.
+
+---
+
+## 🎨 4. Frontend
+
+Depois da conclusão do backend, será desenvolvido o frontend da loja.
+
+O frontend deverá incluir:
+
+* catálogo;
+* busca;
+* filtros;
+* categorias;
+* login;
+* cadastro;
+* carrinho;
+* checkout;
+* pedidos;
+* área do usuário;
+* área administrativa.
+
+---
+
+# 47. 📊 Estado atual do projeto
+
+O projeto evoluiu de:
 
 ```text
 CRUD simples em memória
@@ -1424,123 +1638,211 @@ para:
                             │
           ┌─────────────────┼─────────────────┐
           │                 │                 │
-      products          categorys        Usuários
+       Products          Categories        Users
           │                 │                 │
-       stock              │            JWT + bcrypt
+       Stock                │            JWT + bcrypt
           │                 │                 │
           └─────────────────┼─────────────────┘
                             │
-                         cart
+                          Cart
                             │
                             ▼
-                          order
+                          Order
                             │
                             ▼
                     Pagamento simulado
                             │
                             ▼
-                      Área Admin
+                       Área Admin
                             │
                             ▼
                        PostgreSQL
+                            │
+                            ▼
+                         Docker
 ```
 
-O backend já possui:
+### Funcionalidades implementadas
 
-- CRUD de products;
-- categorys;
-- relacionamento entre categorys e products;
-- controle de stock;
-- usuários;
-- validação de email;
-- validação de password;
-- bcrypt;
-- JWT;
-- autenticação;
-- autorização;
-- roles;
-- cart;
-- controle de quantity;
-- controle de stock no cart;
-- orders;
-- histórico de orders;
-- pagamento simulado;
-- cancelamento;
-- fluxo de status;
-- área administrativa;
-- gerenciamento de usuários;
-- busca;
-- filtros;
-- paginação;
-- valores monetários com Decimal/Numeric;
-- Git e GitHub.
+* [x] CRUD de produtos
+* [x] Categorias
+* [x] Relacionamento entre categorias e produtos
+* [x] Controle de estoque
+* [x] Usuários
+* [x] Validação de email
+* [x] Validação de senha
+* [x] bcrypt
+* [x] JWT
+* [x] Autenticação
+* [x] Autorização
+* [x] Roles
+* [x] Carrinho
+* [x] Controle de quantidade
+* [x] Controle de estoque no carrinho
+* [x] Pedidos
+* [x] Histórico de pedidos
+* [x] Pagamento simulado
+* [x] Cancelamento
+* [x] Fluxo de status
+* [x] Área administrativa
+* [x] Gerenciamento de usuários
+* [x] Busca
+* [x] Filtros
+* [x] Paginação
+* [x] Decimal/Numeric para valores monetários
+* [x] Testes automatizados
+* [x] Alembic
+* [x] Docker
+* [x] Docker Compose
+* [x] PostgreSQL em container
 
 ---
 
-# 43. 📚 O que este projeto ensinou até aqui
+# 48. 📚 O que este projeto ensinou
 
-O desenvolvimento permitiu sair de um CRUD básico e estudar conceitos presentes em aplicações reais:
+O desenvolvimento permitiu sair de um CRUD básico e estudar conceitos presentes em aplicações reais.
 
-- Python;
-- FastAPI;
-- Pydantic;
-- HTTP;
-- REST;
-- CRUD;
-- PostgreSQL;
-- SQLAlchemy;
-- Psycopg;
-- Foreign Keys;
-- relacionamentos ORM;
-- Sessions;
-- Transactions;
-- `commit`, `rollback`, `flush` e `refresh`;
-- validação de dados;
-- validação de email;
-- validação de password;
-- hash de passwords;
-- bcrypt;
-- JWT;
-- autenticação;
-- autorização;
-- roles;
-- dependências do FastAPI;
-- controle de stock;
-- regras de negócio;
-- cart de compras;
-- orders;
-- pagamento simulado;
-- controle de status;
-- filtros;
-- paginação;
-- Decimal;
-- Numeric;
-- organização de projeto;
-- variáveis de ambiente;
-- Git e GitHub.
+### Python e API
 
-O projeto começou como uma forma de aprender CRUD e foi transformado gradualmente em uma **API de e-commerce completa**, com foco em entender não apenas como fazer cada funcionalidade, mas também por que cada decisão de arquitetura existe.
+* Python;
+* FastAPI;
+* Pydantic;
+* HTTP;
+* REST;
+* CRUD;
+* OpenAPI;
+* Swagger;
+* ReDoc.
+
+### Banco de dados
+
+* PostgreSQL;
+* SQLAlchemy;
+* Psycopg;
+* Foreign Keys;
+* relacionamentos ORM;
+* Sessions;
+* Transactions;
+* `commit`;
+* `rollback`;
+* `flush`;
+* `refresh`;
+* migrations;
+* Alembic.
+
+### Segurança
+
+* validação de dados;
+* validação de email;
+* validação de senha;
+* hash de senha;
+* bcrypt;
+* JWT;
+* autenticação;
+* autorização;
+* roles;
+* Bearer Token.
+
+### Regras de negócio
+
+* controle de estoque;
+* carrinho de compras;
+* controle de quantidade;
+* pedidos;
+* histórico de pedidos;
+* pagamento simulado;
+* cancelamento;
+* fluxo de status;
+* filtros;
+* paginação;
+* valores monetários com Decimal.
+
+### Infraestrutura
+
+* variáveis de ambiente;
+* Docker;
+* Docker Compose;
+* containers;
+* volumes;
+* PostgreSQL em container;
+* migrations em ambiente Docker.
+
+### Qualidade
+
+* pytest;
+* testes de integração;
+* fixtures;
+* validação de regras de negócio;
+* organização de projeto.
+
+---
+
+# 49. 🎯 Conclusão
+
+O projeto começou como uma forma de aprender os fundamentos de CRUD com Python e FastAPI.
+
+Ao longo do desenvolvimento, ele foi evoluindo gradualmente para uma aplicação muito mais próxima de um backend real:
+
+```text
+CRUD
+ ↓
+API REST
+ ↓
+Banco de dados
+ ↓
+ORM
+ ↓
+Relacionamentos
+ ↓
+Autenticação
+ ↓
+Autorização
+ ↓
+Regras de negócio
+ ↓
+Carrinho
+ ↓
+Pedidos
+ ↓
+Administração
+ ↓
+Testes
+ ↓
+Migrations
+ ↓
+Docker
+```
+
+O objetivo não foi apenas implementar funcionalidades, mas entender **por que cada camada existe, como elas se relacionam e quais problemas cada tecnologia resolve**.
+
+O resultado é uma API de e-commerce funcional, testada e containerizada, construída progressivamente como projeto de estudo e prática de desenvolvimento backend.
 
 ---
 
 # 📌 Próximo passo
 
-O próximo módulo será:
-
-```text
-🗃️ ALEMBIC
-```
-
-A ideia será adicionar migrations ao projeto para controlar a evolução da estrutura do banco de dados de forma organizada e reproduzível.
-
-Depois de Alembic, seguiremos para:
+Com o backend funcional, testado, versionado através do Alembic e executando em Docker, o próximo ciclo do projeto será:
 
 ```text
 🧹 Refatoração final
         ↓
-🐳 Docker
+🔐 Revisão de segurança
         ↓
 🚀 Preparação para produção / Deploy
         ↓
-🎨 Frontend
+🎨 Desenvolvimento do Frontend
 ```
+
+A documentação interativa da API pode ser acessada durante o desenvolvimento em:
+
+```text
+http://localhost:8000/docs
+```
+
+E a documentação alternativa:
+
+```text
+http://localhost:8000/redoc
+```
+
+O FastAPI disponibiliza essas interfaces automaticamente a partir do schema OpenAPI da aplicação.

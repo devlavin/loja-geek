@@ -1,6 +1,7 @@
 import re
 from pydantic import BaseModel, ConfigDict, Field, EmailStr, field_validator
 from decimal import Decimal
+from typing import Literal
 
 class Item(BaseModel):
     name: str
@@ -110,6 +111,9 @@ class UpdateUser(BaseModel):
             )
 
         return password
+
+class UpdateRole(BaseModel):
+    role: Literal["user", "admin"]
     
 class UserResponse(BaseModel):
     id: int
@@ -127,6 +131,8 @@ class CartItemResponse(BaseModel):
     product_id: int
     name: str
     price: Decimal
+    added_price: Decimal
+    price_changed: bool
     quantity: int
     subtotal: Decimal
 
@@ -134,7 +140,7 @@ class CartItemResponse(BaseModel):
 
 
 class CartResponse(BaseModel):
-    id: int
+    id: int | None
     items: list[CartItemResponse]
     total: Decimal
 
