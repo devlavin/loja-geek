@@ -51,7 +51,7 @@ export interface OrderItem {
 
 export interface Order {
   id: number;
-  status: 'PENDENTE' | 'PAGO' | 'ENVIADO' | 'ENTREGUE' | 'CANCELADO';
+  status: 'PENDENTE' | 'PAGO' | 'CANCELADO';
   items: OrderItem[];
   total: string;
 }

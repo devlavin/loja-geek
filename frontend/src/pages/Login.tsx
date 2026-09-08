@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import { getApiErrorMessage } from "../api/error";
 
 export function Login() {
@@ -14,14 +14,15 @@ export function Login() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    setError('');
+    setError("");
 
     try {
       await login({ email, password });
-      const redirectTo = (location.state as { from?: Location })?.from?.pathname ?? '/';
+      const redirectTo =
+        (location.state as { from?: Location })?.from?.pathname ?? "/";
       navigate(redirectTo, { replace: true });
     } catch (err) {
-      setError(getApiErrorMessage(err, 'E-mail ou senha inválidos.'));
+      setError(getApiErrorMessage(err, "E-mail ou senha inválidos."));
     }
   }
 

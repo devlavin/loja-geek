@@ -1,17 +1,9 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { User } from '../types/api';
 import type { LoginPayload } from '../types/auth';
 import { login as loginRequest, getMe } from '../api/auth';
-
-interface AuthContextValue {
-  user: User | null;
-  isLoading: boolean;
-  login: (payload: LoginPayload) => Promise<void>;
-  logout: () => void;
-}
-
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+import { AuthContext } from './auth-context';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -21,14 +13,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const token = localStorage.getItem('token');
 
     if (!token) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset intencional ao deslogar
       setIsLoading(false);
       return;
     }
 
+    let ignore = false;
+
     getMe()
-      .then(setUser)
-      .catch(() => localStorage.removeItem('token'))
-      .finally(() => setIsLoading(false));
+      .then((data) => {
+        if (!ignore) setUser(data);
+      })
+      .catch(() => {
+        if (!ignore) localStorage.removeItem('token');
+      })
+      .finally(() => {
+        if (!ignore) setIsLoading(false);
+      });
+
+    return () => { ignore = true; };
   }, []);
 
   async function login(payload: LoginPayload) {
@@ -44,16 +47,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, logout, setUser }}>
       {children}
     </AuthContext.Provider>
   );
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth precisa estar dentro de um AuthProvider');
-  }
-  return context;
 }
