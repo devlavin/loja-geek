@@ -92,7 +92,7 @@ Autorização / Role
 # 📂 Estrutura do projeto
 
 ```text
-crud-produtos/
+loja-geek/
 │
 ├── alembic/
 │   ├── versions/
