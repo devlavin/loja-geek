@@ -1,54 +1,59 @@
 # 🛒 Geek Store API — FastAPI + PostgreSQL
 
-API REST desenvolvida com **Python, FastAPI e PostgreSQL**, simulando o backend de uma loja geek fictícia.
+API REST de e-commerce fictício desenvolvida com **Python, FastAPI e PostgreSQL**, com foco em desenvolvimento backend e na construção de uma aplicação estruturada e próxima de um projeto real.
 
-O projeto começou como um CRUD simples de produtos utilizando uma lista em memória e foi evoluindo gradualmente para uma aplicação backend completa, com banco de dados, autenticação, autorização, categorias, carrinho de compras, pedidos, pagamento simulado, área administrativa, testes automatizados e migrations.
+O projeto começou como um CRUD simples de produtos utilizando uma lista em memória e evoluiu gradualmente para uma aplicação backend completa, incorporando banco de dados relacional, autenticação JWT, autorização por roles, categorias, carrinho de compras, pedidos, controle de estoque, pagamento simulado, área administrativa, testes automatizados, migrations com Alembic e ambiente containerizado com Docker.
 
-O principal objetivo é praticar conceitos de desenvolvimento backend e construir uma API estruturada e próxima de um projeto real.
+O principal objetivo é consolidar conhecimentos de desenvolvimento backend e demonstrar a evolução de um projeto desde um CRUD básico até uma API REST completa.
 
 ---
 
 ## 🚀 Tecnologias
 
-- Python
-- FastAPI
-- Pydantic
-- SQLAlchemy
-- Psycopg
-- PostgreSQL
-- JWT
-- bcrypt
-- Alembic
-- Pytest
-- Git e GitHub
+* Python
+* FastAPI
+* Pydantic
+* SQLAlchemy
+* Psycopg
+* PostgreSQL
+* JWT
+* bcrypt
+* Alembic
+* Pytest
+* Docker
+* Docker Compose
+* Git e GitHub
 
 ---
 
 ## 📦 Sobre o projeto
 
-A **Geek Store API** representa o backend de uma loja virtual fictícia voltada para produtos geek.
+A **Geek Store API** simula o backend de uma loja virtual fictícia voltada para produtos geek.
 
 A aplicação permite que usuários:
 
-- Criem uma conta
-- Façam login
-- Consultem seus dados
-- Atualizem seus dados
-- Excluam sua conta
-- Visualizem produtos e categorias
-- Adicionem produtos ao carrinho
-- Alterem a quantidade de produtos no carrinho
-- Removam produtos do carrinho
-- Criem pedidos
-- Consultem seus pedidos
-- Realizem um pagamento simulado
-- Cancelem pedidos permitidos
+* Criem uma conta
+* Façam login
+* Consultem seus dados
+* Atualizem seus dados
+* Excluam sua conta
+* Visualizem produtos e categorias
+* Pesquisem e filtrem produtos
+* Adicionem produtos ao carrinho
+* Alterem a quantidade de produtos no carrinho
+* Removam produtos do carrinho
+* Criem pedidos
+* Consultem seus pedidos
+* Realizem um pagamento simulado
+* Cancelem pedidos permitidos
 
 Administradores possuem permissões adicionais para gerenciar produtos, categorias, usuários e pedidos.
 
 ---
 
-## 🏗️ Arquitetura
+# 🏗️ Arquitetura
+
+A aplicação segue uma estrutura baseada na separação entre rotas, validação, regras de negócio, ORM e banco de dados.
 
 ```text
 Cliente
@@ -62,9 +67,9 @@ SQLAlchemy
 Psycopg
    ↓
 PostgreSQL
-````
+```
 
-Autenticação:
+### Fluxo de autenticação
 
 ```text
 Cliente
@@ -73,22 +78,25 @@ Login
    ↓
 JWT
    ↓
-FastAPI
+Authorization: Bearer <token>
    ↓
 get_current_user
    ↓
-Autorização
+Autenticação
+   ↓
+Autorização / Role
 ```
 
 ---
 
-## 📂 Estrutura do projeto
+# 📂 Estrutura do projeto
 
 ```text
-python/
+crud-produtos/
 │
 ├── alembic/
 │   ├── versions/
+│   │   └── 6fdb58e707fc_initial_migration.py
 │   ├── env.py
 │   └── script.py.mako
 │
@@ -114,9 +122,14 @@ python/
 ├── main.py
 ├── models.py
 ├── schema.py
+│
+├── Dockerfile
+├── docker-compose.yml
+├── requirements.txt
+├── alembic.ini
 ├── .env.example
 ├── .gitignore
-├── alembic.ini
+├── processo.md
 └── README.md
 ```
 
@@ -158,7 +171,7 @@ Retorna os dados do usuário autenticado.
 PATCH /users/{user_id}
 ```
 
-Permite atualizar dados do próprio usuário.
+Permite atualizar os dados do próprio usuário.
 
 ### Excluir usuário
 
@@ -178,7 +191,7 @@ Permite que o usuário exclua sua própria conta.
 POST /products
 ```
 
-Permite que administradores cadastrem um ou vários produtos.
+Permite que administradores cadastrem produtos.
 
 ### Listar produtos
 
@@ -188,9 +201,9 @@ GET /products
 
 Retorna os produtos cadastrados.
 
-Também possui filtros e paginação.
+A rota também possui recursos de pesquisa, filtros e paginação.
 
-Exemplos de filtros:
+Exemplos:
 
 ```text
 /products?name=batman
@@ -231,7 +244,7 @@ DELETE /products/{product_id}
 
 Remove um produto.
 
-Essas operações de gerenciamento são restritas a administradores.
+As operações de gerenciamento de produtos são restritas a administradores.
 
 ---
 
@@ -243,11 +256,15 @@ Essas operações de gerenciamento são restritas a administradores.
 POST /categories
 ```
 
+Cria uma nova categoria.
+
 ### Listar categorias
 
 ```http
 GET /categories
 ```
+
+Retorna todas as categorias cadastradas.
 
 ### Buscar categoria
 
@@ -255,7 +272,7 @@ GET /categories
 GET /categories/{category_id}
 ```
 
-Retorna a categoria juntamente com seus produtos.
+Retorna uma categoria juntamente com seus produtos.
 
 ### Atualizar categoria
 
@@ -263,17 +280,23 @@ Retorna a categoria juntamente com seus produtos.
 PATCH /categories/{category_id}
 ```
 
+Atualiza uma categoria.
+
 ### Excluir categoria
 
 ```http
 DELETE /categories/{category_id}
 ```
 
+Remove uma categoria.
+
 Uma categoria que possui produtos não pode ser excluída.
+
+As operações de gerenciamento de categorias são restritas a administradores.
 
 ---
 
-# 🛒 Carrinho
+# 🛒 Carrinho de compras
 
 Cada usuário possui seu próprio carrinho.
 
@@ -303,6 +326,12 @@ DELETE /cart/{product_id}
 
 O sistema verifica a disponibilidade do produto no estoque antes de adicionar ou alterar sua quantidade.
 
+Produtos não são duplicados no carrinho. Caso o produto já esteja presente, sua quantidade é atualizada.
+
+O sistema também registra o preço do produto no momento em que ele foi adicionado ao carrinho por meio do campo `added_price`.
+
+Caso o preço atual seja diferente do preço registrado, a API consegue identificar essa alteração.
+
 ---
 
 # 📋 Pedidos
@@ -315,13 +344,13 @@ POST /orders
 
 Cria um pedido utilizando os produtos presentes no carrinho.
 
-Durante a criação:
+Durante a criação do pedido:
 
-* O estoque é verificado.
-* O estoque dos produtos é atualizado.
-* Os itens do carrinho são transferidos para o pedido.
-* O carrinho é esvaziado.
-* O preço utilizado no pedido é registrado no `OrderItem`.
+1. O estoque dos produtos é verificado.
+2. O estoque é atualizado.
+3. Os itens do carrinho são transferidos para o pedido.
+4. O preço utilizado na compra é registrado no `OrderItem`.
+5. O carrinho é esvaziado.
 
 ### Listar pedidos
 
@@ -347,7 +376,7 @@ POST /orders/{order_id}/pay
 
 Realiza um **pagamento simulado** e altera o status do pedido.
 
-Não existe integração com gateway de pagamento real.
+Não existe integração com um gateway de pagamento real.
 
 ### Cancelamento
 
@@ -355,9 +384,9 @@ Não existe integração com gateway de pagamento real.
 PATCH /orders/{order_id}/cancel
 ```
 
-Permite cancelar pedidos que ainda podem ser cancelados.
+Permite cancelar pedidos que ainda podem ser cancelados de acordo com as regras de negócio.
 
-Quando um pedido é cancelado, os produtos retornam ao estoque.
+Quando um pedido é cancelado, os produtos correspondentes retornam ao estoque.
 
 ---
 
@@ -405,7 +434,22 @@ Administradores podem:
 * Gerenciar produtos
 * Gerenciar categorias
 
-Os status dos pedidos possuem transições controladas:
+A alteração de permissões utiliza as roles:
+
+```text
+user
+admin
+```
+
+O sistema também possui regras para impedir ações administrativas indevidas, como a alteração da própria role de administrador.
+
+---
+
+# 🔄 Status dos pedidos
+
+Os pedidos possuem transições de status controladas pelas regras de negócio.
+
+Fluxo principal:
 
 ```text
 PENDENTE
@@ -417,13 +461,13 @@ ENVIADO
 ENTREGUE
 ```
 
-Também existem fluxos de cancelamento permitidos conforme o status do pedido.
+Também existem fluxos de cancelamento permitidos de acordo com o status atual do pedido.
 
 ---
 
 # 🗄️ Banco de dados
 
-O projeto utiliza **PostgreSQL** como banco de dados e **SQLAlchemy** como ORM.
+O projeto utiliza **PostgreSQL** como banco de dados relacional e **SQLAlchemy** como ORM.
 
 Principais entidades:
 
@@ -459,11 +503,15 @@ orders
 order_items
 ```
 
+### Valores monetários
+
+Os valores monetários utilizam `Decimal` na aplicação e `NUMERIC(10,2)` no PostgreSQL, evitando problemas de precisão comuns em operações financeiras com `float`.
+
 ---
 
 # 🔄 Migrations
 
-O projeto utiliza **Alembic** para controle de alterações no banco de dados.
+O projeto utiliza **Alembic** para versionamento e controle da estrutura do banco de dados.
 
 Criar uma migration:
 
@@ -471,7 +519,7 @@ Criar uma migration:
 alembic revision --autogenerate -m "description"
 ```
 
-Aplicar migrations:
+Aplicar as migrations:
 
 ```powershell
 alembic upgrade head
@@ -483,7 +531,13 @@ Verificar a migration atual:
 alembic current
 ```
 
-As migrations permitem versionar a estrutura do banco de dados junto com o código da aplicação.
+A migration inicial atual é:
+
+```text
+6fdb58e707fc_initial_migration.py
+```
+
+Ela é responsável pela criação da estrutura inicial do banco de dados.
 
 ---
 
@@ -497,80 +551,170 @@ Executar todos os testes:
 pytest
 ```
 
-Os testes cobrem diferentes partes da API, incluindo:
+### Resultado atual
+
+```text
+66 passed
+```
+
+Os testes cobrem diferentes partes da aplicação, incluindo:
 
 * Produtos
 * Categorias
 * Usuários
 * Autenticação
+* Autorização
 * Carrinho
 * Pedidos
 * Pagamentos
 * Cancelamentos
+* Controle de estoque
 * Área administrativa
-* Controle de permissões
+* Permissões
 * Validações
-* Estoque
+* Regras de negócio
+
+Os testes utilizam uma configuração de banco de dados separada para evitar alterações no banco utilizado pela aplicação.
+
+---
+
+# 🐳 Docker
+
+O projeto possui suporte a **Docker e Docker Compose** para executar a API e o PostgreSQL em containers.
+
+A aplicação utiliza dois serviços principais:
+
+```text
+┌─────────────────────┐
+│     FastAPI API     │
+│    loja-geek-api    │
+└──────────┬──────────┘
+           │
+           ↓
+┌─────────────────────┐
+│     PostgreSQL      │
+│     postgres-dev    │
+└─────────────────────┘
+```
+
+### Iniciar os containers
+
+```powershell
+docker compose up -d --build
+```
+
+### Verificar os containers
+
+```powershell
+docker compose ps
+```
+
+### Executar migrations
+
+```powershell
+docker compose exec api python -m alembic upgrade head
+```
+
+### Parar os containers
+
+```powershell
+docker compose down
+```
+
+O PostgreSQL utiliza um volume Docker para persistir os dados mesmo quando os containers são reiniciados.
 
 ---
 
 # ⚙️ Como executar o projeto
 
-## 1. Clonar o repositório
+## Opção 1 — Docker
+
+Essa é a forma recomendada para reproduzir o ambiente da aplicação.
+
+### 1. Clonar o repositório
 
 ```bash
 git clone https://github.com/devlavin/crud-produtos.git
 cd crud-produtos
 ```
 
-## 2. Criar o ambiente virtual
+### 2. Configurar o `.env`
 
-No Windows:
+Crie um arquivo `.env` na raiz do projeto:
+
+```env
+DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5432/loja
+JWT_SECRET_KEY=SUA_CHAVE_SECRETA
+```
+
+> O arquivo `.env` não deve ser enviado para o GitHub.
+
+Utilize o `.env.example` como referência.
+
+### 3. Iniciar os containers
+
+```powershell
+docker compose up -d --build
+```
+
+### 4. Aplicar as migrations
+
+```powershell
+docker compose exec api python -m alembic upgrade head
+```
+
+A API estará disponível em:
+
+```text
+http://localhost:8000
+```
+
+---
+
+## Opção 2 — Ambiente Python local
+
+Também é possível executar a aplicação diretamente em um ambiente virtual Python.
+
+### 1. Criar o ambiente virtual
 
 ```powershell
 python -m venv .venv
 ```
 
-Ativar:
+### 2. Ativar o ambiente virtual
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
 ```
 
-## 3. Instalar as dependências
+### 3. Instalar as dependências
 
 ```powershell
 pip install -r requirements.txt
 ```
 
-## 4. Configurar as variáveis de ambiente
+### 4. Configurar as variáveis de ambiente
 
-Crie um arquivo `.env` na raiz do projeto:
+Crie o arquivo `.env`:
 
 ```env
-DATABASE_URL=postgresql+psycopg://postgres:SUA_PASSWORD@localhost:5432/fastapi_products
+DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5432/loja
 JWT_SECRET_KEY=SUA_CHAVE_SECRETA
 ```
 
-O arquivo `.env` não deve ser enviado para o GitHub.
-
-Utilize o `.env.example` como referência.
-
-## 5. Configurar o banco
-
-Crie o banco PostgreSQL e execute as migrations:
+### 5. Executar as migrations
 
 ```powershell
 alembic upgrade head
 ```
 
-## 6. Executar a API
+### 6. Iniciar a API
 
 ```powershell
 uvicorn main:app --reload
 ```
 
-A API ficará disponível em:
+A API estará disponível em:
 
 ```text
 http://127.0.0.1:8000
@@ -580,32 +724,36 @@ http://127.0.0.1:8000
 
 # 📚 Documentação da API
 
-O FastAPI gera automaticamente uma documentação interativa.
+O FastAPI gera automaticamente uma documentação interativa para os endpoints.
 
 ### Swagger UI
 
 ```text
-http://127.0.0.1:8000/docs
+http://localhost:8000/docs
 ```
 
 ### ReDoc
 
 ```text
-http://127.0.0.1:8000/redoc
+http://localhost:8000/redoc
 ```
 
 ---
 
 # 🔒 Segurança
 
-O projeto utiliza algumas práticas básicas de segurança:
+O projeto implementa algumas práticas básicas de segurança:
 
-* Senhas armazenadas com `bcrypt`
+* Senhas armazenadas com hash utilizando `bcrypt`
 * Autenticação utilizando JWT
-* Controle de acesso baseado em roles
+* Autorização baseada em roles
 * Variáveis de ambiente para informações sensíveis
 * `.env` protegido pelo `.gitignore`
 * Validação de dados utilizando Pydantic
+* Banco de dados separado para testes
+* Validação de estoque
+* Controle das transições de status dos pedidos
+* Restrições de acesso às operações administrativas
 
 O projeto não utiliza dados reais de clientes e o pagamento é apenas simulado para fins de estudo.
 
@@ -613,7 +761,7 @@ O projeto não utiliza dados reais de clientes e o pagamento é apenas simulado 
 
 # 🎯 Objetivos de aprendizado
 
-O projeto tem como objetivo consolidar conhecimentos em:
+O projeto foi desenvolvido para consolidar conhecimentos em:
 
 * Python
 * FastAPI
@@ -628,45 +776,74 @@ O projeto tem como objetivo consolidar conhecimentos em:
 * Autorização
 * Hash de senhas
 * Carrinho de compras
-* Fluxo de pedidos
+* Processamento de pedidos
 * Controle de estoque
 * Migrations com Alembic
 * Testes automatizados com Pytest
+* Docker
+* Docker Compose
 * Git e GitHub
 * Estruturação de aplicações backend
 
 ---
 
-# 🚧 Próximos passos
+# 🚧 Status do projeto
 
-O projeto continuará evoluindo com foco em aproximá-lo de uma aplicação real.
+O projeto evoluiu de um CRUD simples utilizando dados em memória para uma aplicação backend estruturada, com banco de dados, autenticação, regras de negócio, testes e ambiente containerizado.
+
+## Concluído
 
 * [x] CRUD de produtos
 * [x] PostgreSQL
 * [x] SQLAlchemy
-* [x] Autenticação
+* [x] Pydantic
+* [x] Autenticação de usuários
+* [x] JWT
 * [x] Autorização por role
 * [x] Categorias
-* [x] Carrinho
+* [x] Carrinho de compras
+* [x] Controle de quantidade no carrinho
+* [x] Controle de estoque
 * [x] Pedidos
 * [x] Pagamento simulado
+* [x] Cancelamento de pedidos
 * [x] Área administrativa
 * [x] Testes automatizados
+* [x] 66 testes passando
 * [x] Alembic
+* [x] Migrations
+* [x] Docker
+* [x] Docker Compose
+* [x] Configuração por variáveis de ambiente
 * [x] Padronização dos nomes do projeto
+
+## Próximos passos
+
 * [ ] Refatoração do código
 * [ ] Melhorar tratamento de erros
-* [ ] Docker
-* [ ] Deploy
+* [ ] Revisão de segurança
+* [ ] Deploy em produção
 * [ ] Desenvolvimento do frontend
 * [ ] Integração entre frontend e API
 
 ---
 
-## 💻 Projeto
+# 💻 Projeto
 
-Projeto desenvolvido como parte dos estudos de **desenvolvimento backend com Python**, com foco em construir uma API REST completa e evoluir gradualmente de um CRUD simples para uma aplicação de e-commerce fictícia.
+Projeto desenvolvido como parte dos estudos de **desenvolvimento backend com Python**, com foco na construção de uma API REST e na evolução gradual de um CRUD simples para uma aplicação de e-commerce fictícia.
+
+O projeto busca aplicar conceitos presentes no desenvolvimento backend real, incluindo autenticação, autorização, relacionamentos entre entidades, regras de negócio, controle de estoque, testes automatizados, migrations e containerização.
 
 **Backend:** Python + FastAPI + PostgreSQL
+
+**ORM:** SQLAlchemy
+
+**Autenticação:** JWT + bcrypt
+
+**Testes:** Pytest
+
+**Migrations:** Alembic
+
+**Containerização:** Docker + Docker Compose
 
 **Objetivo:** aprendizado, prática e construção de portfólio.
