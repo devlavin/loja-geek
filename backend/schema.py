@@ -166,8 +166,18 @@ class OrderItemResponse(BaseModel):
 class OrderResponse(BaseModel):
     id: int
     status: str
+    phone: str
+    delivery_type: Literal["retirada", "entrega"]
+    address: str | None
+    payment_method: Literal["pix", "cartao", "dinheiro"]
     items: list[OrderItemResponse]
     total: Decimal
 
+class OrderCreate(BaseModel):
+    phone: str
+    delivery_type: Literal["retirada", "entrega"]
+    address: str | None = None
+    payment_method: Literal["pix", "cartao", "dinheiro"]
+    
 class UpdateStatusOrder(BaseModel):
     status: Literal["PENDENTE", "PAGO", "ENVIADO", "ENTREGUE", "CANCELADO"]

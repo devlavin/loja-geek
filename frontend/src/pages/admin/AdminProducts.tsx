@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   listProducts,
   createProduct,
@@ -33,6 +34,7 @@ const EMPTY_FORM: FormState = {
 
 export function AdminProducts() {
   const [search, setSearch] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
   const [categoryFilter, setCategoryFilter] = useState("");
 
   const [products, setProducts] = useState<Product[]>([]);
@@ -77,6 +79,21 @@ export function AdminProducts() {
     const timeout = setTimeout(load, 300);
     return () => clearTimeout(timeout);
   }, [search, categoryFilter]);
+
+  useEffect(() => {
+    const editId = searchParams.get("edit");
+
+    if (!editId || products.length === 0) return;
+
+    const productToEdit = products.find(
+      (product) => product.id === Number(editId),
+    );
+
+    if (productToEdit) {
+      openEdit(productToEdit);
+      setSearchParams({});
+    }
+  }, [products, searchParams, setSearchParams]);
 
   function openCreate() {
     setForm(EMPTY_FORM);

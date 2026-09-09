@@ -112,6 +112,23 @@ class Order(Base):
         Numeric(10, 2)
     )
 
+    phone: Mapped[str] = mapped_column(
+        String(20)
+    )
+
+    delivery_type: Mapped[str] = mapped_column(
+        String(20)
+    )
+
+    address: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True
+    )
+
+    payment_method: Mapped[str] = mapped_column(
+        String(20)
+    )
+
     items: Mapped[list["OrderItem"]] = relationship(
         back_populates="order"
     )

@@ -18,6 +18,7 @@ import { AdminProducts } from "./pages/admin/AdminProducts";
 import { AdminCategories } from "./pages/admin/AdminCategories";
 import { AdminOrders } from "./pages/admin/AdminOrders";
 import { AdminUsers } from "./pages/admin/Adminusers";
+import { Footer } from "./components/Footer";
 
 export function App() {
   return (
@@ -25,74 +26,72 @@ export function App() {
       <AuthProvider>
         <CartProvider>
           <Navbar />
-          <Routes>
-            <Route path="/" element={<ProductList />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route
-              path="/perfil"
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/carrinho"
-              element={
-                <ProtectedRoute>
-                  <Cart />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/produtos/:id" element={<ProductDetail />} />
-            <Route
-              path="/carrinho"
-              element={
-                <ProtectedRoute>
-                  <Cart />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/checkout"
-              element={
-                <ProtectedRoute>
-                  <Checkout />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/pedidos"
-              element={
-                <ProtectedRoute>
-                  <OrderList />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/pedidos/:id"
-              element={
-                <ProtectedRoute>
-                  <OrderDetail />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin"
-              element={
-                <AdminRoute>
-                  <AdminLayout />
-                </AdminRoute>
-              }
-            >
-              <Route index element={<Navigate to="/admin/pedidos" replace />} />
-              <Route path="produtos" element={<AdminProducts />} />
-              <Route path="categorias" element={<AdminCategories />} />
-              <Route path="pedidos" element={<AdminOrders />} />
-              <Route path="usuarios" element={<AdminUsers />} />
-            </Route>
-          </Routes>
+          <main className="main-content">
+            <Routes>
+              <Route path="/" element={<ProductList />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route
+                path="/perfil"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/carrinho"
+                element={
+                  <ProtectedRoute>
+                    <Cart />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/produtos/:id" element={<ProductDetail />} />
+              <Route
+                path="/checkout"
+                element={
+                  <ProtectedRoute>
+                    <Checkout />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/pedidos"
+                element={
+                  <ProtectedRoute>
+                    <OrderList />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/pedidos/:id"
+                element={
+                  <ProtectedRoute>
+                    <OrderDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin"
+                element={
+                  <AdminRoute>
+                    <AdminLayout />
+                  </AdminRoute>
+                }
+              >
+                <Route
+                  index
+                  element={<Navigate to="/admin/pedidos" replace />}
+                />
+                <Route path="produtos" element={<AdminProducts />} />
+                <Route path="categorias" element={<AdminCategories />} />
+                <Route path="pedidos" element={<AdminOrders />} />
+                <Route path="usuarios" element={<AdminUsers />} />
+              </Route>
+            </Routes>
+          </main>
+          <Footer />
         </CartProvider>
       </AuthProvider>
     </BrowserRouter>

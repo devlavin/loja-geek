@@ -1,8 +1,17 @@
 import { api } from './client';
 import type { Order } from '../types/api';
 
-export async function createOrder(): Promise<Order> {
-  const { data } = await api.post<Order>('/orders');
+export type CreateOrderData = {
+  phone: string;
+  delivery_type: "retirada" | "entrega";
+  address: string | null;
+  payment_method: "pix" | "cartao" | "dinheiro";
+};
+
+export async function createOrder(
+  orderData: CreateOrderData
+): Promise<Order> {
+  const { data } = await api.post<Order>("/orders", orderData);
   return data;
 }
 

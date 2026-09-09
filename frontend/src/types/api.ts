@@ -54,6 +54,10 @@ export interface OrderItem {
 export interface Order {
   id: number;
   status: 'PENDENTE' | 'PAGO' | 'ENVIADO' | 'ENTREGUE' | 'CANCELADO';
+  phone: string;
+  delivery_type: 'retirada' | 'entrega';
+  address: string | null;
+  payment_method: 'pix' | 'cartao' | 'dinheiro';
   items: OrderItem[];
   total: string;
 }

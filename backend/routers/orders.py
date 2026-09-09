@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 from models import Order, OrderItem, Cart, Product, User
-from schema import OrderResponse
+from schema import OrderResponse, OrderCreate
 from auth import get_current_user
 
 
@@ -19,6 +19,7 @@ router = APIRouter(
     response_model=OrderResponse
 )
 def create_order(
+    order_data: OrderCreate,
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -63,7 +64,11 @@ def create_order(
         new_order = Order(
             user_id=user.id,
             status="PENDENTE",
-            total=total
+            total=total,
+            phone=order_data.phone,
+            delivery_type=order_data.delivery_type,
+            address=order_data.address,
+            payment_method=order_data.payment_method
         )
 
         db.add(new_order)
@@ -116,6 +121,10 @@ def create_order(
         return {
             "id": new_order.id,
             "status": new_order.status,
+            "phone": new_order.phone,
+            "delivery_type": new_order.delivery_type,
+            "address": new_order.address,
+            "payment_method": new_order.payment_method,
             "items": response_items,
             "total": new_order.total
         }
@@ -124,12 +133,12 @@ def create_order(
         db.rollback()
         raise
 
-    except Exception:
+    except Exception as e:
         db.rollback()
-
+        print(f"ERRO AO CRIAR PEDIDO: {e}", flush=True)
         raise HTTPException(
             status_code=500,
-            detail="Erro ao criar pedido."
+            detail=str(e)
         )
 
 
@@ -206,6 +215,10 @@ def list_orders(
         response.append({
             "id": order.id,
             "status": order.status,
+            "phone": order.phone,
+            "delivery_type": order.delivery_type,
+            "address": order.address,
+            "payment_method": order.payment_method,
             "items": items,
             "total": order.total
         })
@@ -251,6 +264,10 @@ def get_order(
     return {
         "id": order.id,
         "status": order.status,
+        "phone": order.phone,
+        "delivery_type": order.delivery_type,
+        "address": order.address,
+        "payment_method": order.payment_method,
         "items": items,
         "total": order.total
     }

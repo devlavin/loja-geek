@@ -8,7 +8,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useCart } from "../hooks/useCart";
 import type { Product, Category } from "../types/api";
 import { formatPrice } from "../utils/format";
-import { ProductThumb } from '../components/ProductThumb';
+import { ProductThumb } from "../components/ProductThumb";
 
 export function ProductDetail() {
   const { id } = useParams<{ id: string }>();
@@ -87,14 +87,19 @@ export function ProductDetail() {
 
   return (
     <div className="product-detail-page">
-      <ProductThumb src={product.image_url} alt={product.name} className="product-detail-thumb" />
+      <ProductThumb
+        src={product.image_url}
+        alt={product.name}
+        className="product-detail-thumb"
+      />
 
       <div className="product-detail-body">
         {categoryName && <div className="product-cat">{categoryName}</div>}
         <h1>{product.name}</h1>
         <div className="product-detail-price">{formatPrice(product.price)}</div>
-        {product.description && <p className="product-detail-description">{product.description}</p>}
-        <div className="product-detail-description">{product.description}</div>
+        {product.description && (
+          <p className="product-detail-description">{product.description}</p>
+        )}
 
         {outOfStock ? (
           <div className="stock-note out">esgotado</div>
@@ -104,35 +109,50 @@ export function ProductDetail() {
           <div className="stock-note ok">em estoque</div>
         )}
 
-        {!outOfStock && (
-          <div className="qty-row">
-            <button
-              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-              disabled={quantity <= 1}
-            >
-              -
-            </button>
-            <span>{quantity}</span>
-            <button
-              onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
-              disabled={quantity >= product.stock}
-            >
-              +
-            </button>
-          </div>
-        )}
+        {user?.role === "admin" ? (
+          <button
+            className="btn-primary"
+            onClick={() => navigate(`/admin/produtos?edit=${product.id}`)}
+          >
+            Editar produto
+          </button>
+        ) : (
+          <>
+            {!outOfStock && (
+              <div className="qty-row">
+                <button
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  disabled={quantity <= 1}
+                >
+                  -
+                </button>
 
-        <button
-          className="btn-primary"
-          onClick={handleAddToCart}
-          disabled={outOfStock || isAdding}
-        >
-          {outOfStock
-            ? "Esgotado"
-            : isAdding
-              ? "Adicionando..."
-              : "Adicionar ao carrinho"}
-        </button>
+                <span>{quantity}</span>
+
+                <button
+                  onClick={() =>
+                    setQuantity((q) => Math.min(product.stock, q + 1))
+                  }
+                  disabled={quantity >= product.stock}
+                >
+                  +
+                </button>
+              </div>
+            )}
+
+            <button
+              className="btn-primary"
+              onClick={handleAddToCart}
+              disabled={outOfStock || isAdding}
+            >
+              {outOfStock
+                ? "Esgotado"
+                : isAdding
+                  ? "Adicionando..."
+                  : "Adicionar ao carrinho"}
+            </button>
+          </>
+        )}
 
         {message && (
           <p
