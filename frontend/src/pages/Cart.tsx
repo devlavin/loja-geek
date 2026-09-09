@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
 import { updateCartItem, removeCartItem } from "../api/cart";
 import { formatPrice } from "../utils/format";
+import { ProductThumb } from "../components/ProductThumb";
 
 export function Cart() {
   const navigate = useNavigate();
@@ -48,9 +49,7 @@ export function Cart() {
       <div className="cart-list">
         {cart.items.map((item) => (
           <div key={item.product_id} className="cart-row">
-            <div className="cart-row-thumb">
-              {item.image_url && <img src={item.image_url} alt={item.name} />}
-            </div>
+            <ProductThumb src={item.image_url} alt={item.name} className="cart-row-thumb" />
 
             <div className="cart-row-info">
               <div className="cart-row-name">{item.name}</div>

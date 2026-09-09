@@ -8,6 +8,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useCart } from "../hooks/useCart";
 import type { Product, Category } from "../types/api";
 import { formatPrice } from "../utils/format";
+import { ProductThumb } from '../components/ProductThumb';
 
 export function ProductDetail() {
   const { id } = useParams<{ id: string }>();
@@ -86,16 +87,13 @@ export function ProductDetail() {
 
   return (
     <div className="product-detail-page">
-      <div className="product-thumb">
-        {product.image_url && (
-          <img src={product.image_url} alt={product.name} />
-        )}
-      </div>
+      <ProductThumb src={product.image_url} alt={product.name} className="product-detail-thumb" />
 
       <div className="product-detail-body">
         {categoryName && <div className="product-cat">{categoryName}</div>}
         <h1>{product.name}</h1>
         <div className="product-detail-price">{formatPrice(product.price)}</div>
+        {product.description && <p className="product-detail-description">{product.description}</p>}
         <div className="product-detail-description">{product.description}</div>
 
         {outOfStock ? (

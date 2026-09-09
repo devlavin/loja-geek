@@ -1,17 +1,14 @@
-import { Link } from "react-router-dom";
-import type { Product } from "../types/api";
-import { formatPrice } from "../utils/format";
+import { Link } from 'react-router-dom';
+import type { Product } from '../types/api';
+import { formatPrice } from '../utils/format';
+import { ProductThumb } from './ProductThumb';
 
 export function ProductCard({ product }: { product: Product }) {
   const outOfStock = product.stock <= 0;
 
   return (
     <Link to={`/produtos/${product.id}`} className="product-card">
-      <div className="product-thumb">
-        {product.image_url && (
-          <img src={product.image_url} alt={product.name} />
-        )}
-      </div>
+      <ProductThumb src={product.image_url} alt={product.name} className="product-thumb" />
       <div className="product-body">
         <div className="product-name">{product.name}</div>
         <div className="product-price">{formatPrice(product.price)}</div>

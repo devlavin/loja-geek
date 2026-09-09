@@ -22,18 +22,28 @@ export async function getProduct(id: number): Promise<Product> {
 
 export interface ProductInput {
   name: string;
+  description?: string;
   price: number;
   stock: number;
   category_id: number;
+  image_url?: string;
 }
 
 export async function createProduct(item: ProductInput): Promise<void> {
-  // a API espera uma lista, mesmo pra 1 produto só, e não devolve o produto criado
   await api.post('/products', [item]);
 }
 
-export async function updateProductPrice(id: number, price: number): Promise<Product> {
-  const { data } = await api.patch<Product>(`/products/${id}`, { price });
+export interface ProductUpdateInput {
+  name?: string;
+  description?: string;
+  price?: number;
+  stock?: number;
+  category_id?: number;
+  image_url?: string;
+}
+
+export async function updateProduct(id: number, payload: ProductUpdateInput): Promise<Product> {
+  const { data } = await api.patch<Product>(`/products/${id}`, payload);
   return data;
 }
 

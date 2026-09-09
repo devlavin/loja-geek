@@ -764,3 +764,63 @@
 .admin-order-details { padding: 0 16px 16px; border-top: 1px solid var(--line); padding-top: 14px; }
 .admin-status-actions { display: flex; gap: 10px; margin-top: 14px; }
 .admin-status-actions .btn-primary { padding: 8px 16px; font-size: 13px; }
+
+/* ============ IMAGENS DE PRODUTO ============ */
+
+.product-thumb, .product-detail-thumb, .cart-row-thumb, .admin-thumb {
+  object-fit: contain;
+  display: block;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.product-detail-description {
+  margin-top: 18px;
+  color: var(--ink-dim);
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+
+.admin-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 4px;
+  background: var(--surface-2);
+}
+
+
+/* ============ FORMULÁRIO DE PRODUTO (ADMIN) ============ */
+
+.admin-form-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 480px;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  margin-bottom: 28px;
+}
+
+.admin-form-panel h2 { font-size: 17px; }
+
+.admin-form-panel textarea {
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-tag);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14.5px;
+  resize: vertical;
+}
+
+.form-row { display: flex; gap: 14px; }
+.form-row .form-group { flex: 1; }
+
+.admin-form-preview {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 4px;
+  background: var(--surface-2);
+}
+
+.form-actions { display: flex; gap: 14px; align-items: center; }

@@ -1,13 +1,12 @@
 export interface Product {
-    id: number;
-    name: string;
-    price: string;
-    description: string | null;
-    stock: number;
-    category_id: number;
-    image_url: string | null;
+  id: number;
+  name: string;
+  description: string | null;
+  price: string;
+  stock: number;
+  category_id: number;
+  image_url: string | null;
 }
-
 export interface ProductWithCategory extends Product {
   category: Category;
 }
@@ -38,7 +37,6 @@ export interface CartItem {
   quantity: number;
   subtotal: string;
 }
-
 export interface Cart {
   id: number | null;
   items: CartItem[];
