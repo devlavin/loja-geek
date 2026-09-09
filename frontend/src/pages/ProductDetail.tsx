@@ -1,21 +1,24 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { getProduct } from '../api/products';
-import { listCategories } from '../api/categories';
-import { addToCart } from '../api/cart';
-import { getApiErrorMessage } from '../api/error';
-import { useAuth } from '../hooks/useAuth';
-import { useCart } from '../hooks/useCart';
-import type { Product, Category } from '../types/api';
-import { formatPrice } from '../utils/format';
+import { useEffect, useState } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { getProduct } from "../api/products";
+import { listCategories } from "../api/categories";
+import { addToCart } from "../api/cart";
+import { getApiErrorMessage } from "../api/error";
+import { useAuth } from "../hooks/useAuth";
+import { useCart } from "../hooks/useCart";
+import type { Product, Category } from "../types/api";
+import { formatPrice } from "../utils/format";
 
 export function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<Product | null>(null);
-  const [categoryName, setCategoryName] = useState('');
+  const [categoryName, setCategoryName] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
-  const [message, setMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
+  const [message, setMessage] = useState<{
+    type: "error" | "success";
+    text: string;
+  } | null>(null);
   const [isAdding, setIsAdding] = useState(false);
 
   const { user } = useAuth();
@@ -31,8 +34,10 @@ export function ProductDetail() {
       .then(([productData, categories]) => {
         if (ignore) return;
         setProduct(productData);
-        const cat = categories.find((c: Category) => c.id === productData.category_id);
-        setCategoryName(cat?.name ?? '');
+        const cat = categories.find(
+          (c: Category) => c.id === productData.category_id,
+        );
+        setCategoryName(cat?.name ?? "");
       })
       .catch(() => {
         if (!ignore) setProduct(null);
@@ -41,14 +46,16 @@ export function ProductDetail() {
         if (!ignore) setIsLoading(false);
       });
 
-    return () => { ignore = true; };
+    return () => {
+      ignore = true;
+    };
   }, [id]);
 
   async function handleAddToCart() {
     if (!product) return;
 
     if (!user) {
-      navigate('/login', { state: { from: location } });
+      navigate("/login", { state: { from: location } });
       return;
     }
 
@@ -58,9 +65,15 @@ export function ProductDetail() {
     try {
       await addToCart(product.id, quantity);
       await refreshCart();
-      setMessage({ type: 'success', text: 'Produto adicionado ao carrinho.' });
+      setMessage({ type: "success", text: "Produto adicionado ao carrinho." });
     } catch (err) {
-      setMessage({ type: 'error', text: getApiErrorMessage(err, 'Não foi possível adicionar ao carrinho.') });
+      setMessage({
+        type: "error",
+        text: getApiErrorMessage(
+          err,
+          "Não foi possível adicionar ao carrinho.",
+        ),
+      });
     } finally {
       setIsAdding(false);
     }
@@ -73,12 +86,17 @@ export function ProductDetail() {
 
   return (
     <div className="product-detail-page">
-      <div className="product-detail-thumb" />
+      <div className="product-thumb">
+        {product.image_url && (
+          <img src={product.image_url} alt={product.name} />
+        )}
+      </div>
 
       <div className="product-detail-body">
         {categoryName && <div className="product-cat">{categoryName}</div>}
         <h1>{product.name}</h1>
         <div className="product-detail-price">{formatPrice(product.price)}</div>
+        <div className="product-detail-description">{product.description}</div>
 
         {outOfStock ? (
           <div className="stock-note out">esgotado</div>
@@ -90,9 +108,19 @@ export function ProductDetail() {
 
         {!outOfStock && (
           <div className="qty-row">
-            <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} disabled={quantity <= 1}>-</button>
+            <button
+              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+              disabled={quantity <= 1}
+            >
+              -
+            </button>
             <span>{quantity}</span>
-            <button onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))} disabled={quantity >= product.stock}>+</button>
+            <button
+              onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
+              disabled={quantity >= product.stock}
+            >
+              +
+            </button>
           </div>
         )}
 
@@ -101,13 +129,24 @@ export function ProductDetail() {
           onClick={handleAddToCart}
           disabled={outOfStock || isAdding}
         >
-          {outOfStock ? 'Esgotado' : isAdding ? 'Adicionando...' : 'Adicionar ao carrinho'}
+          {outOfStock
+            ? "Esgotado"
+            : isAdding
+              ? "Adicionando..."
+              : "Adicionar ao carrinho"}
         </button>
 
         {message && (
-          <p className={message.type === 'error' ? 'auth-error' : 'success-note'}>
+          <p
+            className={message.type === "error" ? "auth-error" : "success-note"}
+          >
             {message.text}
-            {message.type === 'success' && <> — <a href="/carrinho">ver carrinho</a></>}
+            {message.type === "success" && (
+              <>
+                {" "}
+                — <a href="/carrinho">ver carrinho</a>
+              </>
+            )}
           </p>
         )}
       </div>

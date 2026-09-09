@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthProvider";
 import { CartProvider } from "./context/CartProvider";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -11,7 +11,13 @@ import { Cart } from "./pages/Cart";
 import { Checkout } from "./pages/Checkout";
 import { OrderList } from "./pages/OrderList";
 import { OrderDetail } from "./pages/OrderDetail";
-import { Profile } from './pages/Profile';
+import { Profile } from "./pages/Profile";
+import { AdminRoute } from "./components/AdminRoute";
+import { AdminLayout } from "./components/AdminLayout";
+import { AdminProducts } from "./pages/admin/AdminPorducts";
+import { AdminCategories } from "./pages/admin/AdminCategories";
+import { AdminOrders } from "./pages/admin/AdminOrders";
+import { AdminUsers } from "./pages/admin/Adminusers";
 
 export function App() {
   return (
@@ -23,7 +29,14 @@ export function App() {
             <Route path="/" element={<ProductList />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/perfil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route
+              path="/perfil"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/carrinho"
               element={
@@ -65,6 +78,20 @@ export function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <AdminLayout />
+                </AdminRoute>
+              }
+            >
+              <Route index element={<Navigate to="/admin/pedidos" replace />} />
+              <Route path="produtos" element={<AdminProducts />} />
+              <Route path="categorias" element={<AdminCategories />} />
+              <Route path="pedidos" element={<AdminOrders />} />
+              <Route path="usuarios" element={<AdminUsers />} />
+            </Route>
           </Routes>
         </CartProvider>
       </AuthProvider>

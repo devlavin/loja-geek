@@ -6,18 +6,27 @@ from typing import Literal
 class Item(BaseModel):
     name: str
     price: Decimal = Field(gt=0)
+    description: str | None = None
     stock: int = Field(ge=0)
     category_id: int
+    image_url: str | None = None
 
-class UpdatePrice(BaseModel):
-    price: Decimal = Field(gt=0)
-
+class UpdateProduct(BaseModel):
+    name: str | None = None
+    description: str | None = None
+    price: Decimal | None = Field(default=None, gt=0)
+    stock: int | None = Field(default=None, ge=0)
+    category_id: int | None = None
+    image_url: str | None = None
+    
 class ProductResponse(BaseModel):
     id: int
     name: str
     price: Decimal
+    description: str | None = None
     stock: int
     category_id: int
+    image_url: str | None = None
     
     model_config = ConfigDict(from_attributes=True)
     
@@ -119,6 +128,7 @@ class UserResponse(BaseModel):
     id: int
     name: str
     email: str
+    role: str
     
     model_config = ConfigDict(from_attributes=True)
     
@@ -130,6 +140,7 @@ class CartItemCreate(BaseModel):
 class CartItemResponse(BaseModel):
     product_id: int
     name: str
+    image_url: str | None
     price: Decimal
     added_price: Decimal
     price_changed: bool
@@ -159,4 +170,4 @@ class OrderResponse(BaseModel):
     total: Decimal
 
 class UpdateStatusOrder(BaseModel):
-    status: str
+    status: Literal["PENDENTE", "PAGO", "ENVIADO", "ENTREGUE", "CANCELADO"]

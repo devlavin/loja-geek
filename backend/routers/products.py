@@ -7,7 +7,7 @@ from auth import get_current_admin
 from models import Product, Category, User
 from schema import (
     Item,
-    UpdatePrice,
+    UpdateProduct,
     UpdateStock,
     ProductResponse,
     ProductWithCategoryResponse,
@@ -45,9 +45,11 @@ def create_product(
 
             new_product = Product(
                 name=item.name,
+                description=item.description,
                 price=item.price,
                 stock=item.stock,
-                category_id=item.category_id
+                category_id=item.category_id,
+                image_url=item.image_url
             )
 
             db.add(new_product)
@@ -146,7 +148,7 @@ def get_product(
 )
 def update_product(
     product_id: int,
-    item: UpdatePrice,
+    item: UpdateProduct,
     _: User = Depends(get_current_admin),
     db: Session = Depends(get_db)
 ):
@@ -164,13 +166,42 @@ def update_product(
             detail="Produto não encontrado."
         )
 
-    product.price = item.price
+    if item.name is not None:
+        product.name = item.name
+
+    if item.description is not None:
+        product.description = item.description
+
+    if item.price is not None:
+        product.price = item.price
+
+    if item.stock is not None:
+        product.stock = item.stock
+
+    if item.category_id is not None:
+        result = db.execute(
+            select(Category).where(
+                Category.id == item.category_id
+            )
+        )
+
+        category = result.scalar_one_or_none()
+
+        if category is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Categoria não encontrada."
+            )
+
+        product.category_id = item.category_id
+
+    if item.image_url is not None:
+        product.image_url = item.image_url
 
     db.commit()
     db.refresh(product)
 
     return product
-
 
 @router.patch(
     "/{product_id}/stock",

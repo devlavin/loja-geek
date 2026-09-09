@@ -1,7 +1,6 @@
-// src/components/UserMenu.tsx
-import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { useEffect, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 
 export function UserMenu() {
   const { user, logout } = useAuth();
@@ -15,14 +14,17 @@ export function UserMenu() {
         setIsOpen(false);
       }
     }
+
     function handleEscape(e: KeyboardEvent) {
-      if (e.key === 'Escape') setIsOpen(false);
+      if (e.key === "Escape") setIsOpen(false);
     }
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleEscape);
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleEscape);
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
     };
   }, []);
 
@@ -31,25 +33,50 @@ export function UserMenu() {
   function handleLogout() {
     setIsOpen(false);
     logout();
-    navigate('/');
+    navigate("/");
   }
 
-  const firstName = user.name.split(' ')[0];
+  const firstName = user.name.split(" ")[0];
 
   return (
     <div className="user-menu" ref={menuRef}>
-      <button className="user-menu-trigger" onClick={() => setIsOpen((v) => !v)}>
+      <button
+        className="user-menu-trigger"
+        onClick={() => setIsOpen((v) => !v)}
+      >
         {firstName}
-        <svg viewBox="0 0 12 8" width="10" height="7" className={`chevron ${isOpen ? 'open' : ''}`}>
-          <path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+
+        <svg
+          viewBox="0 0 12 8"
+          width="10"
+          height="7"
+          className={`chevron ${isOpen ? "open" : ""}`}
+        >
+          <path
+            d="M1 1l5 5 5-5"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       </button>
 
       {isOpen && (
         <div className="user-menu-dropdown">
-          <Link to="/pedidos" onClick={() => setIsOpen(false)}>Meus pedidos</Link>
-          <Link to="/perfil" onClick={() => setIsOpen(false)}>Meus dados</Link>
+          {user.role !== "admin" && (
+            <Link to="/pedidos" onClick={() => setIsOpen(false)}>
+              Meus pedidos
+            </Link>
+          )}
+
+          <Link to="/perfil" onClick={() => setIsOpen(false)}>
+            Meus dados
+          </Link>
+
           <div className="user-menu-divider" />
+
           <button onClick={handleLogout}>Sair</button>
         </div>
       )}

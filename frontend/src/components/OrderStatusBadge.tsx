@@ -3,6 +3,8 @@ import type { Order } from '../types/api';
 const LABELS: Record<Order['status'], string> = {
   PENDENTE: 'Pendente',
   PAGO: 'Pago',
+  ENVIADO: 'Enviado',
+  ENTREGUE: 'Entregue',
   CANCELADO: 'Cancelado',
 };
 

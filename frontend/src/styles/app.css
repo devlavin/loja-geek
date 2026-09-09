@@ -70,6 +70,20 @@
   background: var(--brand);
 }
 
+.cart-row-thumb {
+  width: 100px;
+  height: 100px;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.cart-row-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
 .btn-link {
   background: none;
   border: none;
@@ -229,8 +243,17 @@
 }
 
 .product-thumb {
-  aspect-ratio: 1;
-  background: var(--surface-2);
+    width: 100%;
+    height: 220px;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+.product-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
 }
 
 .product-body {
@@ -611,7 +634,8 @@
 .status-pendente { background: #EFEBE7; color: var(--steel); }
 .status-pago { background: #E7F1EB; color: var(--stock-ok); }
 .status-cancelado { background: #FDEDEB; color: var(--brand); }
-
+.status-enviado { background: #E9EEF2; color: var(--info); }
+.status-entregue { background: #E7F1EB; color: var(--stock-ok); }
 
 /* ============ MEUS PEDIDOS ============ */
 
@@ -651,4 +675,61 @@
   margin-top: 16px;
   padding-top: 16px;
   border-top: 1px solid var(--line);
+}
+
+/* ============ ADMIN LAYOUT ============ */
+
+.admin-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  min-height: calc(100vh - 65px);
+}
+
+.admin-sidebar {
+  border-right: 1px solid var(--line);
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.admin-back {
+  font-size: 13px;
+  color: var(--ink-dim);
+  text-decoration: none;
+}
+
+.admin-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-nav a {
+  padding: 9px 12px;
+  border-radius: 4px;
+  font-size: 14.5px;
+  color: var(--ink-dim);
+  text-decoration: none;
+}
+
+.admin-nav a:hover {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.admin-nav a.active {
+  background: var(--surface);
+  color: var(--brand);
+  font-weight: 500;
+}
+
+.admin-content {
+  padding: 36px 40px;
+}
+
+@media (max-width: 860px) {
+  .admin-layout { grid-template-columns: 1fr; }
+  .admin-sidebar { border-right: none; border-bottom: 1px solid var(--line); flex-direction: row; align-items: center; justify-content: space-between; padding: 16px 20px; }
+  .admin-nav { flex-direction: row; }
 }

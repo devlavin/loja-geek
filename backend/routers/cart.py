@@ -47,6 +47,7 @@ def get_cart(
         items.append({
             "product_id": item.product.id,
             "name": item.product.name,
+            "image_url": item.product.image_url,
             "price": current_price,
             "added_price": item.added_price,
             "price_changed": item.added_price != current_price,
@@ -148,6 +149,7 @@ def add_to_cart(
         items.append({
             "product_id": item.product.id,
             "name": item.product.name,
+            "image_url": item.product.image_url,
             "price": current_price,
             "added_price": item.added_price,
             "price_changed": item.added_price != current_price,

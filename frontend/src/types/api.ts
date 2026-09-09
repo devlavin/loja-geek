@@ -1,9 +1,11 @@
 export interface Product {
-  id: number;
-  name: string;
-  price: string;      // Decimal do backend chega como string no JSON
-  stock: number;
-  category_id: number;
+    id: number;
+    name: string;
+    price: string;
+    description: string | null;
+    stock: number;
+    category_id: number;
+    image_url: string | null;
 }
 
 export interface ProductWithCategory extends Product {
@@ -23,11 +25,13 @@ export interface User {
   id: number;
   name: string;
   email: string;
+  role: 'user' | 'admin';
 }
 
 export interface CartItem {
   product_id: number;
   name: string;
+  image_url: string | null;
   price: string;
   added_price: string;
   price_changed: boolean;
@@ -51,7 +55,7 @@ export interface OrderItem {
 
 export interface Order {
   id: number;
-  status: 'PENDENTE' | 'PAGO' | 'CANCELADO';
+  status: 'PENDENTE' | 'PAGO' | 'ENVIADO' | 'ENTREGUE' | 'CANCELADO';
   items: OrderItem[];
   total: string;
 }
