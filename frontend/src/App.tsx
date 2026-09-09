@@ -14,7 +14,7 @@ import { OrderDetail } from "./pages/OrderDetail";
 import { Profile } from "./pages/Profile";
 import { AdminRoute } from "./components/AdminRoute";
 import { AdminLayout } from "./components/AdminLayout";
-import { AdminProducts } from "./pages/admin/AdminPorducts";
+import { AdminProducts } from "./pages/admin/AdminProducts";
 import { AdminCategories } from "./pages/admin/AdminCategories";
 import { AdminOrders } from "./pages/admin/AdminOrders";
 import { AdminUsers } from "./pages/admin/Adminusers";

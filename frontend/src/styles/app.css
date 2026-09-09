@@ -733,3 +733,34 @@
   .admin-sidebar { border-right: none; border-bottom: 1px solid var(--line); flex-direction: row; align-items: center; justify-content: space-between; padding: 16px 20px; }
   .admin-nav { flex-direction: row; }
 }
+
+/* ============ ADMIN — PÁGINAS ============ */
+
+.admin-page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+
+.admin-inline-form { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+.admin-inline-form input, .admin-inline-form select {
+  padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-tag); font-size: 14px;
+}
+
+.admin-table { width: 100%; border-collapse: collapse; }
+.admin-table th { text-align: left; font-size: 12.5px; color: var(--ink-dim); padding: 10px 12px; border-bottom: 1px solid var(--line); }
+.admin-table td { padding: 12px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.admin-table .btn-link { font-size: 13px; margin-right: 10px; }
+
+.admin-edit-cell { display: flex; align-items: center; gap: 6px; }
+.admin-edit-cell input { width: 90px; padding: 5px 8px; border: 1px solid var(--brand); border-radius: 3px; font-size: 13.5px; }
+.admin-edit-cell button { background: none; border: none; font-size: 12px; color: var(--ink-dim); cursor: pointer; }
+
+.admin-order-list { display: flex; flex-direction: column; gap: 10px; }
+.admin-order-row { border: 1px solid var(--line); border-radius: 4px; }
+
+.admin-order-summary {
+  width: 100%; display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 14px; align-items: center;
+  padding: 14px 16px; background: none; border: none; cursor: pointer; text-align: left;
+  font-size: 14px; font-family: 'IBM Plex Sans', sans-serif;
+}
+
+.admin-order-details { padding: 0 16px 16px; border-top: 1px solid var(--line); padding-top: 14px; }
+.admin-status-actions { display: flex; gap: 10px; margin-top: 14px; }
+.admin-status-actions .btn-primary { padding: 8px 16px; font-size: 13px; }
