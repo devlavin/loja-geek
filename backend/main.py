@@ -1,11 +1,9 @@
 from fastapi import FastAPI, Request
-
-from slowapi import _rate_limit_exceeded_handler
+from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
 
 from limiter import limiter
 from fastapi.middleware.cors import CORSMiddleware
-import os
 
 from routers.admin import router as admin_router
 from routers.cart import router as cart_router
@@ -34,9 +32,18 @@ app.add_middleware(
 )
 
 app.state.limiter = limiter
+
+def rate_limit_handler(request: Request, exc: RateLimitExceeded):
+    return JSONResponse(
+        status_code=429,
+        content={
+            "detail": "Muitas tentativas de login. Tente novamente em alguns minutos."
+        }
+    )
+
 app.add_exception_handler(
     RateLimitExceeded,
-    _rate_limit_exceeded_handler
+    rate_limit_handler
 )
 
 app.include_router(admin_router)
