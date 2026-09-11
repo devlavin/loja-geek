@@ -1,4 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+
+from limiter import limiter
 from fastapi.middleware.cors import CORSMiddleware
 import os
 
@@ -8,7 +13,6 @@ from routers.categories import router as categories_router
 from routers.orders import router as orders_router
 from routers.products import router as products_router
 from routers.users import router as users_router
-
 
 app = FastAPI(
     title="Loja Geek API",
@@ -27,6 +31,12 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+)
+
+app.state.limiter = limiter
+app.add_exception_handler(
+    RateLimitExceeded,
+    _rate_limit_exceeded_handler
 )
 
 app.include_router(admin_router)

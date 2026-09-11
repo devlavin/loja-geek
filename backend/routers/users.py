@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Request
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -7,7 +7,7 @@ import bcrypt
 from auth import create_token, get_current_user
 from models import User
 from schema import UserCreate, UserLogin, UserResponse, UpdateUser
-
+from limiter import limiter
 
 router = APIRouter(
     prefix="/users",
@@ -55,7 +55,9 @@ def create_user(
 
 
 @router.post("/login")
+@limiter.limit("5/minute")
 def login(
+    request: Request,
     user: UserLogin,
     db: Session = Depends(get_db)
 ):
