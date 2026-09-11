@@ -27,26 +27,26 @@ export function Checkout() {
     return <p className="page-status">Seu carrinho está vazio.</p>;
   }
 
-  async function handleConfirm() {
-    setError("");
-    setIsSubmitting(true);
+async function handleConfirm() {
+  setError('');
+  setIsSubmitting(true);
 
-    try {
-      const order = await createOrder({
-        phone,
-        delivery_type: deliveryType,
-        address: deliveryType === "entrega" ? address : null,
-        payment_method: paymentMethod,
-      });
-      await payOrder(order.id);
-      await refreshCart();
-      navigate(`/pedidos/${order.id}`);
-    } catch (err) {
-      setError(getApiErrorMessage(err, "Não foi possível concluir o pedido."));
-    } finally {
-      setIsSubmitting(false);
-    }
+  try {
+    const order = await createOrder({
+      phone,
+      delivery_type: deliveryType,
+      address: deliveryType === 'entrega' ? address : undefined,
+      payment_method: paymentMethod,
+    });
+    await payOrder(order.id);
+    await refreshCart();
+    navigate(`/pedidos/${order.id}`);
+  } catch (err) {
+    setError(getApiErrorMessage(err, 'Não foi possível concluir o pedido.'));
+  } finally {
+    setIsSubmitting(false);
   }
+}
 
   return (
     <div className="checkout-page">

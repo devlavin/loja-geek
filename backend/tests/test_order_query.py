@@ -32,6 +32,11 @@ def test_user_cannot_get_another_users_order(
 
     order = client.post(
         "/orders",
+        json={
+            "phone": "16999999999",
+            "delivery_type": "retirada",
+            "payment_method": "pix"
+        },
         headers=user_headers
     )
 

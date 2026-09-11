@@ -21,6 +21,11 @@ def test_create_order(db, user_headers, product):
 
     response = client.post(
         "/orders",
+        json={
+            "phone": "16999999999",
+            "delivery_type": "retirada",
+            "payment_method": "pix"
+        },
         headers=user_headers
     )
 
@@ -75,6 +80,11 @@ def test_list_orders(user_headers, product):
 
     response = client.post(
         "/orders",
+        json={
+            "phone": "16999999999",
+            "delivery_type": "retirada",
+            "payment_method": "pix"
+        },
         headers=user_headers
     )
 
@@ -125,6 +135,11 @@ def test_get_order(user_headers, db, category):
 
     response = client.post(
         "/orders",
+        json={
+            "phone": "16999999999",
+            "delivery_type": "retirada",
+            "payment_method": "pix"
+        },
         headers=user_headers
     )
 

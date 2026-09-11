@@ -19,6 +19,11 @@ def create_order_for_test(user_headers, product):
 
     order = client.post(
         "/orders",
+        json={
+            "phone": "16999999999",
+            "delivery_type": "retirada",
+            "payment_method": "pix"
+        },
         headers=user_headers
     )
 

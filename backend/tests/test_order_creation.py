@@ -8,6 +8,11 @@ client = TestClient(app)
 def test_create_order_with_empty_cart(user_headers):
     response = client.post(
         "/orders",
+        json={
+            "phone": "16999999999",
+            "delivery_type": "retirada",
+            "payment_method": "pix"
+        },
         headers=user_headers
     )
 
@@ -39,6 +44,11 @@ def test_create_order_with_insufficient_stock(
 
     response = client.post(
         "/orders",
+        json={
+            "phone": "16999999999",
+            "delivery_type": "retirada",
+            "payment_method": "pix"
+        },
         headers=user_headers
     )
 

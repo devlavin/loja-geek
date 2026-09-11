@@ -8,10 +8,15 @@ export type CreateOrderData = {
   payment_method: "pix" | "cartao" | "dinheiro";
 };
 
-export async function createOrder(
-  orderData: CreateOrderData
-): Promise<Order> {
-  const { data } = await api.post<Order>("/orders", orderData);
+export interface OrderCreateInput {
+  phone: string;
+  delivery_type: 'retirada' | 'entrega';
+  address?: string;
+  payment_method: 'pix' | 'cartao' | 'dinheiro';
+}
+
+export async function createOrder(payload: OrderCreateInput): Promise<Order> {
+  const { data } = await api.post<Order>('/orders', payload);
   return data;
 }
 

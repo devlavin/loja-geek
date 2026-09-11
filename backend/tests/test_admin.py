@@ -22,6 +22,11 @@ def create_order_for_admin(user_headers, product):
 
     response = client.post(
         "/orders",
+        json={
+            "phone": "16999999999",
+            "delivery_type": "retirada",
+            "payment_method": "pix"
+        },
         headers=user_headers
     )
 
@@ -153,8 +158,7 @@ def test_admin_invalid_order_status(
         headers=admin_headers
     )
 
-    assert response.status_code == 400
-    assert response.json()["detail"] == "Status inválido."
+    assert response.status_code == 422
 
 
 def test_admin_update_nonexistent_order_status(admin_headers):

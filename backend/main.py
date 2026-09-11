@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import os
 
 from routers.admin import router as admin_router
 from routers.cart import router as cart_router
@@ -15,9 +16,14 @@ app = FastAPI(
     version="1.0.0",
 )
 
+allowed_origins = os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://localhost:5173,http://localhost:5174"
+).split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:5174"],  # onde o Vite roda
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
