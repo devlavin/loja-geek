@@ -1,308 +1,169 @@
-# 🛒 Geek Store
+# 🛒 Geek World — E-commerce Full Stack
 
-E-commerce fictício desenvolvido para praticar **desenvolvimento full stack**, com foco principalmente em backend.
+E-commerce fictício voltado para produtos geek, desenvolvido como projeto de estudo full stack, com **backend em Python/FastAPI** e **frontend em React/Vite**, ambos em produção.
 
-O projeto começou como um CRUD simples de produtos e evoluiu para uma aplicação completa com autenticação, autorização, banco de dados, carrinho, pedidos, controle de estoque, testes automatizados e Docker.
+O projeto começou como um CRUD simples de produtos com dados em memória e evoluiu para uma aplicação completa: banco de dados relacional, autenticação JWT, autorização por roles, categorias, carrinho de compras, pedidos, controle de estoque, pagamento simulado, área administrativa, testes automatizados, migrations com Alembic, containerização com Docker — e agora também com uma interface de usuário completa consumindo essa API.
+
+**🔗 Projeto em produção:** [loja-geek-phi.vercel.app](https://loja-geek-phi.vercel.app/)
+**🔗 API em produção:** [loja-geek.onrender.com](https://loja-geek.onrender.com/)
 
 ---
 
 ## 🚀 Tecnologias
 
-### Backend
+**Backend**
+- Python
+- FastAPI
+- Pydantic
+- SQLAlchemy
+- Psycopg
+- PostgreSQL
+- JWT + bcrypt
+- Alembic (migrations)
+- Pytest (66 testes passando)
 
-* Python
-* FastAPI
-* Pydantic
-* SQLAlchemy
-* PostgreSQL
-* Psycopg
-* JWT
-* bcrypt
-* Alembic
-* Pytest
+**Frontend**
+- React
+- Vite
 
-### Frontend
-
-* React
-* TypeScript
-* Vite
-* React Router
-
-### Infraestrutura
-
-* Docker
-* Docker Compose
-* Git
-* GitHub
+**Infraestrutura**
+- Docker + Docker Compose
+- Deploy: Render (API) + Vercel (frontend)
+- Git e GitHub
 
 ---
 
-## ✨ Funcionalidades
+## 📦 Sobre o projeto
 
-### 👤 Usuários
+O **Geek World** simula uma loja virtual completa de produtos geek, cobrindo tanto a experiência do cliente quanto a área administrativa.
 
-* Cadastro
-* Login com JWT
-* Consulta e atualização de perfil
-* Exclusão de conta
-* Hash de senhas com bcrypt
-* Autorização por roles (`user` / `admin`)
+A aplicação permite que usuários:
 
-### 📦 Produtos e categorias
+- Criem uma conta e façam login
+- Consultem e atualizem seus dados
+- Visualizem, pesquisem e filtrem produtos por categoria e preço
+- Adicionem, atualizem e removam produtos do carrinho
+- Criem pedidos a partir do carrinho
+- Realizem um pagamento simulado
+- Consultem e cancelem pedidos (quando permitido)
 
-* CRUD de produtos
-* CRUD de categorias
-* Pesquisa e filtros
-* Paginação
-* Controle de estoque
-* Proteção das operações administrativas
-
-### 🛒 Carrinho
-
-* Adicionar produtos
-* Alterar quantidade
-* Remover produtos
-* Validação de estoque
-* Controle do preço no momento da adição
-
-### 📋 Pedidos
-
-* Criação de pedidos a partir do carrinho
-* Histórico de pedidos
-* Detalhes do pedido
-* Pagamento simulado
-* Cancelamento
-* Atualização automática do estoque
-
-### 👑 Administração
-
-* Gerenciamento de usuários
-* Alteração de roles
-* Gerenciamento de produtos e categorias
-* Gerenciamento de pedidos
-* Atualização de status
+Administradores possuem permissões adicionais para gerenciar produtos, categorias, usuários e pedidos.
 
 ---
 
 ## 🏗️ Arquitetura
 
-```text
-                 ┌─────────────────┐
-                 │     React       │
-                 │   TypeScript    │
-                 └────────┬────────┘
-                          │
-                          ▼
-                 ┌─────────────────┐
-                 │    FastAPI      │
-                 │      JWT        │
-                 └────────┬────────┘
-                          │
-                          ▼
-                 ┌─────────────────┐
-                 │   SQLAlchemy    │
-                 └────────┬────────┘
-                          │
-                          ▼
-                 ┌─────────────────┐
-                 │   PostgreSQL    │
-                 └─────────────────┘
 ```
+Cliente (React + Vite)
+   ↓
+FastAPI
+   ↓
+Pydantic (validação)
+   ↓
+SQLAlchemy (ORM)
+   ↓
+Psycopg
+   ↓
+PostgreSQL
+```
+
+### Fluxo de autenticação
+
+```
+Cliente
+   ↓
+Login
+   ↓
+JWT
+   ↓
+Authorization: Bearer <token>
+   ↓
+get_current_user
+   ↓
+Autenticação → Autorização / Role
+```
+
+Frontend e backend são hospedados separadamente (Vercel e Render), integrados via variável de ambiente apontando para a URL da API, com CORS configurado entre os dois serviços.
 
 ---
 
 ## 🗄️ Banco de dados
 
+PostgreSQL como banco relacional, com SQLAlchemy como ORM.
+
 Principais entidades:
 
-```text
-User
- ├── Cart
- │    └── CartItem
- │         └── Product
- │
- └── Order
-      └── OrderItem
-           └── Product
-
-Product
- └── Category
+```
+User → Cart → CartItem → Product → Category
+User → Order → OrderItem → Product
 ```
 
-O projeto utiliza **SQLAlchemy** como ORM e **Alembic** para migrations.
-
-Valores monetários são tratados com `Decimal` na aplicação e `NUMERIC(10,2)` no PostgreSQL.
+Valores monetários usam `Decimal` na aplicação e `NUMERIC(10,2)` no PostgreSQL, evitando problemas de precisão de `float`.
 
 ---
 
-## 🔐 Autenticação
+## 🔐 Autenticação e autorização
 
-A autenticação utiliza **JWT com Bearer Token**.
-
-```text
-Login
-  ↓
-JWT
-  ↓
-Authorization: Bearer <token>
-  ↓
-Usuário autenticado
-  ↓
-Verificação de permissões
-```
-
-Existem dois níveis de acesso:
-
-```text
-user
-admin
-```
+Autenticação via **JWT**. Dois níveis de acesso: `user` e `admin`. Administradores têm permissões adicionais de gerenciamento da loja, com regras que impedem ações administrativas indevidas (como alterar a própria role).
 
 ---
 
 ## 🧪 Testes
 
-O projeto utiliza **Pytest** para testes automatizados.
-
-Atualmente:
-
-```text
-66 passed
+```
+pytest
 ```
 
-Os testes cobrem autenticação, usuários, produtos, categorias, carrinho, pedidos, estoque, pagamentos e permissões administrativas.
+66 testes cobrindo produtos, categorias, usuários, autenticação, autorização, carrinho, pedidos, pagamentos, cancelamentos, controle de estoque, área administrativa e regras de negócio.
 
 ---
 
 ## 🐳 Docker
 
-O projeto possui ambiente containerizado utilizando Docker Compose.
-
-```text
-┌─────────────────────┐
-│   React + Vite      │
-│   :5173             │
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│   FastAPI           │
-│   :8000             │
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│   PostgreSQL        │
-│   :5432             │
-└─────────────────────┘
 ```
-
-### Iniciar o projeto
-
-```bash
-docker compose up --build
-```
-
-Frontend:
-
-```text
-http://localhost:5173
-```
-
-API:
-
-```text
-http://localhost:8000
-```
-
-Swagger:
-
-```text
-http://localhost:8000/docs
-```
-
-Para executar as migrations:
-
-```bash
+docker compose up -d --build
 docker compose exec api python -m alembic upgrade head
 ```
 
+Dois serviços principais: a API FastAPI e o PostgreSQL, com volume Docker para persistência dos dados.
+
 ---
 
-## 📂 Estrutura
+## ⚙️ Como executar o backend localmente
 
-```text
-loja-geek/
-│
-├── backend/
-│   ├── alembic/
-│   ├── routers/
-│   ├── tests/
-│   ├── auth.py
-│   ├── database.py
-│   ├── main.py
-│   ├── models.py
-│   ├── schema.py
-│   ├── Dockerfile
-│   └── requirements.txt
-│
-├── frontend/
-│   ├── src/
-│   ├── Dockerfile
-│   ├── package.json
-│   └── vite.config.ts
-│
-├── docker-compose.yml
-├── .env.example
-├── .gitignore
-├── processo.md
-└── README.md
+```bash
+git clone https://github.com/devlavin/loja-geek.git
+cd loja-geek
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+alembic upgrade head
+uvicorn main:app --reload
 ```
 
+API disponível em `http://127.0.0.1:8000` — documentação automática em `/docs` (Swagger) e `/redoc`.
+
 ---
 
-## 📌 Status
+## 🚧 Status do projeto
 
-**Em desenvolvimento / projeto de estudo e portfólio.**
+O projeto evoluiu de um CRUD simples para uma aplicação full stack completa, com frontend próprio consumindo a API em produção.
 
-### Concluído
+**Concluído**
+- [x] Backend completo (CRUD, autenticação, autorização, carrinho, pedidos, pagamento simulado, área administrativa)
+- [x] Frontend em React/Vite integrado à API
+- [x] Testes automatizados (66 passando)
+- [x] Migrations com Alembic
+- [x] Docker e Docker Compose
+- [x] Deploy em produção (API no Render, frontend na Vercel)
 
-* [x] API REST
-* [x] PostgreSQL
-* [x] SQLAlchemy
-* [x] Autenticação JWT
-* [x] Autorização por roles
-* [x] Produtos
-* [x] Categorias
-* [x] Carrinho
-* [x] Pedidos
-* [x] Controle de estoque
-* [x] Pagamento simulado
-* [x] Área administrativa
-* [x] Testes automatizados
-* [x] Alembic
-* [x] Docker
-* [x] Docker Compose
-* [x] Frontend React + TypeScript
-* [x] Integração frontend/API
-
-### Próximos passos
-
-* [ ] Refinar interface
-* [ ] Melhorar tratamento de erros
-* [ ] Revisão de segurança
-* [ ] Deploy
+**Próximos passos**
+- [ ] Refatoração e melhorias de tratamento de erros
+- [ ] Revisão de segurança
+- [ ] Ajustes finais de integração frontend/backend
 
 ---
 
 ## 🎯 Objetivo
 
-Projeto desenvolvido para consolidar conhecimentos em **Python, FastAPI, PostgreSQL, React e desenvolvimento de APIs REST**, evoluindo gradualmente de um CRUD simples para uma aplicação full stack estruturada.
-
-**Backend:** Python + FastAPI + PostgreSQL
-**Frontend:** React + TypeScript + Vite
-**ORM:** SQLAlchemy
-**Autenticação:** JWT + bcrypt
-**Testes:** Pytest
-**Migrations:** Alembic
-**Containerização:** Docker + Docker Compose
+Projeto desenvolvido para consolidar conhecimentos em desenvolvimento full stack: API REST em Python/FastAPI, ORM e banco relacional, autenticação e autorização, testes automatizados, containerização e integração entre frontend e backend hospedados separadamente — construção de portfólio real.
